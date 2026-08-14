@@ -29,6 +29,7 @@ app.get('/api/health', (_req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'clinica-medica-api',
+    version: 'cors-v1',
   })
 })
 
