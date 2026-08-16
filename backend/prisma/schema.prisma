@@ -1,0 +1,374 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model agendamentos {
+  id                     BigInt                   @id @default(autoincrement())
+  paciente_id            BigInt
+  medico_id              BigInt
+  especialidade_id       BigInt
+  inicio_em              DateTime                 @db.Timestamptz(6)
+  fim_em                 DateTime                 @db.Timestamptz(6)
+  status                 String                   @db.VarChar(30)
+  tipo_atendimento       String                   @default("PRESENCIAL") @db.VarChar(30)
+  motivo_consulta        String?                  @db.VarChar(500)
+  observacoes            String?                  @db.VarChar(1000)
+  confirmado_em          DateTime?                @db.Timestamptz(6)
+  presenca_em            DateTime?                @db.Timestamptz(6)
+  cancelado_em           DateTime?                @db.Timestamptz(6)
+  motivo_cancelamento    String?                  @db.VarChar(500)
+  agendamento_origem_id  BigInt?
+  criado_em              DateTime                 @default(now()) @db.Timestamptz(6)
+  criado_por             BigInt?
+  atualizado_em          DateTime?                @db.Timestamptz(6)
+  atualizado_por         BigInt?
+  especialidades         especialidades           @relation(fields: [especialidade_id], references: [id], onUpdate: NoAction, map: "fk_agendamentos_especialidade")
+  medicos                medicos                  @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_agendamentos_medico")
+  agendamentos           agendamentos?            @relation("agendamentosToagendamentos", fields: [agendamento_origem_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_agendamentos_origem")
+  other_agendamentos     agendamentos[]           @relation("agendamentosToagendamentos")
+  pacientes              pacientes                @relation(fields: [paciente_id], references: [id], onUpdate: NoAction, map: "fk_agendamentos_paciente")
+  consultas              consultas?
+  historicos_agendamento historicos_agendamento[]
+
+  @@index([medico_id, inicio_em, fim_em], map: "idx_agendamentos_ativos_medico", where: raw("((status)::text = ANY (ARRAY[('AGENDADO'::character varying)::text, ('CONFIRMADO'::character varying)::text, ('PACIENTE_PRESENTE'::character varying)::text, ('EM_ATENDIMENTO'::character varying)::text]))"))
+  @@index([paciente_id, inicio_em, fim_em], map: "idx_agendamentos_ativos_paciente", where: raw("((status)::text = ANY (ARRAY[('AGENDADO'::character varying)::text, ('CONFIRMADO'::character varying)::text, ('PACIENTE_PRESENTE'::character varying)::text, ('EM_ATENDIMENTO'::character varying)::text]))"))
+  @@index([inicio_em], map: "idx_agendamentos_inicio")
+  @@index([medico_id, inicio_em], map: "idx_agendamentos_medico_inicio")
+  @@index([paciente_id, inicio_em], map: "idx_agendamentos_paciente_inicio")
+  @@index([status], map: "idx_agendamentos_status")
+}
+
+model agendas_medicas {
+  id                       BigInt    @id @default(autoincrement())
+  medico_id                BigInt
+  dia_semana               Int       @db.SmallInt
+  hora_inicio              DateTime  @db.Time(6)
+  hora_fim                 DateTime  @db.Time(6)
+  intervalo_inicio         DateTime? @db.Time(6)
+  intervalo_fim            DateTime? @db.Time(6)
+  duracao_consulta_minutos Int       @db.SmallInt
+  vigencia_inicio          DateTime  @db.Date
+  vigencia_fim             DateTime? @db.Date
+  ativo                    Boolean   @default(true)
+  criado_em                DateTime  @default(now()) @db.Timestamptz(6)
+  criado_por               BigInt?
+  atualizado_em            DateTime? @db.Timestamptz(6)
+  atualizado_por           BigInt?
+  medicos                  medicos   @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_agendas_medicas_medico")
+
+  @@index([medico_id, dia_semana], map: "idx_agendas_medicas_medico")
+}
+
+model alergias {
+  id             BigInt      @id @default(autoincrement())
+  prontuario_id  BigInt
+  substancia     String      @db.VarChar(180)
+  reacao         String?     @db.VarChar(500)
+  gravidade      String      @default("NAO_INFORMADA") @db.VarChar(20)
+  observacoes    String?     @db.VarChar(500)
+  ativo          Boolean     @default(true)
+  registrado_em  DateTime    @default(now()) @db.Timestamptz(6)
+  registrado_por BigInt?
+  prontuarios    prontuarios @relation(fields: [prontuario_id], references: [id], onUpdate: NoAction, map: "fk_alergias_prontuario")
+
+  @@index([prontuario_id, ativo], map: "idx_alergias_prontuario")
+}
+
+model atestados {
+  id                  BigInt    @id @default(autoincrement())
+  consulta_id         BigInt
+  paciente_id         BigInt
+  medico_id           BigInt
+  data_inicio         DateTime  @db.Date
+  quantidade_dias     Int       @db.SmallInt
+  texto               String
+  cid                 String?   @db.VarChar(20)
+  autorizacao_cid     Boolean   @default(false)
+  emitido_em          DateTime  @default(now()) @db.Timestamptz(6)
+  status              String    @default("EMITIDO") @db.VarChar(20)
+  cancelado_em        DateTime? @db.Timestamptz(6)
+  motivo_cancelamento String?   @db.VarChar(500)
+  consultas           consultas @relation(fields: [consulta_id], references: [id], onUpdate: NoAction, map: "fk_atestados_consulta")
+  medicos             medicos   @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_atestados_medico")
+  pacientes           pacientes @relation(fields: [paciente_id], references: [id], onUpdate: NoAction, map: "fk_atestados_paciente")
+
+  @@index([consulta_id], map: "idx_atestados_consulta")
+}
+
+model auditorias {
+  id               BigInt    @id @default(autoincrement())
+  usuario_id       BigInt?
+  acao             String    @db.VarChar(100)
+  entidade         String?   @db.VarChar(100)
+  entidade_id      BigInt?
+  descricao        String?   @db.VarChar(1000)
+  dados_anteriores Json?
+  dados_novos      Json?
+  ip_origem        String?   @db.VarChar(45)
+  user_agent       String?   @db.VarChar(500)
+  ocorrido_em      DateTime  @default(now()) @db.Timestamptz(6)
+  usuarios         usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_auditorias_usuario")
+
+  @@index([acao], map: "idx_auditorias_acao")
+  @@index([entidade, entidade_id], map: "idx_auditorias_entidade")
+  @@index([ocorrido_em], map: "idx_auditorias_ocorrido_em")
+  @@index([usuario_id], map: "idx_auditorias_usuario")
+}
+
+model bloqueios_agenda {
+  id            BigInt    @id @default(autoincrement())
+  medico_id     BigInt
+  inicio_em     DateTime  @db.Timestamptz(6)
+  fim_em        DateTime  @db.Timestamptz(6)
+  motivo        String    @db.VarChar(300)
+  tipo          String    @db.VarChar(30)
+  criado_em     DateTime  @default(now()) @db.Timestamptz(6)
+  criado_por    BigInt?
+  cancelado_em  DateTime? @db.Timestamptz(6)
+  cancelado_por BigInt?
+  medicos       medicos   @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_bloqueios_agenda_medico")
+
+  @@index([medico_id, inicio_em, fim_em], map: "idx_bloqueios_agenda_medico_periodo")
+}
+
+model consultas {
+  id                    BigInt       @id @default(autoincrement())
+  agendamento_id        BigInt       @unique(map: "uk_consultas_agendamento")
+  paciente_id           BigInt
+  medico_id             BigInt
+  iniciada_em           DateTime     @db.Timestamptz(6)
+  finalizada_em         DateTime?    @db.Timestamptz(6)
+  status                String       @db.VarChar(30)
+  queixa_principal      String?
+  historia_doenca_atual String?
+  avaliacao             String?
+  diagnostico           String?
+  conduta               String?
+  observacoes           String?
+  criado_em             DateTime     @default(now()) @db.Timestamptz(6)
+  atualizado_em         DateTime?    @db.Timestamptz(6)
+  atestados             atestados[]
+  agendamentos          agendamentos @relation(fields: [agendamento_id], references: [id], onUpdate: NoAction, map: "fk_consultas_agendamento")
+  medicos               medicos      @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_consultas_medico")
+  pacientes             pacientes    @relation(fields: [paciente_id], references: [id], onUpdate: NoAction, map: "fk_consultas_paciente")
+  receitas              receitas[]
+
+  @@index([medico_id, iniciada_em], map: "idx_consultas_medico")
+  @@index([paciente_id, iniciada_em], map: "idx_consultas_paciente")
+}
+
+model especialidades {
+  id                     BigInt                   @id @default(autoincrement())
+  nome                   String                   @unique(map: "uk_especialidades_nome") @db.VarChar(120)
+  descricao              String?                  @db.VarChar(500)
+  ativo                  Boolean                  @default(true)
+  criado_em              DateTime                 @default(now()) @db.Timestamptz(6)
+  criado_por             BigInt?
+  atualizado_em          DateTime?                @db.Timestamptz(6)
+  atualizado_por         BigInt?
+  agendamentos           agendamentos[]
+  medicos_especialidades medicos_especialidades[]
+
+  @@index([ativo], map: "idx_especialidades_ativo")
+  @@index([nome], map: "idx_especialidades_nome")
+}
+
+model flyway_schema_history {
+  installed_rank Int      @id(map: "flyway_schema_history_pk")
+  version        String?  @db.VarChar(50)
+  description    String   @db.VarChar(200)
+  type           String   @db.VarChar(20)
+  script         String   @db.VarChar(1000)
+  checksum       Int?
+  installed_by   String   @db.VarChar(100)
+  installed_on   DateTime @default(now()) @db.Timestamp(6)
+  execution_time Int
+  success        Boolean
+
+  @@index([success], map: "flyway_schema_history_s_idx")
+}
+
+model historicos_agendamento {
+  id                 BigInt       @id @default(autoincrement())
+  agendamento_id     BigInt
+  status_anterior    String?      @db.VarChar(30)
+  status_novo        String       @db.VarChar(30)
+  inicio_anterior_em DateTime?    @db.Timestamptz(6)
+  fim_anterior_em    DateTime?    @db.Timestamptz(6)
+  inicio_novo_em     DateTime?    @db.Timestamptz(6)
+  fim_novo_em        DateTime?    @db.Timestamptz(6)
+  motivo             String?      @db.VarChar(500)
+  alterado_em        DateTime     @default(now()) @db.Timestamptz(6)
+  alterado_por       BigInt?
+  agendamentos       agendamentos @relation(fields: [agendamento_id], references: [id], onUpdate: NoAction, map: "fk_historicos_agendamento")
+
+  @@index([agendamento_id, alterado_em], map: "idx_historicos_agendamento")
+}
+
+model itens_receita {
+  id                BigInt   @id @default(autoincrement())
+  receita_id        BigInt
+  medicamento       String   @db.VarChar(200)
+  dosagem           String   @db.VarChar(100)
+  via_administracao String?  @db.VarChar(100)
+  frequencia        String   @db.VarChar(150)
+  duracao           String?  @db.VarChar(100)
+  quantidade        String?  @db.VarChar(100)
+  orientacoes       String?  @db.VarChar(500)
+  ordem             Int      @db.SmallInt
+  receitas          receitas @relation(fields: [receita_id], references: [id], onUpdate: NoAction, map: "fk_itens_receita_receita")
+
+  @@unique([receita_id, ordem], map: "uk_itens_receita_ordem")
+}
+
+model medicos {
+  id                       BigInt                  @id @default(autoincrement())
+  usuario_id               BigInt                  @unique(map: "uk_medicos_usuario")
+  nome_completo            String                  @db.VarChar(180)
+  crm_numero               String                  @db.VarChar(20)
+  crm_uf                   String                  @db.Char(2)
+  telefone                 String?                 @db.VarChar(20)
+  email                    String?                 @db.VarChar(180)
+  duracao_consulta_minutos Int                     @default(30) @db.SmallInt
+  ativo                    Boolean                 @default(true)
+  criado_em                DateTime                @default(now()) @db.Timestamptz(6)
+  criado_por               BigInt?
+  atualizado_em            DateTime?               @db.Timestamptz(6)
+  atualizado_por           BigInt?
+  agendamentos             agendamentos[]
+  agendas_medicas          agendas_medicas[]
+  atestados                atestados[]
+  bloqueios_agenda         bloqueios_agenda[]
+  consultas                consultas[]
+  usuarios                 usuarios                @relation(fields: [usuario_id], references: [id], onUpdate: NoAction, map: "fk_medicos_usuario")
+  medicos_especialidades   medicos_especialidades?
+  receitas                 receitas[]
+
+  @@unique([crm_numero, crm_uf], map: "uk_medicos_crm")
+  @@index([ativo], map: "idx_medicos_ativo")
+  @@index([crm_numero, crm_uf], map: "idx_medicos_crm")
+  @@index([nome_completo], map: "idx_medicos_nome")
+}
+
+model medicos_especialidades {
+  medico_id        BigInt         @unique(map: "uk_medicos_especialidade_principal", where: raw("(principal = true)"))
+  especialidade_id BigInt
+  principal        Boolean        @default(false)
+  criado_em        DateTime       @default(now()) @db.Timestamptz(6)
+  especialidades   especialidades @relation(fields: [especialidade_id], references: [id], onUpdate: NoAction, map: "fk_medicos_especialidades_especialidade")
+  medicos          medicos        @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_medicos_especialidades_medico")
+
+  @@id([medico_id, especialidade_id], map: "pk_medicos_especialidades")
+}
+
+model pacientes {
+  id                  BigInt         @id @default(autoincrement())
+  nome_completo       String         @db.VarChar(180)
+  cpf                 String         @unique(map: "uk_pacientes_cpf") @db.VarChar(11)
+  data_nascimento     DateTime       @db.Date
+  sexo                String?        @db.VarChar(30)
+  telefone            String         @db.VarChar(20)
+  telefone_secundario String?        @db.VarChar(20)
+  email               String?        @db.VarChar(180)
+  nome_mae            String?        @db.VarChar(180)
+  cep                 String?        @db.VarChar(8)
+  logradouro          String?        @db.VarChar(180)
+  numero              String?        @db.VarChar(20)
+  complemento         String?        @db.VarChar(100)
+  bairro              String?        @db.VarChar(100)
+  cidade              String?        @db.VarChar(100)
+  estado              String?        @db.VarChar(2)
+  observacoes         String?
+  ativo               Boolean        @default(true)
+  criado_em           DateTime       @default(now()) @db.Timestamptz(6)
+  criado_por          BigInt?
+  atualizado_em       DateTime?      @db.Timestamptz(6)
+  atualizado_por      BigInt?
+  agendamentos        agendamentos[]
+  atestados           atestados[]
+  consultas           consultas[]
+  prontuarios         prontuarios?
+  receitas            receitas[]
+
+  @@index([ativo], map: "idx_pacientes_ativo")
+  @@index([cpf], map: "idx_pacientes_cpf")
+  @@index([nome_completo], map: "idx_pacientes_nome")
+  @@index([telefone], map: "idx_pacientes_telefone")
+}
+
+model prontuarios {
+  id                    BigInt     @id @default(autoincrement())
+  paciente_id           BigInt     @unique(map: "uk_prontuarios_paciente")
+  tipo_sanguineo        String?    @db.VarChar(5)
+  historico_familiar    String?
+  doencas_preexistentes String?
+  medicamentos_em_uso   String?
+  observacoes_gerais    String?
+  criado_em             DateTime   @default(now()) @db.Timestamptz(6)
+  criado_por            BigInt?
+  atualizado_em         DateTime?  @db.Timestamptz(6)
+  atualizado_por        BigInt?
+  alergias              alergias[]
+  pacientes             pacientes  @relation(fields: [paciente_id], references: [id], onUpdate: NoAction, map: "fk_prontuarios_paciente")
+}
+
+model receitas {
+  id                  BigInt          @id @default(autoincrement())
+  consulta_id         BigInt
+  paciente_id         BigInt
+  medico_id           BigInt
+  orientacoes_gerais  String?
+  emitida_em          DateTime        @default(now()) @db.Timestamptz(6)
+  validade_ate        DateTime?       @db.Date
+  status              String          @default("EMITIDA") @db.VarChar(20)
+  cancelada_em        DateTime?       @db.Timestamptz(6)
+  motivo_cancelamento String?         @db.VarChar(500)
+  itens_receita       itens_receita[]
+  consultas           consultas       @relation(fields: [consulta_id], references: [id], onUpdate: NoAction, map: "fk_receitas_consulta")
+  medicos             medicos         @relation(fields: [medico_id], references: [id], onUpdate: NoAction, map: "fk_receitas_medico")
+  pacientes           pacientes       @relation(fields: [paciente_id], references: [id], onUpdate: NoAction, map: "fk_receitas_paciente")
+
+  @@index([consulta_id], map: "idx_receitas_consulta")
+}
+
+model refresh_tokens {
+  id          BigInt    @id @default(autoincrement())
+  usuario_id  BigInt
+  token_hash  String    @unique(map: "uk_refresh_tokens_token_hash") @db.VarChar(255)
+  expira_em   DateTime  @db.Timestamptz(6)
+  revogado_em DateTime? @db.Timestamptz(6)
+  criado_em   DateTime  @default(now()) @db.Timestamptz(6)
+  ip_origem   String?   @db.VarChar(45)
+  user_agent  String?   @db.VarChar(500)
+  usuarios    usuarios  @relation(fields: [usuario_id], references: [id], onUpdate: NoAction, map: "fk_refresh_tokens_usuario")
+
+  @@index([expira_em], map: "idx_refresh_tokens_expira_em")
+  @@index([usuario_id], map: "idx_refresh_tokens_usuario")
+  @@index([usuario_id, expira_em], map: "idx_refresh_tokens_validos", where: raw("(revogado_em IS NULL)"))
+}
+
+model usuarios {
+  id              BigInt           @id @default(autoincrement())
+  nome            String           @db.VarChar(150)
+  email           String           @unique(map: "uk_usuarios_email") @db.VarChar(180)
+  senha           String           @db.VarChar(255)
+  perfil          String           @db.VarChar(30)
+  ativo           Boolean          @default(true)
+  ultimo_login_em DateTime?        @db.Timestamptz(6)
+  criado_em       DateTime         @default(now()) @db.Timestamptz(6)
+  criado_por      BigInt?
+  atualizado_em   DateTime?        @db.Timestamptz(6)
+  atualizado_por  BigInt?
+  auditorias      auditorias[]
+  medicos         medicos?
+  refresh_tokens  refresh_tokens[]
+
+  @@index([ativo], map: "idx_usuarios_ativo")
+  @@index([email], map: "idx_usuarios_email")
+  @@index([perfil], map: "idx_usuarios_perfil")
+}
