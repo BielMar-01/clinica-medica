@@ -5,17 +5,32 @@ import authorizationTestRouter from './authorization-test.routes.js'
 import databaseRouter from './database.routes.js'
 import docsRouter from './docs.routes.js'
 import healthRouter from './health.routes.js'
+import patientRouter from './patient.routes.js'
 
 const router = Router()
 
 router.use(docsRouter)
 
-router.use('/auth', authRouter)
+router.use(
+  '/auth',
+  authRouter,
+)
 
-router.use(healthRouter)
+router.use(
+  healthRouter,
+)
 
-router.use(databaseRouter)
+router.use(
+  databaseRouter,
+)
 
-router.use(authorizationTestRouter)
+router.use(
+  '/pacientes',
+  patientRouter,
+)
+
+router.use(
+  authorizationTestRouter,
+)
 
 export default router
