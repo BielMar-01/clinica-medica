@@ -4,6 +4,8 @@ import type {
   Response,
 } from 'express'
 
+import { AppError } from '../utils/app-error.js'
+
 type UserRole =
   | 'ADMIN'
   | 'RECEPCIONISTA'
@@ -14,16 +16,15 @@ export function authorizeMiddleware(
 ) {
   return (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction,
   ) => {
     if (!req.user) {
-      res.status(401).json({
-        status: 'error',
-        message: 'Usuário não autenticado',
-      })
-
-      return
+      throw new AppError(
+        'Usuário não autenticado',
+        401,
+        'USER_NOT_AUTHENTICATED',
+      )
     }
 
     if (
@@ -31,13 +32,11 @@ export function authorizeMiddleware(
         req.user.perfil,
       )
     ) {
-      res.status(403).json({
-        status: 'error',
-        message:
-          'Usuário sem permissão para acessar este recurso',
-      })
-
-      return
+      throw new AppError(
+        'Usuário sem permissão para acessar este recurso',
+        403,
+        'FORBIDDEN',
+      )
     }
 
     next()

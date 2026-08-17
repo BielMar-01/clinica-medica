@@ -5,23 +5,23 @@ import type {
 } from 'express'
 
 import { findUserById } from '../repositories/auth.repository.js'
+import { AppError } from '../utils/app-error.js'
 import { verifyAccessToken } from '../utils/tokens.js'
 
 export async function authenticateMiddleware(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ) {
   const authorization =
     req.headers.authorization
 
   if (!authorization) {
-    res.status(401).json({
-      status: 'error',
-      message: 'Token de acesso não informado',
-    })
-
-    return
+    throw new AppError(
+      'Token de acesso não informado',
+      401,
+      'ACCESS_TOKEN_MISSING',
+    )
   }
 
   const [type, token] =
@@ -31,12 +31,11 @@ export async function authenticateMiddleware(
     type !== 'Bearer' ||
     !token
   ) {
-    res.status(401).json({
-      status: 'error',
-      message: 'Formato do token inválido',
-    })
-
-    return
+    throw new AppError(
+      'Formato do token inválido',
+      401,
+      'ACCESS_TOKEN_INVALID_FORMAT',
+    )
   }
 
   try {
@@ -50,12 +49,11 @@ export async function authenticateMiddleware(
       await findUserById(userId)
 
     if (!user || !user.ativo) {
-      res.status(401).json({
-        status: 'error',
-        message: 'Usuário inválido ou inativo',
-      })
-
-      return
+      throw new AppError(
+        'Usuário inválido ou inativo',
+        401,
+        'USER_INVALID',
+      )
     }
 
     if (
@@ -63,12 +61,11 @@ export async function authenticateMiddleware(
       user.perfil !== 'RECEPCIONISTA' &&
       user.perfil !== 'MEDICO'
     ) {
-      res.status(403).json({
-        status: 'error',
-        message: 'Perfil de usuário inválido',
-      })
-
-      return
+      throw new AppError(
+        'Perfil de usuário inválido',
+        403,
+        'USER_ROLE_INVALID',
+      )
     }
 
     req.user = {
@@ -79,10 +76,15 @@ export async function authenticateMiddleware(
     }
 
     next()
-  } catch {
-    res.status(401).json({
-      status: 'error',
-      message: 'Token inválido ou expirado',
-    })
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error
+    }
+
+    throw new AppError(
+      'Token inválido ou expirado',
+      401,
+      'ACCESS_TOKEN_INVALID',
+    )
   }
 }

@@ -84,3 +84,35 @@ export async function revokeRefreshTokenByHash(
     },
   })
 }
+
+export async function revokeAllActiveRefreshTokensByUser(
+  usuarioId: bigint,
+) {
+  return prisma.refresh_tokens.updateMany({
+    where: {
+      usuario_id: usuarioId,
+      revogado_em: null,
+    },
+    data: {
+      revogado_em: new Date(),
+    },
+  })
+}
+
+export async function revokeAllRefreshTokensExcept(
+  usuarioId: bigint,
+  exceptTokenId: bigint,
+) {
+  return prisma.refresh_tokens.updateMany({
+    where: {
+      usuario_id: usuarioId,
+      id: {
+        not: exceptTokenId,
+      },
+      revogado_em: null,
+    },
+    data: {
+      revogado_em: new Date(),
+    },
+  })
+}

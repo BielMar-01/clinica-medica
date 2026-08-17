@@ -5,6 +5,7 @@ import {
   findUserByEmail,
   revokeRefreshToken,
   revokeRefreshTokenByHash,
+  revokeAllActiveRefreshTokensByUser,
 } from '../repositories/auth.repository.js'
 import type { LoginInput } from '../schemas/auth.schema.js'
 import { comparePassword } from '../utils/password.js'
@@ -88,20 +89,13 @@ export async function refreshSession(
   refreshToken: string,
   context: RefreshContext,
 ) {
-  const tokenHash = hashRefreshToken(refreshToken)
+  const tokenHash =
+    hashRefreshToken(refreshToken)
 
   const storedToken =
     await findRefreshTokenByHash(tokenHash)
 
   if (!storedToken) {
-    return null
-  }
-
-  if (storedToken.revogado_em) {
-    return null
-  }
-
-  if (storedToken.expira_em <= new Date()) {
     return null
   }
 
@@ -111,9 +105,24 @@ export async function refreshSession(
     return null
   }
 
+  if (storedToken.revogado_em) {
+    await revokeAllActiveRefreshTokensByUser(
+      user.id,
+    )
+
+    return null
+  }
+
+  if (storedToken.expira_em <= new Date()) {
+    await revokeRefreshToken(storedToken.id)
+
+    return null
+  }
+
   await revokeRefreshToken(storedToken.id)
 
-  const newRefreshToken = generateRefreshToken()
+  const newRefreshToken =
+    generateRefreshToken()
 
   const newRefreshTokenHash =
     hashRefreshToken(newRefreshToken)
@@ -126,10 +135,11 @@ export async function refreshSession(
     userAgent: context.userAgent,
   })
 
-  const accessToken = generateAccessToken(
-    user.id,
-    user.perfil,
-  )
+  const accessToken =
+    generateAccessToken(
+      user.id,
+      user.perfil,
+    )
 
   return {
     accessToken,
