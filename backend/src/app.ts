@@ -1,6 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 
+import { env } from './config/env.js'
 import { errorHandlerMiddleware } from './middlewares/error-handler.middleware.js'
 import { notFoundMiddleware } from './middlewares/not-found.middleware.js'
 import router from './routes/index.js'
@@ -9,7 +10,7 @@ const app = express()
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://clinica-medica-galera-do-ti.vercel.app',
+  env.FRONTEND_URL,
 ]
 
 app.use(

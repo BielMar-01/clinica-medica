@@ -1,11 +1,10 @@
-import 'dotenv/config'
-
 import app from './app.js'
+import { env } from './config/env.js'
 
-const PORT = Number(process.env.PORT) || 3000
-
-app.listen(PORT, () => {
-  console.log(`API Clínica Médica rodando em http://localhost:${PORT}`)
+app.listen(env.PORT, () => {
+  console.log(
+    `API Clínica Médica rodando em http://localhost:${env.PORT}`,
+  )
 })
 
 export default app
