@@ -1,7 +1,9 @@
 import cors from 'cors'
 import express from 'express'
 
-import { prisma } from './database/prisma.js'
+import { errorHandlerMiddleware } from './middlewares/error-handler.middleware.js'
+import { notFoundMiddleware } from './middlewares/not-found.middleware.js'
+import router from './routes/index.js'
 
 const app = express()
 
@@ -27,60 +29,10 @@ app.get('/', (_req, res) => {
   })
 })
 
-app.get('/api/health', (_req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    service: 'clinica-medica-api',
-  })
-})
+app.use('/api', router)
 
-app.get('/api/database-health', async (_req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`
+app.use(notFoundMiddleware)
 
-    res.status(200).json({
-      status: 'ok',
-      database: 'connected',
-      provider: 'postgresql',
-    })
-  } catch (error) {
-    console.error('Erro ao conectar com o banco:', error)
-
-    res.status(500).json({
-      status: 'error',
-      database: 'disconnected',
-    })
-  }
-})
-
-app.get('/api/database-test/especialidades', async (_req, res) => {
-  try {
-    const especialidades = await prisma.especialidades.findMany({
-      select: {
-        id: true,
-        nome: true,
-        ativo: true,
-      },
-      orderBy: {
-        nome: 'asc',
-      },
-    })
-
-    const response = especialidades.map((especialidade) => ({
-      id: especialidade.id.toString(),
-      nome: especialidade.nome,
-      ativo: especialidade.ativo,
-    }))
-
-    res.status(200).json(response)
-  } catch (error) {
-    console.error('Erro ao consultar especialidades:', error)
-
-    res.status(500).json({
-      status: 'error',
-      message: 'Erro ao consultar especialidades',
-    })
-  }
-})
+app.use(errorHandlerMiddleware)
 
 export default app
