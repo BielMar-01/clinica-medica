@@ -419,9 +419,227 @@ O projeto está em desenvolvimento ativo.
 - [ ] Atestados
 - [ ] Auditoria
 
+## Evoluções posteriores
+
+- [ ] Área do Paciente
+- [ ] Acesso ao próprio histórico
+- [ ] Atualização de dados cadastrais pelo paciente
+- [ ] Consulta de receitas e atestados
+- [ ] Consulta de agendamentos e atendimentos
+- [ ] Notificações e confirmações
+
 ---
 
 # 🗺️ Visão futura
+
+Depois da conclusão dos módulos administrativos e clínicos principais, o projeto poderá evoluir para novas funcionalidades voltadas tanto para a equipe da clínica quanto para os próprios pacientes.
+
+Entre as principais evoluções previstas estão:
+
+- Dashboard gerencial
+- Indicadores da clínica
+- Confirmação de consultas
+- Notificações
+- Recuperação de senha
+- Gerenciamento de usuários
+- Histórico completo do paciente
+- PWA
+- Melhorias de acessibilidade
+- Auditoria avançada
+- Relatórios
+- Exportação de informações
+- Observabilidade
+- Testes automatizados
+- Melhorias relacionadas à LGPD
+
+---
+
+## 👥 Área do Paciente
+
+Em uma etapa futura, depois da conclusão dos módulos internos da clínica, o sistema também poderá disponibilizar um ambiente exclusivo para os pacientes.
+
+A proposta é permitir que cada paciente tenha acesso apenas às próprias informações através de uma conta segura.
+
+O paciente poderá acompanhar sua jornada dentro da clínica sem depender exclusivamente do atendimento administrativo para consultar informações básicas.
+
+### Funcionalidades previstas
+
+O paciente poderá visualizar informações como:
+
+- Dados pessoais
+- Dados de contato
+- Endereço
+- Histórico de atendimentos
+- Histórico de consultas
+- Consultas futuras
+- Consultas anteriores
+- Médicos responsáveis pelos atendimentos
+- Especialidades relacionadas às consultas
+- Receitas médicas
+- Medicamentos prescritos
+- Orientações médicas disponibilizadas
+- Atestados
+- Documentos disponibilizados pela clínica
+- Informações do próprio prontuário que forem apropriadas para exibição
+- Histórico relacionado aos seus atendimentos
+
+---
+
+### ✏️ Atualização de dados
+
+O paciente também poderá alterar determinadas informações cadastrais diretamente pela plataforma.
+
+Exemplos:
+
+- Telefone
+- Telefone secundário
+- E-mail
+- Endereço
+- CEP
+- Número
+- Complemento
+- Bairro
+- Cidade
+- Estado
+
+Informações mais sensíveis ou que exijam validação administrativa poderão possuir regras diferentes para alteração.
+
+Por exemplo:
+
+```text
+Paciente solicita alteração
+        ↓
+Sistema identifica o tipo de informação
+        ↓
+Alteração direta
+ou
+Validação pela clínica
+```
+
+Isso permitirá manter os dados cadastrais mais atualizados sem comprometer a confiabilidade das informações importantes para a clínica.
+
+---
+
+### 💊 Receitas e documentos
+
+O paciente poderá consultar documentos relacionados aos próprios atendimentos.
+
+Exemplos:
+
+```text
+Receitas
+Atestados
+Orientações
+Documentos médicos disponibilizados
+```
+
+O objetivo é centralizar essas informações dentro da própria plataforma e facilitar o acesso ao histórico do paciente.
+
+---
+
+### 📅 Consultas e agendamentos
+
+A Área do Paciente também poderá evoluir para permitir:
+
+- Visualizar próximas consultas
+- Consultar histórico de consultas
+- Visualizar informações do agendamento
+- Confirmar presença
+- Solicitar cancelamento
+- Solicitar reagendamento
+- Receber lembretes
+- Receber notificações relacionadas ao atendimento
+
+Algumas dessas ações poderão depender das regras administrativas definidas pela clínica.
+
+---
+
+### 🩺 Histórico do paciente
+
+A proposta é oferecer uma linha do tempo organizada da relação do paciente com a clínica.
+
+Exemplo:
+
+```text
+Cadastro
+   ↓
+Agendamento
+   ↓
+Consulta
+   ↓
+Receita
+   ↓
+Atestado
+   ↓
+Novo atendimento
+   ↓
+Histórico contínuo
+```
+
+O paciente poderá consultar informações permitidas sobre os próprios atendimentos enquanto a equipe médica continuará tendo acesso às funcionalidades profissionais e clínicas correspondentes ao seu perfil.
+
+---
+
+### 🔐 Privacidade e segurança
+
+A Área do Paciente exigirá controles de segurança específicos.
+
+Cada paciente deverá acessar exclusivamente os próprios dados.
+
+A arquitetura deverá garantir separação entre:
+
+```text
+Usuário interno da clínica
+        ↓
+ADMIN
+RECEPCIONISTA
+MEDICO
+
+e
+
+Usuário paciente
+        ↓
+PACIENTE
+```
+
+O perfil de paciente deverá possuir permissões próprias e significativamente mais restritas que os perfis internos da clínica.
+
+Também deverão ser considerados aspectos como:
+
+- Proteção de dados pessoais
+- Proteção de informações médicas
+- Controle de sessão
+- Auditoria de acessos
+- Registro de alterações cadastrais
+- Validação de identidade
+- Recuperação segura de conta
+- Consentimentos quando necessários
+- Boas práticas relacionadas à LGPD
+
+---
+
+### 🌐 Evolução da plataforma
+
+Com a Área do Paciente, a aplicação passará a atender dois grandes públicos:
+
+```text
+CLÍNICA
+│
+├── Administradores
+├── Recepcionistas
+└── Médicos
+
+PACIENTES
+│
+├── Dados pessoais
+├── Consultas
+├── Histórico
+├── Receitas
+├── Atestados
+└── Documentos
+```
+
+Assim, o sistema deixa de ser apenas uma ferramenta interna de gestão e passa a funcionar também como um canal digital entre a clínica e seus pacientes.
 
 Além dos módulos principais, o projeto poderá evoluir com funcionalidades como:
 
