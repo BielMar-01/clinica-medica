@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 
@@ -16,12 +17,24 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    methods: [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+    ],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+    ],
   }),
 )
 
 app.use(express.json())
+
+app.use(cookieParser())
 
 app.get('/', (_req, res) => {
   res.status(200).json({
