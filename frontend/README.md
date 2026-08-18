@@ -691,6 +691,248 @@ Sempre:
 
 ---
 
+# 🧪 Seletores para testes e automação QA
+
+O frontend utiliza `data-testid` nos principais elementos da interface para facilitar:
+
+- testes manuais
+- estudos de QA
+- automação com Playwright
+- automação com Cypress
+- criação de evidências
+- aprendizado de seletores
+- testes de regressão
+
+A aplicação não adiciona `data-testid` indiscriminadamente em todos os elementos.
+
+Os identificadores são utilizados principalmente em componentes relevantes para interação, validação ou automação.
+
+---
+
+## 📏 Convenção
+
+O padrão utilizado é:
+
+```text
+modulo-elemento-finalidade
+```
+
+Exemplos:
+
+```text
+login-email-input
+login-password-input
+login-submit-button
+
+nav-dashboard-link
+nav-patients-link
+
+patients-new-button
+patients-search-button
+patients-table
+
+patient-name-input
+patient-cpf-input
+patient-form-submit-button
+```
+
+---
+
+## 🔄 Elementos dinâmicos
+
+Para elementos relacionados a registros específicos, deve ser utilizado o identificador da entidade.
+
+Exemplo:
+
+```text
+patient-row-{id}
+patient-name-{id}
+patient-edit-button-{id}
+patient-status-button-{id}
+```
+
+Exemplo real:
+
+```text
+patient-row-10
+patient-edit-button-10
+patient-status-button-10
+```
+
+Esse padrão deve continuar sendo utilizado nos próximos módulos.
+
+Exemplos futuros:
+
+```text
+specialty-row-{id}
+specialty-edit-button-{id}
+
+doctor-row-{id}
+doctor-edit-button-{id}
+
+appointment-row-{id}
+appointment-cancel-button-{id}
+```
+
+---
+
+## ✅ Onde utilizar `data-testid`
+
+Deve ser utilizado principalmente em:
+
+- páginas
+- formulários
+- inputs
+- selects
+- checkboxes
+- botões
+- menus
+- links de navegação
+- tabelas
+- listas
+- linhas de registros
+- ações sobre registros
+- paginação
+- modais
+- mensagens de erro
+- mensagens de sucesso
+- estados de loading
+- estados sem resultados
+- componentes importantes para validação
+
+---
+
+## 🚫 Onde não é necessário
+
+Não é obrigatório adicionar `data-testid` em:
+
+- elementos puramente decorativos
+- wrappers sem relevância para teste
+- elementos utilizados apenas para layout
+- textos sem importância funcional
+- elementos internos que não precisam ser identificados diretamente
+
+O objetivo é manter seletores úteis e estáveis, sem poluir desnecessariamente o HTML.
+
+---
+
+## 🧷 Regras para nomes
+
+Os identificadores devem:
+
+- ser escritos em inglês
+- utilizar `kebab-case`
+- representar claramente o elemento
+- representar sua finalidade
+- permanecer estáveis mesmo quando CSS ou textos mudarem
+- utilizar o ID da entidade quando necessário
+- evitar nomes genéricos como `button-1`, `input-2` ou `item`
+
+Exemplo correto:
+
+```text
+patients-clear-filters-button
+```
+
+Evitar:
+
+```text
+button2
+```
+
+---
+
+## 🧪 Exemplo com Playwright
+
+```ts
+await page
+  .getByTestId('login-email-input')
+  .fill('admin@clinica.local')
+
+await page
+  .getByTestId('login-password-input')
+  .fill('senha')
+
+await page
+  .getByTestId('login-submit-button')
+  .click()
+
+await expect(
+  page.getByTestId('dashboard-page'),
+).toBeVisible()
+```
+
+Exemplo de Pacientes:
+
+```ts
+await page
+  .getByTestId('nav-patients-link')
+  .click()
+
+await page
+  .getByTestId('patients-new-button')
+  .click()
+
+await page
+  .getByTestId('patient-name-input')
+  .fill('Paciente Automação')
+
+await page
+  .getByTestId('patient-cpf-input')
+  .fill('52998224725')
+
+await page
+  .getByTestId('patient-form-submit-button')
+  .click()
+```
+
+---
+
+## 🧪 Exemplo com Cypress
+
+```ts
+cy.get(
+  '[data-testid="login-email-input"]',
+).type('admin@clinica.local')
+
+cy.get(
+  '[data-testid="login-password-input"]',
+).type('senha')
+
+cy.get(
+  '[data-testid="login-submit-button"]',
+).click()
+
+cy.get(
+  '[data-testid="dashboard-page"]',
+).should('be.visible')
+```
+
+---
+
+## 📌 Regra para novos módulos
+
+Todo novo módulo do frontend deve ser entregue já preparado para automação.
+
+Antes de considerar uma tela concluída, verificar:
+
+```text
+Página principal             ✅
+Inputs principais            ✅
+Botões                       ✅
+Filtros                      ✅
+Tabela/listagem              ✅
+Registros dinâmicos          ✅
+Paginação                    ✅
+Loading                      ✅
+Empty state                  ✅
+Erros                        ✅
+Modais                       ✅
+Ações                        ✅
+```
+
+---
+
 # 🗺️ Evolução
 
 A interface deverá acompanhar a implementação dos módulos:
@@ -718,6 +960,8 @@ Atestados
      ↓
 Dashboard
 ```
+
+Todos os próximos módulos deverão seguir o padrão de `data-testid` definido nesta documentação.
 
 ---
 

@@ -661,6 +661,34 @@ Além dos módulos principais, o projeto poderá evoluir com funcionalidades com
 
 ---
 
+# 🧪 Projeto preparado para estudos de QA
+
+Além da construção do sistema de gestão da clínica, o projeto também foi pensado para servir como ambiente de estudo e prática para profissionais de Quality Assurance.
+
+A aplicação poderá ser utilizada para estudos e exercícios envolvendo:
+
+- Testes manuais
+- Testes exploratórios
+- Criação de cenários
+- BDD / Gherkin
+- Testes de API
+- Testes de integração
+- Testes de regressão
+- Validação de regras de negócio
+- Criação de evidências
+- Testes automatizados
+- Playwright
+- Cypress
+- Postman
+
+Os principais elementos do frontend possuem identificadores estáveis através de `data-testid`, facilitando a criação de automações sem depender de classes CSS ou textos que podem mudar durante a evolução da interface.
+
+Os novos módulos deverão continuar sendo desenvolvidos seguindo esse padrão de testabilidade.
+
+Os detalhes técnicos sobre os seletores utilizados estão disponíveis na documentação do frontend:
+
+[🧪 Padrões de automação e `data-testid`](./frontend/README.md#-seletores-para-testes-e-automação-qa)
+
 # 📚 Documentação técnica
 
 Os detalhes técnicos foram separados da apresentação principal do projeto.

@@ -244,7 +244,9 @@ export function PatientsPage() {
 
   useEffect(() => {
     void loadPatients()
-  }, [loadPatients])
+  }, [
+    loadPatients,
+  ])
 
   function handleSearch() {
     const nextFilters = {
@@ -409,14 +411,20 @@ export function PatientsPage() {
   }
 
   return (
-    <section className="page">
-      <header className="page-header">
+    <section
+      className="page"
+      data-testid="patients-page"
+    >
+      <header
+        className="page-header"
+        data-testid="patients-page-header"
+      >
         <div>
-          <h1>
+          <h1 data-testid="patients-page-title">
             Pacientes
           </h1>
 
-          <p>
+          <p data-testid="patients-page-description">
             Cadastro, consulta e
             gerenciamento de
             pacientes.
@@ -425,6 +433,7 @@ export function PatientsPage() {
 
         {canManage && (
           <button
+            data-testid="patients-new-button"
             type="button"
             className="primary-button"
             onClick={
@@ -440,6 +449,7 @@ export function PatientsPage() {
         <div
           className="page-error"
           role="alert"
+          data-testid="patients-error-message"
         >
           {error}
         </div>
@@ -473,8 +483,12 @@ export function PatientsPage() {
       {!loading &&
         pagination.totalPages >
           0 && (
-          <div className="pagination">
+          <div
+            className="pagination"
+            data-testid="patients-pagination"
+          >
             <button
+              data-testid="patients-previous-page-button"
               type="button"
               className="secondary-button"
               disabled={
@@ -491,7 +505,9 @@ export function PatientsPage() {
               Anterior
             </button>
 
-            <span>
+            <span
+              data-testid="patients-pagination-info"
+            >
               Página{' '}
               {pagination.page}{' '}
               de{' '}
@@ -504,6 +520,7 @@ export function PatientsPage() {
             </span>
 
             <button
+              data-testid="patients-next-page-button"
               type="button"
               className="secondary-button"
               disabled={

@@ -37,13 +37,11 @@ type PatientFormProps = {
 
   submitting: boolean
 
-  onClose:
-    () => void
+  onClose: () => void
 
-  onSubmit:
-    (
-      data: PatientFormData,
-    ) => Promise<void>
+  onSubmit: (
+    data: PatientFormData,
+  ) => Promise<void>
 }
 
 export function PatientForm({
@@ -65,8 +63,7 @@ export function PatientForm({
   const [
     error,
     setError,
-  ] =
-    useState('')
+  ] = useState('')
 
   useEffect(() => {
     if (!open) {
@@ -94,10 +91,12 @@ export function PatientForm({
 
     value: string,
   ) {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }))
+    setForm(
+      (current) => ({
+        ...current,
+        [field]: value,
+      }),
+    )
   }
 
   async function handleSubmit(
@@ -120,13 +119,24 @@ export function PatientForm({
   }
 
   return (
-    <div className="modal-backdrop">
-      <div className="patient-modal">
-        <div className="modal-header">
+    <div
+      className="modal-backdrop"
+      data-testid="patient-form-modal-backdrop"
+    >
+      <div
+        className="patient-modal"
+        data-testid="patient-form-modal"
+      >
+        <div
+          className="modal-header"
+          data-testid="patient-form-header"
+        >
           <div>
-            <h2>{title}</h2>
+            <h2 data-testid="patient-form-title">
+              {title}
+            </h2>
 
-            <p>
+            <p data-testid="patient-form-description">
               Preencha os dados
               cadastrais do
               paciente.
@@ -134,25 +144,30 @@ export function PatientForm({
           </div>
 
           <button
+            data-testid="patient-form-close-button"
             type="button"
             className="icon-button"
             onClick={onClose}
+            aria-label="Fechar formulário"
           >
             ×
           </button>
         </div>
 
         <form
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
           className="patient-form"
+          data-testid="patient-form"
         >
-          <div className="form-grid">
+          <div
+            className="form-grid"
+            data-testid="patient-form-fields"
+          >
             <label className="full-field">
               Nome completo
 
               <input
+                data-testid="patient-name-input"
                 value={
                   form.nomeCompleto
                 }
@@ -170,6 +185,7 @@ export function PatientForm({
               CPF
 
               <input
+                data-testid="patient-cpf-input"
                 value={form.cpf}
                 onChange={(event) =>
                   updateField(
@@ -185,6 +201,7 @@ export function PatientForm({
               Data de nascimento
 
               <input
+                data-testid="patient-birth-date-input"
                 type="date"
                 value={
                   form.dataNascimento
@@ -203,6 +220,7 @@ export function PatientForm({
               Sexo
 
               <select
+                data-testid="patient-sex-select"
                 value={form.sexo}
                 onChange={(event) =>
                   updateField(
@@ -233,6 +251,7 @@ export function PatientForm({
               Telefone
 
               <input
+                data-testid="patient-phone-input"
                 value={
                   form.telefone
                 }
@@ -250,6 +269,7 @@ export function PatientForm({
               Telefone secundário
 
               <input
+                data-testid="patient-secondary-phone-input"
                 value={
                   form.telefoneSecundario
                 }
@@ -266,6 +286,7 @@ export function PatientForm({
               E-mail
 
               <input
+                data-testid="patient-email-input"
                 type="email"
                 value={form.email}
                 onChange={(event) =>
@@ -281,6 +302,7 @@ export function PatientForm({
               Nome da mãe
 
               <input
+                data-testid="patient-mother-name-input"
                 value={
                   form.nomeMae
                 }
@@ -297,6 +319,7 @@ export function PatientForm({
               CEP
 
               <input
+                data-testid="patient-zip-code-input"
                 value={form.cep}
                 onChange={(event) =>
                   updateField(
@@ -311,6 +334,7 @@ export function PatientForm({
               Estado
 
               <input
+                data-testid="patient-state-input"
                 value={
                   form.estado
                 }
@@ -329,6 +353,7 @@ export function PatientForm({
               Logradouro
 
               <input
+                data-testid="patient-address-input"
                 value={
                   form.logradouro
                 }
@@ -345,6 +370,7 @@ export function PatientForm({
               Número
 
               <input
+                data-testid="patient-address-number-input"
                 value={
                   form.numero
                 }
@@ -361,6 +387,7 @@ export function PatientForm({
               Complemento
 
               <input
+                data-testid="patient-address-complement-input"
                 value={
                   form.complemento
                 }
@@ -377,6 +404,7 @@ export function PatientForm({
               Bairro
 
               <input
+                data-testid="patient-neighborhood-input"
                 value={
                   form.bairro
                 }
@@ -393,6 +421,7 @@ export function PatientForm({
               Cidade
 
               <input
+                data-testid="patient-city-input"
                 value={
                   form.cidade
                 }
@@ -409,6 +438,7 @@ export function PatientForm({
               Observações
 
               <textarea
+                data-testid="patient-notes-input"
                 value={
                   form.observacoes
                 }
@@ -427,13 +457,18 @@ export function PatientForm({
             <div
               className="form-error"
               role="alert"
+              data-testid="patient-form-error-message"
             >
               {error}
             </div>
           )}
 
-          <div className="modal-actions">
+          <div
+            className="modal-actions"
+            data-testid="patient-form-actions"
+          >
             <button
+              data-testid="patient-form-cancel-button"
               type="button"
               className="secondary-button"
               onClick={onClose}
@@ -445,6 +480,7 @@ export function PatientForm({
             </button>
 
             <button
+              data-testid="patient-form-submit-button"
               type="submit"
               disabled={
                 submitting

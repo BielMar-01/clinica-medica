@@ -21,12 +21,19 @@ export function PatientFiltersComponent({
   onClear,
 }: PatientFiltersProps) {
   return (
-    <div className="patient-filters">
-      <div className="filter-group">
+    <div
+      className="patient-filters"
+      data-testid="patients-filters"
+    >
+      <div
+        className="filter-group"
+        data-testid="patients-filters-fields"
+      >
         <label>
           Nome
 
           <input
+            data-testid="patients-name-filter-input"
             type="text"
             value={filters.nome}
             onChange={(event) =>
@@ -44,6 +51,7 @@ export function PatientFiltersComponent({
           CPF
 
           <input
+            data-testid="patients-cpf-filter-input"
             type="text"
             value={filters.cpf}
             onChange={(event) =>
@@ -61,6 +69,7 @@ export function PatientFiltersComponent({
           Telefone
 
           <input
+            data-testid="patients-phone-filter-input"
             type="text"
             value={filters.telefone}
             onChange={(event) =>
@@ -78,10 +87,12 @@ export function PatientFiltersComponent({
           Status
 
           <select
+            data-testid="patients-status-filter-select"
             value={filters.ativo}
             onChange={(event) => {
-              const ativo = event.target
-                .value as PatientFilters['ativo']
+              const ativo =
+                event.target
+                  .value as PatientFilters['ativo']
 
               onChange({
                 ...filters,
@@ -105,8 +116,12 @@ export function PatientFiltersComponent({
         </label>
       </div>
 
-      <div className="filter-actions">
+      <div
+        className="filter-actions"
+        data-testid="patients-filter-actions"
+      >
         <button
+          data-testid="patients-search-button"
           type="button"
           onClick={onSearch}
         >
@@ -114,6 +129,7 @@ export function PatientFiltersComponent({
         </button>
 
         <button
+          data-testid="patients-clear-filters-button"
           type="button"
           className="secondary-button"
           onClick={onClear}

@@ -8,48 +8,65 @@ export function DashboardPage() {
   } = useAuth()
 
   return (
-    <section className="page">
-      <header className="page-header">
+    <section
+      className="page"
+      data-testid="dashboard-page"
+    >
+      <header
+        className="page-header"
+        data-testid="dashboard-header"
+      >
         <div>
-          <h1>
+          <h1 data-testid="dashboard-title">
             Dashboard
           </h1>
 
-          <p>
-            Bem-vindo,
-            {' '}
+          <p data-testid="dashboard-welcome-message">
+            Bem-vindo,{' '}
             {user?.nome}.
           </p>
         </div>
       </header>
 
-      <div className="dashboard-grid">
-        <article className="dashboard-card">
+      <div
+        className="dashboard-grid"
+        data-testid="dashboard-cards"
+      >
+        <article
+          className="dashboard-card"
+          data-testid="dashboard-session-card"
+        >
           <span>
             Sessão
           </span>
 
-          <strong>
+          <strong data-testid="dashboard-session-status">
             Ativa
           </strong>
         </article>
 
-        <article className="dashboard-card">
+        <article
+          className="dashboard-card"
+          data-testid="dashboard-role-card"
+        >
           <span>
             Perfil
           </span>
 
-          <strong>
+          <strong data-testid="dashboard-user-role">
             {user?.perfil}
           </strong>
         </article>
 
-        <article className="dashboard-card">
+        <article
+          className="dashboard-card"
+          data-testid="dashboard-patients-card"
+        >
           <span>
             Pacientes
           </span>
 
-          <strong>
+          <strong data-testid="dashboard-patients-status">
             Módulo disponível
           </strong>
         </article>

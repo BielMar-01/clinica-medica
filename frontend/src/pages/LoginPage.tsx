@@ -87,38 +87,42 @@ export function LoginPage() {
   }
 
   return (
-    <main className="login-page">
-      <section className="login-card">
-        <div className="login-header">
-          <h1>
+    <main
+      className="login-page"
+      data-testid="login-page"
+    >
+      <section
+        className="login-card"
+        data-testid="login-card"
+      >
+        <div
+          className="login-header"
+          data-testid="login-header"
+        >
+          <h1 data-testid="login-title">
             Clínica Médica
           </h1>
 
-          <p>
-            Entre para acessar
-            o sistema.
+          <p data-testid="login-description">
+            Entre para acessar o sistema.
           </p>
         </div>
 
         <form
           className="login-form"
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
+          data-testid="login-form"
         >
           <label>
             E-mail
 
             <input
+              data-testid="login-email-input"
               type="email"
               value={email}
-              onChange={(
-                event,
-              ) =>
+              onChange={(event) =>
                 setEmail(
-                  event
-                    .target
-                    .value,
+                  event.target.value,
                 )
               }
               placeholder="seu@email.com"
@@ -131,15 +135,12 @@ export function LoginPage() {
             Senha
 
             <input
+              data-testid="login-password-input"
               type="password"
               value={senha}
-              onChange={(
-                event,
-              ) =>
+              onChange={(event) =>
                 setSenha(
-                  event
-                    .target
-                    .value,
+                  event.target.value,
                 )
               }
               placeholder="Sua senha"
@@ -152,16 +153,16 @@ export function LoginPage() {
             <div
               className="form-error"
               role="alert"
+              data-testid="login-error-message"
             >
               {error}
             </div>
           )}
 
           <button
+            data-testid="login-submit-button"
             type="submit"
-            disabled={
-              submitting
-            }
+            disabled={submitting}
           >
             {submitting
               ? 'Entrando...'
