@@ -67,6 +67,13 @@ export function AppLayout() {
           >
             Pacientes
           </NavLink>
+
+          <NavLink
+            to="/especialidades"
+            data-testid="nav-specialties-link"
+          >
+            Especialidades
+          </NavLink>
         </nav>
 
         <div

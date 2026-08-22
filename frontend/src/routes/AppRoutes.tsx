@@ -28,6 +28,10 @@ import {
   PatientsPage,
 } from '../pages/PatientsPage'
 
+import {
+  SpecialtiesPage,
+} from '../pages/SpecialtiesPage'
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -59,6 +63,13 @@ export function AppRoutes() {
             path="/pacientes"
             element={
               <PatientsPage />
+            }
+          />
+
+          <Route
+            path="/especialidades"
+            element={
+              <SpecialtiesPage />
             }
           />
 
