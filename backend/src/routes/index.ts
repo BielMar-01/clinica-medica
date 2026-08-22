@@ -6,10 +6,13 @@ import databaseRouter from './database.routes.js'
 import docsRouter from './docs.routes.js'
 import healthRouter from './health.routes.js'
 import patientRouter from './patient.routes.js'
+import specialtyRouter from './specialty.routes.js'
 
 const router = Router()
 
-router.use(docsRouter)
+router.use(
+  docsRouter,
+)
 
 router.use(
   '/auth',
@@ -27,6 +30,11 @@ router.use(
 router.use(
   '/pacientes',
   patientRouter,
+)
+
+router.use(
+  '/especialidades',
+  specialtyRouter,
 )
 
 router.use(

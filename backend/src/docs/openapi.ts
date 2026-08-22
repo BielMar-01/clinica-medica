@@ -37,6 +37,11 @@ export const openApiDocument = {
       description: 'Cadastro e gerenciamento de pacientes.',
     },
     {
+      name: 'Especialidades',
+      description:
+        'Cadastro e gerenciamento das especialidades médicas.',
+    },
+    {
       name: 'Internal',
       description:
         'Rotas temporárias utilizadas durante o desenvolvimento.',
@@ -195,27 +200,6 @@ export const openApiDocument = {
           provider: {
             type: 'string',
             example: 'postgresql',
-          },
-        },
-      },
-
-      Especialidade: {
-        type: 'object',
-
-        properties: {
-          id: {
-            type: 'string',
-            example: '1',
-          },
-
-          nome: {
-            type: 'string',
-            example: 'Cardiologia',
-          },
-
-          ativo: {
-            type: 'boolean',
-            example: true,
           },
         },
       },
@@ -509,6 +493,125 @@ export const openApiDocument = {
         },
       },
 
+      SpecialtySummary: {
+        type: 'object',
+
+        properties: {
+          id: {
+            type: 'string',
+            example: '1',
+          },
+
+          nome: {
+            type: 'string',
+            example: 'Cardiologia',
+          },
+
+          descricao: {
+            type: 'string',
+            nullable: true,
+            example:
+              'Especialidade médica relacionada ao diagnóstico e tratamento de doenças cardiovasculares.',
+          },
+
+          ativo: {
+            type: 'boolean',
+            example: true,
+          },
+        },
+      },
+
+      Specialty: {
+        type: 'object',
+
+        properties: {
+          id: {
+            type: 'string',
+            example: '1',
+          },
+
+          nome: {
+            type: 'string',
+            example: 'Cardiologia',
+          },
+
+          descricao: {
+            type: 'string',
+            nullable: true,
+            example:
+              'Especialidade médica relacionada ao diagnóstico e tratamento de doenças cardiovasculares.',
+          },
+
+          ativo: {
+            type: 'boolean',
+            example: true,
+          },
+
+          criadoEm: {
+            type: 'string',
+            format: 'date-time',
+          },
+
+          criadoPor: {
+            type: 'string',
+            nullable: true,
+            example: '1',
+          },
+
+          atualizadoEm: {
+            type: 'string',
+            nullable: true,
+            format: 'date-time',
+          },
+
+          atualizadoPor: {
+            type: 'string',
+            nullable: true,
+            example: '1',
+          },
+        },
+      },
+
+      SpecialtyRequest: {
+        type: 'object',
+
+        required: [
+          'nome',
+        ],
+
+        properties: {
+          nome: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 120,
+            example: 'Neurologia',
+          },
+
+          descricao: {
+            type: 'string',
+            maxLength: 500,
+            nullable: true,
+            example:
+              'Especialidade médica relacionada ao sistema nervoso.',
+          },
+        },
+      },
+
+      SpecialtyStatusRequest: {
+        type: 'object',
+
+        required: [
+          'ativo',
+        ],
+
+        properties: {
+          ativo: {
+            type: 'boolean',
+            example: false,
+          },
+        },
+      },
+
       Pagination: {
         type: 'object',
 
@@ -617,33 +720,6 @@ export const openApiDocument = {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/ErrorResponse',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-
-    '/api/database-test/especialidades': {
-      get: {
-        tags: ['Internal'],
-        summary: 'Listar especialidades para teste da integração',
-        description:
-          'Endpoint temporário. Será substituído pelo módulo oficial de especialidades.',
-
-        responses: {
-          '200': {
-            description: 'Especialidades encontradas',
-
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-
-                  items: {
-                    $ref: '#/components/schemas/Especialidade',
-                  },
                 },
               },
             },
@@ -1116,6 +1192,30 @@ export const openApiDocument = {
             },
           },
 
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem permissão',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
           '404': {
             description: 'Paciente não encontrado',
 
@@ -1198,6 +1298,30 @@ export const openApiDocument = {
 
           '400': {
             description: 'Dados inválidos',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem permissão',
 
             content: {
               'application/json': {
@@ -1314,6 +1438,30 @@ export const openApiDocument = {
             },
           },
 
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem permissão',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
           '404': {
             description: 'Paciente não encontrado',
 
@@ -1333,6 +1481,708 @@ export const openApiDocument = {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/especialidades': {
+      get: {
+        tags: ['Especialidades'],
+        summary: 'Listar especialidades',
+        description:
+          'Lista especialidades com paginação e filtros opcionais. Permitido para ADMIN, RECEPCIONISTA e MEDICO.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            description: 'Página da listagem.',
+            schema: {
+              type: 'integer',
+              minimum: 1,
+              default: 1,
+            },
+          },
+
+          {
+            name: 'limit',
+            in: 'query',
+            description:
+              'Quantidade máxima de registros por página.',
+            schema: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 10,
+            },
+          },
+
+          {
+            name: 'nome',
+            in: 'query',
+            description:
+              'Pesquisa parcial pelo nome da especialidade.',
+            schema: {
+              type: 'string',
+              example: 'cardio',
+            },
+          },
+
+          {
+            name: 'ativo',
+            in: 'query',
+            description:
+              'Filtra especialidades por situação.',
+            schema: {
+              type: 'boolean',
+            },
+          },
+        ],
+
+        responses: {
+          '200': {
+            description: 'Especialidades encontradas',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    data: {
+                      type: 'array',
+
+                      items: {
+                        $ref: '#/components/schemas/SpecialtySummary',
+                      },
+                    },
+
+                    pagination: {
+                      $ref: '#/components/schemas/Pagination',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'Filtros inválidos',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem permissão',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+
+      post: {
+        tags: ['Especialidades'],
+        summary: 'Cadastrar especialidade',
+        description:
+          'Cadastra uma nova especialidade médica. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/SpecialtyRequest',
+              },
+
+              example: {
+                nome: 'Neurologia',
+                descricao:
+                  'Especialidade médica relacionada ao sistema nervoso.',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '201': {
+            description: 'Especialidade cadastrada com sucesso',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    message: {
+                      type: 'string',
+                      example:
+                        'Especialidade cadastrada com sucesso',
+                    },
+
+                    data: {
+                      $ref: '#/components/schemas/Specialty',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'Dados da especialidade inválidos',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Dados da especialidade inválidos',
+                  code: 'SPECIALTY_VALIDATION_ERROR',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description:
+              'Usuário não possui permissão para cadastrar especialidades',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description:
+              'Já existe uma especialidade com o nome informado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Já existe uma especialidade cadastrada com este nome',
+                  code: 'SPECIALTY_NAME_ALREADY_EXISTS',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/especialidades/{id}': {
+      get: {
+        tags: ['Especialidades'],
+        summary: 'Buscar especialidade por ID',
+        description:
+          'Permitido para ADMIN, RECEPCIONISTA e MEDICO.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'ID da especialidade.',
+
+            schema: {
+              type: 'string',
+              example: '1',
+            },
+          },
+        ],
+
+        responses: {
+          '200': {
+            description: 'Especialidade encontrada',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    data: {
+                      $ref: '#/components/schemas/Specialty',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'ID inválido',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'ID da especialidade inválido',
+                  code: 'SPECIALTY_ID_INVALID',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem permissão',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Especialidade não encontrada',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Especialidade não encontrada',
+                  code: 'SPECIALTY_NOT_FOUND',
+                },
+              },
+            },
+          },
+        },
+      },
+
+      put: {
+        tags: ['Especialidades'],
+        summary: 'Atualizar especialidade',
+        description:
+          'Atualiza nome e descrição de uma especialidade. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+
+            schema: {
+              type: 'string',
+              example: '1',
+            },
+          },
+        ],
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/SpecialtyRequest',
+              },
+
+              example: {
+                nome: 'Neurologia',
+                descricao:
+                  'Atendimento especializado em neurologia.',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description: 'Especialidade atualizada com sucesso',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    message: {
+                      type: 'string',
+                      example:
+                        'Especialidade atualizada com sucesso',
+                    },
+
+                    data: {
+                      $ref: '#/components/schemas/Specialty',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description:
+              'ID ou dados da especialidade inválidos',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description:
+              'Usuário não possui permissão para editar especialidades',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Especialidade não encontrada',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Especialidade não encontrada',
+                  code: 'SPECIALTY_NOT_FOUND',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description:
+              'Nome já utilizado por outra especialidade',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Já existe outra especialidade cadastrada com este nome',
+                  code: 'SPECIALTY_NAME_ALREADY_EXISTS',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/especialidades/{id}/status': {
+      patch: {
+        tags: ['Especialidades'],
+        summary: 'Ativar ou inativar especialidade',
+        description:
+          'Altera a situação de uma especialidade. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+
+            schema: {
+              type: 'string',
+              example: '1',
+            },
+          },
+        ],
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/SpecialtyStatusRequest',
+              },
+
+              examples: {
+                inativar: {
+                  summary: 'Inativar especialidade',
+                  value: {
+                    ativo: false,
+                  },
+                },
+
+                ativar: {
+                  summary: 'Ativar especialidade',
+                  value: {
+                    ativo: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description:
+              'Status da especialidade atualizado com sucesso',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    message: {
+                      type: 'string',
+                      example:
+                        'Especialidade inativada com sucesso',
+                    },
+
+                    data: {
+                      $ref: '#/components/schemas/Specialty',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'ID ou status inválido',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description:
+              'Usuário não possui permissão para alterar especialidades',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Especialidade não encontrada',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                example: {
+                  status: 'error',
+                  message:
+                    'Especialidade não encontrada',
+                  code: 'SPECIALTY_NOT_FOUND',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description:
+              'Especialidade já possui o status solicitado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+
+                examples: {
+                  alreadyInactive: {
+                    value: {
+                      status: 'error',
+                      message:
+                        'Especialidade já está inativa',
+                      code: 'SPECIALTY_ALREADY_INACTIVE',
+                    },
+                  },
+
+                  alreadyActive: {
+                    value: {
+                      status: 'error',
+                      message:
+                        'Especialidade já está ativa',
+                      code: 'SPECIALTY_ALREADY_ACTIVE',
+                    },
+                  },
                 },
               },
             },
