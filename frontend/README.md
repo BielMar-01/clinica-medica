@@ -1,4 +1,4 @@
-# 🎨 Clínica Médica — Frontend
+# 🏥 Clínica Médica — Frontend
 
 Aplicação web responsável pela interface utilizada pelos profissionais da Clínica Médica.
 
@@ -24,6 +24,7 @@ A aplicação está sendo construída com foco em:
 - Componentização
 - Segurança
 - Acessibilidade
+- Testabilidade
 - Evolução futura para PWA
 
 ---
@@ -50,13 +51,15 @@ PostgreSQL
 
 Todas as regras de negócio relevantes devem ser validadas pelo backend.
 
+O frontend pode aplicar validações e controles visuais para melhorar a experiência do usuário, mas essas validações não substituem as regras implementadas na API.
+
 ---
 
 # 📂 Estrutura
 
 A estrutura evolui conforme novos módulos são implementados.
 
-Exemplo:
+Estrutura atual:
 
 ```text
 frontend/
@@ -65,8 +68,10 @@ frontend/
 │
 ├── src/
 │   ├── assets/
+│   │
 │   ├── components/
-│   │   └── patients/
+│   │   ├── patients/
+│   │   └── specialties/
 │   │
 │   ├── contexts/
 │   ├── hooks/
@@ -89,11 +94,22 @@ frontend/
 └── README.md
 ```
 
+Os módulos devem manter a separação entre:
+
+```text
+Componentes
+Páginas
+Serviços
+Tipos
+Rotas
+Contextos
+```
+
 ---
 
 # 📋 Pré-requisitos
 
-Para executar:
+Para executar o frontend:
 
 - Node.js
 - npm
@@ -117,7 +133,7 @@ Entre na pasta:
 cd frontend
 ```
 
-Instale:
+Instale as dependências:
 
 ```bash
 npm install
@@ -133,13 +149,13 @@ Crie:
 frontend/.env
 ```
 
-Exemplo:
+Exemplo para desenvolvimento local:
 
 ```env
 VITE_API_URL=http://localhost:3000
 ```
 
-Produção utiliza a URL pública da API.
+Produção utiliza a URL pública da API:
 
 ```env
 VITE_API_URL=https://clinica-medica-api.vercel.app
@@ -174,9 +190,9 @@ Supabase Secret Key
 
 # 🌐 Camada HTTP
 
-A comunicação com a API deve ficar centralizada na camada de serviços.
+A comunicação com a API fica centralizada na camada de serviços.
 
-Exemplo:
+Arquivo principal:
 
 ```text
 src/services/api.ts
@@ -185,23 +201,33 @@ src/services/api.ts
 Fluxo:
 
 ```text
-Component
-   ↓
-Service
-   ↓
+Página / Componente
+       ↓
+Service do módulo
+       ↓
 api.ts
-   ↓
+       ↓
 Backend
 ```
 
-Isso evita chamadas HTTP espalhadas pela aplicação e facilita:
+Exemplos de services:
 
-- tratamento de erros
-- autenticação
-- renovação de sessão
-- configuração de headers
-- alteração da URL da API
-- manutenção
+```text
+auth.service.ts
+patient.service.ts
+specialty.service.ts
+```
+
+Essa estrutura evita chamadas HTTP espalhadas pela aplicação e facilita:
+
+- Tratamento de erros
+- Autenticação
+- Renovação de sessão
+- Configuração de headers
+- Alteração da URL da API
+- Manutenção
+- Testes
+- Evolução dos módulos
 
 ---
 
@@ -223,11 +249,13 @@ Frontend recebe autenticação
 Usuário entra no sistema
 ```
 
+A aplicação possui fluxo de autenticação integrado ao backend.
+
 ---
 
 # 🔄 Renovação da sessão
 
-A camada HTTP deve conseguir tratar a expiração do Access Token.
+A camada HTTP trata a expiração do Access Token.
 
 Fluxo:
 
@@ -243,7 +271,7 @@ Novo Access Token
 Repete Request
 ```
 
-Isso evita que o usuário seja enviado para o login imediatamente sempre que o Access Token expirar.
+Isso evita que o usuário seja enviado imediatamente para o login quando o Access Token expirar e ainda existir uma sessão válida.
 
 ---
 
@@ -259,28 +287,41 @@ credentials: 'include'
 
 O JavaScript do navegador não precisa acessar diretamente o Refresh Token.
 
+Isso reduz a exposição do token no frontend.
+
 ---
 
 # 🛡️ Rotas protegidas
 
-Páginas internas devem verificar se existe um usuário autenticado antes de permitir o acesso.
+Páginas internas verificam se existe um usuário autenticado antes de permitir o acesso.
 
-Exemplos de páginas protegidas:
+Rotas atualmente implementadas incluem:
 
 ```text
+/dashboard
 /pacientes
+/especialidades
+```
+
+Rotas futuras incluem:
+
+```text
 /medicos
 /agendamentos
 /consultas
 ```
 
-Usuários sem sessão devem ser redirecionados para o login.
+Usuários sem sessão válida devem ser redirecionados para:
+
+```text
+/login
+```
 
 ---
 
 # 👥 Permissões
 
-Além de verificar autenticação, determinadas telas e ações podem depender do perfil.
+Além de verificar autenticação, determinadas telas e ações dependem do perfil do usuário.
 
 Perfis:
 
@@ -306,36 +347,76 @@ MEDICO
  └── Prontuários
 ```
 
-O frontend pode ocultar ações sem permissão para melhorar a experiência, mas a autorização real deve continuar sendo validada pelo backend.
+O frontend pode ocultar ações sem permissão para melhorar a experiência.
+
+Entretanto:
+
+> A autorização real deve sempre continuar sendo validada pelo backend.
+
+Ocultar um botão no frontend não representa uma regra de segurança suficiente.
 
 ---
 
-# 👤 Módulo de pacientes
+# 🏠 Dashboard
 
-O frontend do módulo de pacientes contempla recursos como:
+A aplicação possui uma área inicial autenticada disponível em:
+
+```text
+/dashboard
+```
+
+O Dashboard funciona como ponto inicial para navegação entre os módulos do sistema.
+
+Conforme novos módulos forem implementados, o Dashboard poderá evoluir para apresentar:
+
+- Quantidade de pacientes
+- Agendamentos
+- Consultas
+- Informações de agenda
+- Indicadores operacionais
+- Atalhos para funcionalidades importantes
+
+---
+
+# 👤 Módulo de Pacientes
+
+O frontend possui o módulo de gerenciamento de pacientes disponível em:
+
+```text
+/pacientes
+```
+
+O módulo contempla:
 
 - Listagem
 - Pesquisa
 - Filtros
 - Paginação
 - Cadastro
-- Visualização
 - Edição
 - Ativação
 - Inativação
 - Feedback de carregamento
 - Feedback de erro
 - Estado sem resultados
+- Controle visual de permissões
 
 ---
 
-# 🔎 Busca e filtros
+## 🔎 Filtros de pacientes
 
-A tela de pacientes permite combinar critérios de consulta.
+A tela permite combinar critérios de consulta como:
 
-O estado dos filtros deve ser controlado pela aplicação e enviado para a API.
+```text
+Nome
+CPF
+Telefone
+Status
+```
 
-Ao alterar filtros, normalmente a paginação deve retornar para:
+O estado dos filtros é controlado pela aplicação e enviado para a API.
+
+Ao executar uma nova busca, a paginação retorna para:
 
 ```text
 page = 1
@@ -343,23 +424,196 @@ page = 1
 
 ---
 
-# 📑 Paginação
+## 📄 Paginação de pacientes
 
-A interface não deve carregar todos os pacientes simultaneamente.
+A interface não carrega todos os pacientes simultaneamente.
 
 Fluxo:
 
 ```text
-Página 1
- ↓
+Página
+  ↓
 API
- ↓
-Resultados + informações de paginação
- ↓
-Controles da interface
+  ↓
+Resultados + paginação
+  ↓
+Tabela
+  ↓
+Anterior / Próxima
 ```
 
-Isso ajuda a manter a aplicação preparada para bases maiores.
+Isso ajuda a preparar a aplicação para bases maiores.
+
+---
+
+## 🔐 Permissões de pacientes
+
+Consulta e listagem podem ser realizadas pelos perfis autorizados pelo backend.
+
+As operações de escrita são controladas conforme RBAC.
+
+Atualmente:
+
+```text
+ADMIN
+RECEPCIONISTA
+```
+
+podem executar operações de gerenciamento de pacientes.
+
+O perfil:
+
+```text
+MEDICO
+```
+
+possui acesso de consulta, sem permissão de escrita.
+
+---
+
+# 🩺 Módulo de Especialidades
+
+O frontend possui o módulo de gerenciamento de especialidades médicas disponível em:
+
+```text
+/especialidades
+```
+
+O módulo contempla:
+
+- Listagem de especialidades
+- Pesquisa por nome
+- Filtro por status
+- Paginação
+- Cadastro
+- Edição
+- Ativação
+- Inativação
+- Confirmação antes da alteração de status
+- Tratamento de duplicidade
+- Feedback de carregamento
+- Feedback de erro
+- Estado sem resultados
+- Controle visual de permissões
+
+---
+
+## 🔎 Filtros de especialidades
+
+A tela permite consultar especialidades utilizando:
+
+```text
+Nome
+Status
+```
+
+Status disponíveis:
+
+```text
+Todos
+Ativas
+Inativas
+```
+
+Ao realizar uma nova busca, a paginação retorna para a primeira página.
+
+---
+
+## 📄 Paginação de especialidades
+
+A listagem utiliza paginação integrada ao backend.
+
+A interface apresenta:
+
+```text
+Anterior
+Página atual
+Total de páginas
+Total de especialidades
+Próxima
+```
+
+---
+
+## ✏️ Cadastro e edição
+
+Usuários autorizados podem cadastrar novas especialidades e editar registros existentes.
+
+Campos atualmente utilizados:
+
+```text
+Nome
+Descrição
+```
+
+O formulário possui tratamento para erros retornados pela API.
+
+Também é tratada a tentativa de cadastro de especialidade com nome já existente.
+
+---
+
+## 🔄 Ativação e inativação
+
+Especialidades podem ser ativadas ou inativadas.
+
+Antes da operação, a interface solicita confirmação.
+
+Fluxo:
+
+```text
+Usuário seleciona Inativar
+          ↓
+Confirmação
+          ↓
+PATCH /api/especialidades/:id/status
+          ↓
+Backend atualiza
+          ↓
+Frontend recarrega a listagem
+```
+
+O mesmo fluxo é utilizado para reativação.
+
+---
+
+## 🔐 Permissões de especialidades
+
+As consultas podem ser realizadas pelos perfis:
+
+```text
+ADMIN
+RECEPCIONISTA
+MEDICO
+```
+
+As operações de gerenciamento são disponibilizadas somente para:
+
+```text
+ADMIN
+```
+
+Isso inclui:
+
+- Cadastrar
+- Editar
+- Ativar
+- Inativar
+
+A autorização real continua sendo validada pelo backend.
+
+---
+
+## 🌐 API de Especialidades
+
+O módulo utiliza:
+
+```text
+GET    /api/especialidades
+GET    /api/especialidades/:id
+POST   /api/especialidades
+PUT    /api/especialidades/:id
+PATCH  /api/especialidades/:id/status
+```
 
 ---
 
@@ -379,10 +633,22 @@ Exemplos:
 ### Loading
 
 ```text
+Carregando especialidades...
+```
+
+ou:
+
+```text
 Carregando pacientes...
 ```
 
 ### Empty
+
+```text
+Nenhuma especialidade encontrada.
+```
+
+ou:
 
 ```text
 Nenhum paciente encontrado.
@@ -390,19 +656,34 @@ Nenhum paciente encontrado.
 
 ### Error
 
-```text
-Não foi possível carregar os pacientes.
-```
+A interface deve apresentar uma mensagem compreensível baseada no erro normalizado pela camada HTTP.
 
 ---
 
 # ⚠️ Tratamento de erros
 
-A camada HTTP deve normalizar erros vindos da API.
+A camada HTTP normaliza erros vindos da API.
 
 Isso evita que cada componente precise interpretar formatos diferentes de resposta.
 
-A interface deve exibir mensagens compreensíveis para o usuário e evitar apresentar detalhes internos da API.
+A interface deve:
+
+- Exibir mensagens compreensíveis
+- Evitar detalhes internos da API
+- Manter o usuário informado
+- Preservar o estado da tela quando possível
+- Permitir correção de dados inválidos
+
+Exemplos:
+
+```text
+Credenciais inválidas
+CPF já cadastrado
+Especialidade já cadastrada
+Registro não encontrado
+Usuário sem permissão
+Erro de comunicação com a API
+```
 
 ---
 
@@ -439,7 +720,7 @@ Futuramente poderão ser adicionados:
 - Estratégias de cache
 - Página offline
 
-Recursos relacionados a dados clínicos exigirão cuidado para evitar armazenamento inadequado de informações sensíveis no dispositivo.
+Recursos relacionados a dados clínicos exigirão cuidado especial para evitar armazenamento inadequado de informações sensíveis no dispositivo.
 
 ---
 
@@ -455,6 +736,7 @@ As interfaces devem evoluir considerando:
 - Mensagens de erro compreensíveis
 - Elementos interativos identificáveis
 - Responsividade
+- Uso adequado de atributos ARIA quando necessário
 
 ---
 
@@ -488,6 +770,8 @@ O build de produção será gerado em:
 dist/
 ```
 
+O build também funciona como uma validação importante de TypeScript antes do código ser enviado ao repositório.
+
 ---
 
 # 👀 Preview
@@ -514,20 +798,33 @@ Depois valide manualmente:
 
 ```text
 Login
- ↓
+  ↓
 Carregamento do usuário
- ↓
+  ↓
+Dashboard
+  ↓
 Navegação
- ↓
+  ↓
 Pacientes
- ↓
-Busca
- ↓
-Filtros
- ↓
-Paginação
- ↓
+  ↓
+Filtros / CRUD / Status
+  ↓
+Especialidades
+  ↓
+Filtros / CRUD / Status
+  ↓
 Logout
+```
+
+Também é recomendado validar:
+
+```text
+Rota protegida
+Sessão após atualização da página
+Tratamento de erro
+Empty state
+Loading
+Permissões visuais
 ```
 
 ---
@@ -546,15 +843,15 @@ Fluxo:
 
 ```text
 Código
- ↓
+  ↓
 Git
- ↓
+  ↓
 GitHub
- ↓
+  ↓
 Vercel
- ↓
+  ↓
 Build
- ↓
+  ↓
 Deploy
 ```
 
@@ -672,22 +969,25 @@ npm run preview
 
 Nunca:
 
-- armazenar senhas no frontend
-- colocar JWT Secret no frontend
-- acessar o PostgreSQL diretamente
-- colocar Supabase Secret Key no bundle
-- confiar apenas nas permissões visuais
-- armazenar informações clínicas desnecessariamente no navegador
+- Armazenar senhas no frontend
+- Colocar JWT Secret no frontend
+- Acessar o PostgreSQL diretamente
+- Colocar Supabase Secret Key no bundle
+- Confiar apenas nas permissões visuais
+- Armazenar informações clínicas desnecessariamente no navegador
+- Utilizar dados sensíveis diretamente em testes automatizados
+- Versionar credenciais
 
 Sempre:
 
-- utilizar a API
-- tratar erros
-- validar estados de carregamento
-- proteger páginas autenticadas
-- respeitar as permissões do usuário
-- manter a interface responsiva
-- executar o build antes do commit
+- Utilizar a API
+- Tratar erros
+- Validar estados de carregamento
+- Proteger páginas autenticadas
+- Respeitar as permissões do usuário
+- Manter a interface responsiva
+- Executar o build antes do commit
+- Utilizar seletores estáveis para automação
 
 ---
 
@@ -695,13 +995,14 @@ Sempre:
 
 O frontend utiliza `data-testid` nos principais elementos da interface para facilitar:
 
-- testes manuais
-- estudos de QA
-- automação com Playwright
-- automação com Cypress
-- criação de evidências
-- aprendizado de seletores
-- testes de regressão
+- Testes manuais
+- Estudos de QA
+- Automação com Cypress
+- Automação com Playwright
+- Criação de evidências
+- Aprendizado de seletores
+- Testes de regressão
+- Testes E2E
 
 A aplicação não adiciona `data-testid` indiscriminadamente em todos os elementos.
 
@@ -726,23 +1027,274 @@ login-submit-button
 
 nav-dashboard-link
 nav-patients-link
+nav-specialties-link
 
 patients-new-button
 patients-search-button
 patients-table
 
-patient-name-input
-patient-cpf-input
-patient-form-submit-button
+specialties-new-button
+specialties-search-button
+specialties-table
 ```
 
 ---
 
-## 🔄 Elementos dinâmicos
+# 🔐 Seletores de Login
+
+Principais seletores:
+
+```text
+login-page
+login-email-input
+login-password-input
+login-submit-button
+login-error-message
+```
+
+Exemplo:
+
+```html
+data-testid="login-email-input"
+```
+
+---
+
+# 🧭 Seletores de navegação
+
+Principais seletores:
+
+```text
+app-layout
+app-sidebar
+sidebar-brand
+sidebar-brand-title
+sidebar-brand-description
+sidebar-navigation
+
+nav-dashboard-link
+nav-patients-link
+nav-specialties-link
+
+sidebar-user-section
+sidebar-user-name
+sidebar-user-role
+
+logout-button
+app-content
+```
+
+---
+
+# 🏠 Seletores do Dashboard
+
+Principais seletores:
+
+```text
+dashboard-page
+dashboard-title
+dashboard-patients-card
+```
+
+Novos elementos do Dashboard devem continuar utilizando a mesma convenção.
+
+---
+
+# 👤 Seletores de Pacientes
+
+## Página
+
+```text
+patients-page
+patients-new-button
+```
+
+## Filtros
+
+```text
+patients-filters
+patients-name-filter-input
+patients-cpf-filter-input
+patients-phone-filter-input
+patients-status-filter-select
+patients-search-button
+patients-clear-filters-button
+```
+
+## Tabela
+
+```text
+patients-table
+patients-table-body
+```
+
+## Registros dinâmicos
+
+```text
+patient-row-{id}
+patient-edit-button-{id}
+patient-status-button-{id}
+```
+
+## Estados
+
+```text
+patients-loading
+patients-empty-state
+patients-error-message
+```
+
+## Paginação
+
+```text
+patients-pagination
+patients-previous-page-button
+patients-pagination-info
+patients-next-page-button
+```
+
+## Formulário
+
+```text
+patient-form-*
+patient-name-input
+patient-cpf-input
+patient-birth-date-input
+patient-sex-select
+patient-phone-input
+patient-secondary-phone-input
+patient-email-input
+patient-mother-name-input
+patient-zip-code-input
+patient-state-input
+patient-address-input
+patient-address-number-input
+patient-address-complement-input
+patient-neighborhood-input
+patient-city-input
+patient-notes-input
+```
+
+---
+
+# 🩺 Seletores de Especialidades
+
+## Página
+
+```text
+specialties-page
+specialties-page-header
+specialties-page-title
+specialties-page-description
+specialties-content
+```
+
+## Navegação
+
+```text
+nav-specialties-link
+```
+
+## Ações principais
+
+```text
+specialties-new-button
+```
+
+## Filtros
+
+```text
+specialties-filters
+specialties-filters-fields
+specialties-filter-actions
+
+specialties-name-filter-input
+specialties-status-filter-select
+
+specialties-search-button
+specialties-clear-filters-button
+```
+
+## Tabela
+
+```text
+specialties-table-card
+specialties-table-wrapper
+specialties-table
+specialties-table-header
+specialties-table-body
+```
+
+## Registros dinâmicos
+
+O ID da especialidade deve fazer parte do seletor.
+
+```text
+specialty-row-{id}
+specialty-name-{id}
+specialty-description-{id}
+specialty-status-{id}
+specialty-actions-{id}
+specialty-edit-button-{id}
+specialty-status-button-{id}
+```
+
+Exemplo:
+
+```text
+specialty-row-5
+specialty-edit-button-5
+specialty-status-button-5
+```
+
+## Formulário
+
+```text
+specialty-form-modal-backdrop
+specialty-form-modal
+specialty-form-header
+specialty-form-title
+specialty-form-description
+
+specialty-form
+
+specialty-form-fields
+
+specialty-name-input
+specialty-description-input
+
+specialty-form-error-message
+
+specialty-form-actions
+specialty-form-cancel-button
+specialty-form-submit-button
+specialty-form-close-button
+```
+
+## Paginação
+
+```text
+specialties-pagination
+specialties-previous-page-button
+specialties-pagination-info
+specialties-next-page-button
+```
+
+## Estados
+
+```text
+specialties-loading
+specialties-empty-state
+specialties-error-message
+```
+
+---
+
+# 🔄 Elementos dinâmicos
 
 Para elementos relacionados a registros específicos, deve ser utilizado o identificador da entidade.
 
-Exemplo:
+Pacientes:
 
 ```text
 patient-row-{id}
@@ -751,12 +1303,25 @@ patient-edit-button-{id}
 patient-status-button-{id}
 ```
 
+Especialidades:
+
+```text
+specialty-row-{id}
+specialty-name-{id}
+specialty-description-{id}
+specialty-status-{id}
+specialty-edit-button-{id}
+specialty-status-button-{id}
+```
+
 Exemplo real:
 
 ```text
 patient-row-10
 patient-edit-button-10
-patient-status-button-10
+
+specialty-row-5
+specialty-edit-button-5
 ```
 
 Esse padrão deve continuar sendo utilizado nos próximos módulos.
@@ -764,74 +1329,74 @@ Esse padrão deve continuar sendo utilizado nos próximos módulos.
 Exemplos futuros:
 
 ```text
-specialty-row-{id}
-specialty-edit-button-{id}
-
 doctor-row-{id}
 doctor-edit-button-{id}
 
 appointment-row-{id}
 appointment-cancel-button-{id}
+
+consultation-row-{id}
+consultation-view-button-{id}
 ```
 
 ---
 
-## ✅ Onde utilizar `data-testid`
+# ✅ Onde utilizar `data-testid`
 
 Deve ser utilizado principalmente em:
 
-- páginas
-- formulários
-- inputs
-- selects
-- checkboxes
-- botões
-- menus
-- links de navegação
-- tabelas
-- listas
-- linhas de registros
-- ações sobre registros
-- paginação
-- modais
-- mensagens de erro
-- mensagens de sucesso
-- estados de loading
-- estados sem resultados
-- componentes importantes para validação
+- Páginas
+- Formulários
+- Inputs
+- Selects
+- Checkboxes
+- Botões
+- Menus
+- Links de navegação
+- Tabelas
+- Listas
+- Linhas de registros
+- Ações sobre registros
+- Paginação
+- Modais
+- Mensagens de erro
+- Mensagens de sucesso
+- Estados de loading
+- Estados sem resultados
+- Componentes importantes para validação
 
 ---
 
-## 🚫 Onde não é necessário
+# 🚫 Onde não é necessário
 
 Não é obrigatório adicionar `data-testid` em:
 
-- elementos puramente decorativos
-- wrappers sem relevância para teste
-- elementos utilizados apenas para layout
-- textos sem importância funcional
-- elementos internos que não precisam ser identificados diretamente
+- Elementos puramente decorativos
+- Wrappers sem relevância para teste
+- Elementos utilizados apenas para layout
+- Textos sem importância funcional
+- Elementos internos que não precisam ser identificados diretamente
 
 O objetivo é manter seletores úteis e estáveis, sem poluir desnecessariamente o HTML.
 
 ---
 
-## 🧷 Regras para nomes
+# 🧩 Regras para nomes
 
 Os identificadores devem:
 
-- ser escritos em inglês
-- utilizar `kebab-case`
-- representar claramente o elemento
-- representar sua finalidade
-- permanecer estáveis mesmo quando CSS ou textos mudarem
-- utilizar o ID da entidade quando necessário
-- evitar nomes genéricos como `button-1`, `input-2` ou `item`
+- Ser escritos em inglês
+- Utilizar `kebab-case`
+- Representar claramente o elemento
+- Representar sua finalidade
+- Permanecer estáveis mesmo quando CSS ou textos mudarem
+- Utilizar o ID da entidade quando necessário
+- Evitar nomes genéricos
 
 Exemplo correto:
 
 ```text
-patients-clear-filters-button
+specialties-clear-filters-button
 ```
 
 Evitar:
@@ -840,55 +1405,22 @@ Evitar:
 button2
 ```
 
----
+Também evitar seletores baseados exclusivamente em:
 
-## 🧪 Exemplo com Playwright
-
-```ts
-await page
-  .getByTestId('login-email-input')
-  .fill('admin@clinica.local')
-
-await page
-  .getByTestId('login-password-input')
-  .fill('senha')
-
-await page
-  .getByTestId('login-submit-button')
-  .click()
-
-await expect(
-  page.getByTestId('dashboard-page'),
-).toBeVisible()
+```text
+classe CSS
+posição do elemento
+texto visível
+estrutura do DOM
 ```
 
-Exemplo de Pacientes:
-
-```ts
-await page
-  .getByTestId('nav-patients-link')
-  .click()
-
-await page
-  .getByTestId('patients-new-button')
-  .click()
-
-await page
-  .getByTestId('patient-name-input')
-  .fill('Paciente Automação')
-
-await page
-  .getByTestId('patient-cpf-input')
-  .fill('52998224725')
-
-await page
-  .getByTestId('patient-form-submit-button')
-  .click()
-```
+quando existir um `data-testid` específico.
 
 ---
 
-## 🧪 Exemplo com Cypress
+# 🧪 Exemplo com Cypress
+
+Login:
 
 ```ts
 cy.get(
@@ -908,9 +1440,117 @@ cy.get(
 ).should('be.visible')
 ```
 
+Navegação para Pacientes:
+
+```ts
+cy.get(
+  '[data-testid="nav-patients-link"]',
+).click()
+
+cy.get(
+  '[data-testid="patients-page"]',
+).should('be.visible')
+```
+
+Navegação para Especialidades:
+
+```ts
+cy.get(
+  '[data-testid="nav-specialties-link"]',
+).click()
+
+cy.get(
+  '[data-testid="specialties-page"]',
+).should('be.visible')
+```
+
+Busca de especialidade:
+
+```ts
+cy.get(
+  '[data-testid="specialties-name-filter-input"]',
+).type('Cardio')
+
+cy.get(
+  '[data-testid="specialties-search-button"]',
+).click()
+
+cy.get(
+  '[data-testid="specialties-table"]',
+).should('be.visible')
+```
+
+Cadastro:
+
+```ts
+cy.get(
+  '[data-testid="specialties-new-button"]',
+).click()
+
+cy.get(
+  '[data-testid="specialty-name-input"]',
+).type('Geriatria')
+
+cy.get(
+  '[data-testid="specialty-description-input"]',
+).type(
+  'Especialidade médica voltada à saúde da pessoa idosa.',
+)
+
+cy.get(
+  '[data-testid="specialty-form-submit-button"]',
+).click()
+```
+
 ---
 
-## 📌 Regra para novos módulos
+# 🧪 Exemplo com Playwright
+
+```ts
+await page
+  .getByTestId('login-email-input')
+  .fill('admin@clinica.local')
+
+await page
+  .getByTestId('login-password-input')
+  .fill('senha')
+
+await page
+  .getByTestId('login-submit-button')
+  .click()
+
+await expect(
+  page.getByTestId('dashboard-page'),
+).toBeVisible()
+```
+
+Especialidades:
+
+```ts
+await page
+  .getByTestId('nav-specialties-link')
+  .click()
+
+await expect(
+  page.getByTestId('specialties-page'),
+).toBeVisible()
+
+await page
+  .getByTestId(
+    'specialties-name-filter-input',
+  )
+  .fill('Cardio')
+
+await page
+  .getByTestId(
+    'specialties-search-button',
+  )
+  .click()
+```
+
+---
+
+# 📌 Regra para novos módulos
 
 Todo novo módulo do frontend deve ser entregue já preparado para automação.
 
@@ -929,13 +1569,45 @@ Empty state                  ✅
 Erros                        ✅
 Modais                       ✅
 Ações                        ✅
+data-testid                  ✅
 ```
+
+O padrão deve ser aplicado durante o desenvolvimento da funcionalidade, e não somente depois que a tela estiver pronta.
+
+---
+
+# 🧪 Objetivo para estudos de QA
+
+O projeto também é estruturado para permitir estudos e práticas de Quality Assurance.
+
+Os módulos podem ser utilizados para praticar:
+
+- Criação de cenários de teste
+- BDD / Gherkin
+- Testes exploratórios
+- Testes funcionais
+- Testes de regressão
+- Testes negativos
+- Testes de API
+- Automação E2E
+- Cypress
+- Playwright
+- Postman
+- Validação de RBAC
+- Validação de autenticação
+- Manipulação de massa de teste
+- Evidências de teste
+- Estratégias de seletores
+
+Por esse motivo, a testabilidade deve ser considerada durante o desenvolvimento de novas funcionalidades.
 
 ---
 
 # 🗺️ Evolução
 
-A interface deverá acompanhar a implementação dos módulos:
+A interface acompanha a implementação dos módulos.
+
+Fluxo planejado:
 
 ```text
 Autenticação
@@ -946,19 +1618,45 @@ Especialidades
      ↓
 Médicos
      ↓
-Agenda
+Médico x Especialidade
+     ↓
+Agenda Médica
+     ↓
+Bloqueios de Agenda
      ↓
 Agendamentos
+     ↓
+Histórico de Agendamentos
      ↓
 Consultas
      ↓
 Prontuário
      ↓
+Alergias
+     ↓
 Receitas
      ↓
 Atestados
      ↓
-Dashboard
+Auditoria
+```
+
+Atualmente:
+
+```text
+Autenticação       ✅
+Dashboard          ✅
+Pacientes          ✅
+Especialidades     ✅
+
+Médicos            ⏳
+Agenda Médica      ⏳
+Agendamentos       ⏳
+Consultas          ⏳
+Prontuário         ⏳
+Receitas           ⏳
+Atestados          ⏳
+Auditoria          ⏳
 ```
 
 Todos os próximos módulos deverão seguir o padrão de `data-testid` definido nesta documentação.
