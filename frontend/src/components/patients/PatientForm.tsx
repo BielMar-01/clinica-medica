@@ -206,6 +206,11 @@ export function PatientForm({
                 value={
                   form.dataNascimento
                 }
+                max={
+                  new Date()
+                    .toISOString()
+                    .split('T')[0]
+                }
                 onChange={(event) =>
                   updateField(
                     'dataNascimento',
