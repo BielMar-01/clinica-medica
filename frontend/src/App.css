@@ -516,3 +516,54 @@ button {
   font-size: 0.875rem;
   color: #6b7280;
 }
+
+.alphabet-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.alphabet-button {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.alphabet-button:hover {
+  background: rgba(
+    127,
+    127,
+    127,
+    0.1
+  );
+}
+
+.alphabet-button-active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+@media (
+  max-width: 768px
+) {
+  .alphabet-filter {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+
+  .alphabet-button {
+    flex: 0 0 auto;
+  }
+}

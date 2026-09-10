@@ -5,7 +5,8 @@ export type Patient = {
   dataNascimento: string
   sexo: string | null
   telefone: string
-  telefoneSecundario: string | null
+  telefoneSecundario:
+    string | null
   email: string | null
   nomeMae: string | null
   cep: string | null
@@ -54,7 +55,9 @@ export type PatientFormData = {
 
 export type PatientListResponse = {
   status: 'ok'
-  data: PatientSummary[]
+
+  data:
+    PatientSummary[]
 
   pagination: {
     page: number
@@ -70,11 +73,29 @@ export type PatientResponse = {
   data: Patient
 }
 
+export type PatientSortField =
+  | 'nome'
+  | 'criadoEm'
+
+export type PatientSortOrder =
+  | 'asc'
+  | 'desc'
+
 export type PatientFilters = {
   page: number
   limit: number
   nome: string
   cpf: string
   telefone: string
-  ativo: '' | 'true' | 'false'
+
+  ativo:
+    | ''
+    | 'true'
+    | 'false'
+
+  ordenarPor:
+    PatientSortField
+
+  ordem:
+    PatientSortOrder
 }

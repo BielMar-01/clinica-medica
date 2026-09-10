@@ -42,6 +42,8 @@ const initialFilters:
     cpf: '',
     telefone: '',
     ativo: '',
+    ordenarPor: 'nome',
+    ordem: 'asc',
   }
 
 function patientToFormData(
@@ -62,7 +64,8 @@ function patientToFormData(
       patient.dataNascimento,
 
     sexo:
-      patient.sexo ?? '',
+      patient.sexo ??
+      '',
 
     telefone:
       patient.telefone,
@@ -72,32 +75,40 @@ function patientToFormData(
       '',
 
     email:
-      patient.email ?? '',
+      patient.email ??
+      '',
 
     nomeMae:
-      patient.nomeMae ?? '',
+      patient.nomeMae ??
+      '',
 
     cep:
-      patient.cep ?? '',
+      patient.cep ??
+      '',
 
     logradouro:
-      patient.logradouro ?? '',
+      patient.logradouro ??
+      '',
 
     numero:
-      patient.numero ?? '',
+      patient.numero ??
+      '',
 
     complemento:
       patient.complemento ??
       '',
 
     bairro:
-      patient.bairro ?? '',
+      patient.bairro ??
+      '',
 
     cidade:
-      patient.cidade ?? '',
+      patient.cidade ??
+      '',
 
     estado:
-      patient.estado ?? '',
+      patient.estado ??
+      '',
 
     observacoes:
       patient.observacoes ??
@@ -109,7 +120,8 @@ export function PatientsPage() {
   const {
     user,
     isAuthenticated,
-  } = useAuth()
+  } =
+    useAuth()
 
   const [
     patients,
@@ -199,14 +211,17 @@ export function PatientsPage() {
     useState(false)
 
   const canManage =
-    user?.perfil === 'ADMIN' ||
+    user?.perfil ===
+      'ADMIN' ||
     user?.perfil ===
       'RECEPCIONISTA'
 
   const loadPatients =
     useCallback(
       async () => {
-        if (!isAuthenticated) {
+        if (
+          !isAuthenticated
+        ) {
           return
         }
 
@@ -228,7 +243,8 @@ export function PatientsPage() {
           )
         } catch (error) {
           setError(
-            error instanceof Error
+            error instanceof
+              Error
               ? error.message
               : 'Erro ao carregar pacientes',
           )
@@ -248,18 +264,21 @@ export function PatientsPage() {
     loadPatients,
   ])
 
-  function handleSearch() {
-    const nextFilters = {
-      ...filters,
+  function handleApplyFilters(
+    nextFilters:
+      PatientFilters,
+  ) {
+    const filtersToApply = {
+      ...nextFilters,
       page: 1,
     }
 
     setFilters(
-      nextFilters,
+      filtersToApply,
     )
 
     setAppliedFilters(
-      nextFilters,
+      filtersToApply,
     )
   }
 
@@ -288,7 +307,8 @@ export function PatientsPage() {
   }
 
   async function openEditForm(
-    patient: PatientSummary,
+    patient:
+      PatientSummary,
   ) {
     try {
       setError('')
@@ -315,7 +335,8 @@ export function PatientsPage() {
       setFormOpen(true)
     } catch (error) {
       setError(
-        error instanceof Error
+        error instanceof
+          Error
           ? error.message
           : 'Erro ao carregar paciente',
       )
@@ -323,7 +344,8 @@ export function PatientsPage() {
   }
 
   async function handleSubmit(
-    data: PatientFormData,
+    data:
+      PatientFormData,
   ) {
     try {
       setSubmitting(true)
@@ -350,7 +372,8 @@ export function PatientsPage() {
   }
 
   async function handleToggleStatus(
-    patient: PatientSummary,
+    patient:
+      PatientSummary,
   ) {
     const action =
       patient.ativo
@@ -377,7 +400,8 @@ export function PatientsPage() {
       await loadPatients()
     } catch (error) {
       setError(
-        error instanceof Error
+        error instanceof
+          Error
           ? error.message
           : 'Erro ao alterar status do paciente',
       )
@@ -420,11 +444,15 @@ export function PatientsPage() {
         data-testid="patients-page-header"
       >
         <div>
-          <h1 data-testid="patients-page-title">
+          <h1
+            data-testid="patients-page-title"
+          >
             Pacientes
           </h1>
 
-          <p data-testid="patients-page-description">
+          <p
+            data-testid="patients-page-description"
+          >
             Cadastro, consulta e
             gerenciamento de
             pacientes.
@@ -456,12 +484,14 @@ export function PatientsPage() {
       )}
 
       <PatientFiltersComponent
-        filters={filters}
+        filters={
+          filters
+        }
         onChange={
           setFilters
         }
-        onSearch={
-          handleSearch
+        onApply={
+          handleApplyFilters
         }
         onClear={
           handleClear
@@ -469,9 +499,15 @@ export function PatientsPage() {
       />
 
       <PatientTable
-        patients={patients}
-        loading={loading}
-        canManage={canManage}
+        patients={
+          patients
+        }
+        loading={
+          loading
+        }
+        canManage={
+          canManage
+        }
         onEdit={
           openEditForm
         }
@@ -515,7 +551,9 @@ export function PatientsPage() {
                 pagination.totalPages
               }
               {' — '}
-              {pagination.total}{' '}
+              {
+                pagination.total
+              }{' '}
               paciente(s)
             </span>
 
@@ -540,8 +578,12 @@ export function PatientsPage() {
         )}
 
       <PatientForm
-        open={formOpen}
-        title={formTitle}
+        open={
+          formOpen
+        }
+        title={
+          formTitle
+        }
         initialData={
           formData
         }

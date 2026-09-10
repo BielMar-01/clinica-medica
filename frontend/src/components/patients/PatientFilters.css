@@ -1,0 +1,230 @@
+.patient-filters {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+}
+
+.patient-filter-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-main-search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.patient-main-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  outline: none;
+  font-size: 14px;
+}
+
+.patient-main-search input:focus {
+  border-color: #667085;
+}
+
+.patient-filter-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-toggle-button,
+.patient-search-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-toggle-button {
+  position: relative;
+  background: #ffffff;
+  color: #344054;
+  border: 1px solid #d0d5dd;
+}
+
+.filter-toggle-button:hover {
+  background: #f9fafb;
+}
+
+.filter-toggle-button-active {
+  border-color: #98a2b3;
+  background: #f9fafb;
+}
+
+.active-filter-indicator {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1570ef;
+}
+
+.patient-search-button {
+  background: #101828;
+  color: #ffffff;
+}
+
+.patient-search-button:hover {
+  background: #344054;
+}
+
+.patient-sort-field {
+  margin: 0;
+}
+
+.patient-sort-field select {
+  min-height: 44px;
+  min-width: 158px;
+  padding: 10px 34px 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  outline: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.patient-sort-field select:focus {
+  border-color: #667085;
+}
+
+.patient-advanced-filters {
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid #eaecf0;
+}
+
+.patient-advanced-filter-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  gap: 16px;
+}
+
+.patient-advanced-filter-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.patient-advanced-filter-grid input,
+.patient-advanced-filter-grid select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  outline: none;
+  font-weight: 400;
+}
+
+.patient-advanced-filter-grid input:focus,
+.patient-advanced-filter-grid select:focus {
+  border-color: #667085;
+}
+
+.patient-advanced-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.patient-advanced-filter-actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(
+    0,
+    0,
+    0,
+    0
+  );
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (
+  max-width: 900px
+) {
+  .patient-filter-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .patient-filter-toolbar-actions {
+    width: 100%;
+  }
+
+  .patient-sort-field {
+    flex: 1;
+  }
+
+  .patient-sort-field select {
+    width: 100%;
+  }
+
+  .patient-advanced-filter-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+@media (
+  max-width: 600px
+) {
+  .patient-filter-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-toggle-button,
+  .patient-search-button,
+  .patient-sort-field,
+  .patient-sort-field select {
+    width: 100%;
+  }
+
+  .patient-advanced-filter-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .patient-advanced-filter-actions button {
+    width: 100%;
+  }
+}v

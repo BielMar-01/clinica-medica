@@ -25,6 +25,16 @@ function buildQuery(
     filters.limit.toString(),
   )
 
+  params.set(
+    'ordenarPor',
+    filters.ordenarPor,
+  )
+
+  params.set(
+    'ordem',
+    filters.ordem,
+  )
+
   if (filters.nome) {
     params.set(
       'nome',
@@ -67,7 +77,8 @@ export async function listPatientsRequest(
   >(
     `/api/pacientes?${query}`,
     {
-      method: 'GET',
+      method:
+        'GET',
     },
   )
 }
@@ -80,7 +91,8 @@ export async function getPatientRequest(
   >(
     `/api/pacientes/${patientId}`,
     {
-      method: 'GET',
+      method:
+        'GET',
     },
   )
 }
@@ -93,7 +105,8 @@ export async function createPatientRequest(
   >(
     '/api/pacientes',
     {
-      method: 'POST',
+      method:
+        'POST',
 
       body:
         JSON.stringify(
@@ -112,7 +125,8 @@ export async function updatePatientRequest(
   >(
     `/api/pacientes/${patientId}`,
     {
-      method: 'PUT',
+      method:
+        'PUT',
 
       body:
         JSON.stringify(
@@ -131,7 +145,8 @@ export async function updatePatientStatusRequest(
   >(
     `/api/pacientes/${patientId}/status`,
     {
-      method: 'PATCH',
+      method:
+        'PATCH',
 
       body:
         JSON.stringify({
