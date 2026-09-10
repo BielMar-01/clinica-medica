@@ -505,3 +505,14 @@ button {
     padding: 18px;
   }
 }
+
+.required-field-mark {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.required-fields-hint {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}

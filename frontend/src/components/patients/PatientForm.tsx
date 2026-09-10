@@ -159,12 +159,33 @@ export function PatientForm({
           className="patient-form"
           data-testid="patient-form"
         >
+          <p
+            className="required-fields-hint"
+            data-testid="patient-required-fields-hint"
+          >
+            <span
+              className="required-field-mark"
+              aria-hidden="true"
+            >
+              *
+            </span>{' '}
+            Campos obrigatórios
+          </p>
+
           <div
             className="form-grid"
             data-testid="patient-form-fields"
           >
             <label className="full-field">
-              Nome completo
+              <span>
+                Nome completo{' '}
+                <span
+                  className="required-field-mark"
+                  aria-hidden="true"
+                >
+                  *
+                </span>
+              </span>
 
               <input
                 data-testid="patient-name-input"
@@ -182,7 +203,15 @@ export function PatientForm({
             </label>
 
             <label>
-              CPF
+              <span>
+                CPF{' '}
+                <span
+                  className="required-field-mark"
+                  aria-hidden="true"
+                >
+                  *
+                </span>
+              </span>
 
               <input
                 data-testid="patient-cpf-input"
@@ -198,7 +227,15 @@ export function PatientForm({
             </label>
 
             <label>
-              Data de nascimento
+              <span>
+                Data de nascimento{' '}
+                <span
+                  className="required-field-mark"
+                  aria-hidden="true"
+                >
+                  *
+                </span>
+              </span>
 
               <input
                 data-testid="patient-birth-date-input"
@@ -253,7 +290,15 @@ export function PatientForm({
             </label>
 
             <label>
-              Telefone
+              <span>
+                Telefone{' '}
+                <span
+                  className="required-field-mark"
+                  aria-hidden="true"
+                >
+                  *
+                </span>
+              </span>
 
               <input
                 data-testid="patient-phone-input"
