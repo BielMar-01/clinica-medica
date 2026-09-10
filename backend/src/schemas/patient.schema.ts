@@ -63,11 +63,11 @@ const phoneSchema = z
   .transform(onlyDigits)
   .refine(
     (telefone) =>
-      telefone.length >= 8 &&
-      telefone.length <= 20,
+      telefone.length === 10 ||
+      telefone.length === 11,
     {
       message:
-        'Telefone inválido',
+        'Telefone deve conter 10 ou 11 números',
     },
   )
 
@@ -78,17 +78,48 @@ const optionalPhoneSchema = z
   .refine(
     (telefone) =>
       telefone === '' ||
-      (
-        telefone.length >= 8 &&
-        telefone.length <= 20
-      ),
+      telefone.length === 10 ||
+      telefone.length === 11,
     {
       message:
-        'Telefone secundário inválido',
+        'Telefone secundário deve conter 10 ou 11 números',
     },
   )
   .optional()
   .or(z.literal(''))
+
+function isFutureDate(
+  value: string,
+) {
+  const inputDate =
+    new Date(`${value}T00:00:00`)
+
+  const today =
+    new Date()
+
+  today.setHours(
+    0,
+    0,
+    0,
+    0,
+  )
+
+  return inputDate > today
+}
+
+const birthDateSchema = z
+  .string()
+  .date(
+    'Data de nascimento inválida',
+  )
+  .refine(
+    (value) =>
+      !isFutureDate(value),
+    {
+      message:
+        'Data de nascimento não pode ser futura',
+    },
+  )
 
 export const createPatientSchema =
   z.object({
@@ -103,11 +134,8 @@ export const createPatientSchema =
 
     cpf: cpfSchema,
 
-    dataNascimento: z
-      .string()
-      .date(
-        'Data de nascimento inválida',
-      ),
+    dataNascimento:
+      birthDateSchema,
 
     sexo: optionalString(30),
 
