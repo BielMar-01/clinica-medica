@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import {
+  forgotPasswordController,
   loginController,
   logoutController,
   meController,
@@ -10,11 +11,25 @@ import { authenticateMiddleware } from '../middlewares/authenticate.middleware.j
 
 const authRouter = Router()
 
-authRouter.post('/login', loginController)
+authRouter.post(
+  '/login',
+  loginController,
+)
 
-authRouter.post('/refresh', refreshController)
+authRouter.post(
+  '/refresh',
+  refreshController,
+)
 
-authRouter.post('/logout', logoutController)
+authRouter.post(
+  '/logout',
+  logoutController,
+)
+
+authRouter.post(
+  '/forgot-password',
+  forgotPasswordController,
+)
 
 authRouter.get(
   '/me',

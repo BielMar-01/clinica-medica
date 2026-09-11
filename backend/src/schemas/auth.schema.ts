@@ -12,4 +12,18 @@ export const loginSchema = z.object({
     .min(1, 'Senha é obrigatória'),
 })
 
-export type LoginInput = z.infer<typeof loginSchema>
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email('E-mail inválido')
+    .transform((email) => email.toLowerCase()),
+})
+
+export type LoginInput = z.infer<
+  typeof loginSchema
+>
+
+export type ForgotPasswordInput = z.infer<
+  typeof forgotPasswordSchema
+>
