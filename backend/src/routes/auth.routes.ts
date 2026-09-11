@@ -6,6 +6,7 @@ import {
   logoutController,
   meController,
   refreshController,
+  verifyResetCodeController,
 } from '../controllers/auth.controller.js'
 import { authenticateMiddleware } from '../middlewares/authenticate.middleware.js'
 
@@ -29,6 +30,11 @@ authRouter.post(
 authRouter.post(
   '/forgot-password',
   forgotPasswordController,
+)
+
+authRouter.post(
+  '/verify-reset-code',
+  verifyResetCodeController,
 )
 
 authRouter.get(

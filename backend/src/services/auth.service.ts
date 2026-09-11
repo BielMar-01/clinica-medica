@@ -51,10 +51,13 @@ export type VerifyPasswordResetCodeResult =
       resetToken: string
     }
   | {
-      status:
-        | 'invalid'
-        | 'expired'
-        | 'attempts_exceeded'
+      status: 'invalid'
+    }
+  | {
+      status: 'expired'
+    }
+  | {
+      status: 'attempts_exceeded'
     }
 
 function calculateRefreshExpiration() {

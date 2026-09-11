@@ -7,12 +7,14 @@ import { env } from '../config/env.js'
 import {
   forgotPasswordSchema,
   loginSchema,
+  verifyResetCodeSchema,
 } from '../schemas/auth.schema.js'
 import {
   createPasswordResetCode,
   login,
   logout,
   refreshSession,
+  verifyPasswordResetCode,
 } from '../services/auth.service.js'
 import { sendPasswordResetCodeEmail } from '../services/email.service.js'
 
@@ -251,5 +253,78 @@ export async function forgotPasswordController(
 
     message:
       'Se existir uma conta com este e-mail, enviaremos um código de recuperação.',
+  })
+}
+
+export async function verifyResetCodeController(
+  req: Request,
+  res: Response,
+) {
+  const parsedBody =
+    verifyResetCodeSchema.safeParse(
+      req.body,
+    )
+
+  if (!parsedBody.success) {
+    res.status(400).json({
+      status: 'error',
+      message:
+        'Dados de verificação inválidos',
+
+      errors:
+        parsedBody.error.flatten()
+          .fieldErrors,
+    })
+
+    return
+  }
+
+  const result =
+    await verifyPasswordResetCode(
+      parsedBody.data.email,
+      parsedBody.data.codigo,
+    )
+
+  if (result.status === 'invalid') {
+    res.status(400).json({
+      status: 'error',
+      message:
+        'Código inválido',
+    })
+
+    return
+  }
+
+  if (result.status === 'expired') {
+    res.status(400).json({
+      status: 'error',
+      message:
+        'Código expirado. Solicite um novo código.',
+    })
+
+    return
+  }
+
+  if (
+    result.status ===
+    'attempts_exceeded'
+  ) {
+    res.status(429).json({
+      status: 'error',
+      message:
+        'Limite de tentativas excedido. Solicite um novo código.',
+    })
+
+    return
+  }
+
+  res.status(200).json({
+    status: 'ok',
+
+    message:
+      'Código verificado com sucesso.',
+
+    resetToken:
+      result.resetToken,
   })
 }
