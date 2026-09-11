@@ -353,22 +353,43 @@ model refresh_tokens {
 }
 
 model usuarios {
-  id              BigInt           @id @default(autoincrement())
-  nome            String           @db.VarChar(150)
-  email           String           @unique(map: "uk_usuarios_email") @db.VarChar(180)
-  senha           String           @db.VarChar(255)
-  perfil          String           @db.VarChar(30)
-  ativo           Boolean          @default(true)
-  ultimo_login_em DateTime?        @db.Timestamptz(6)
-  criado_em       DateTime         @default(now()) @db.Timestamptz(6)
-  criado_por      BigInt?
-  atualizado_em   DateTime?        @db.Timestamptz(6)
-  atualizado_por  BigInt?
-  auditorias      auditorias[]
-  medicos         medicos?
-  refresh_tokens  refresh_tokens[]
+  id                        BigInt                      @id @default(autoincrement())
+  nome                      String                      @db.VarChar(150)
+  email                     String                      @unique(map: "uk_usuarios_email") @db.VarChar(180)
+  senha                     String                      @db.VarChar(255)
+  perfil                    String                      @db.VarChar(30)
+  ativo                     Boolean                     @default(true)
+  ultimo_login_em           DateTime?                   @db.Timestamptz(6)
+  criado_em                 DateTime                    @default(now()) @db.Timestamptz(6)
+  criado_por                BigInt?
+  atualizado_em             DateTime?                   @db.Timestamptz(6)
+  atualizado_por            BigInt?
+  auditorias                auditorias[]
+  codigos_redefinicao_senha codigos_redefinicao_senha[]
+  medicos                   medicos?
+  refresh_tokens            refresh_tokens[]
 
   @@index([ativo], map: "idx_usuarios_ativo")
   @@index([email], map: "idx_usuarios_email")
   @@index([perfil], map: "idx_usuarios_perfil")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model codigos_redefinicao_senha {
+  id                    BigInt    @id @default(autoincrement())
+  usuario_id            BigInt
+  codigo_hash           String    @db.VarChar(255)
+  expira_em             DateTime  @db.Timestamptz(6)
+  tentativas            Int       @default(0) @db.SmallInt
+  verificado_em         DateTime? @db.Timestamptz(6)
+  reset_token_hash      String?   @unique(map: "uk_codigos_redefinicao_senha_reset_token_hash", where: raw("(reset_token_hash IS NOT NULL)")) @db.VarChar(255)
+  reset_token_expira_em DateTime? @db.Timestamptz(6)
+  usado_em              DateTime? @db.Timestamptz(6)
+  invalidado_em         DateTime? @db.Timestamptz(6)
+  criado_em             DateTime  @default(now()) @db.Timestamptz(6)
+  usuarios              usuarios  @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_codigos_redefinicao_senha_usuario")
+
+  @@index([expira_em], map: "idx_codigos_redefinicao_senha_expira_em")
+  @@index([usuario_id], map: "idx_codigos_redefinicao_senha_usuario")
 }
