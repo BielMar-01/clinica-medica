@@ -27,7 +27,10 @@ const envSchema = z.object({
 
   JWT_SECRET: z
     .string()
-    .min(32, 'JWT_SECRET deve possuir pelo menos 32 caracteres'),
+    .min(
+      32,
+      'JWT_SECRET deve possuir pelo menos 32 caracteres',
+    ),
 
   JWT_ACCESS_EXPIRATION_SECONDS: z.coerce
     .number()
@@ -62,13 +65,39 @@ const envSchema = z.object({
 
   ADMIN_PASSWORD: z
     .string()
-    .min(8, 'ADMIN_PASSWORD deve possuir pelo menos 8 caracteres'),
+    .min(
+      8,
+      'ADMIN_PASSWORD deve possuir pelo menos 8 caracteres',
+    ),
+
+  RESEND_API_KEY: z
+    .string()
+    .min(
+      1,
+      'RESEND_API_KEY é obrigatória',
+    ),
+
+  RESEND_FROM_EMAIL: z
+    .string()
+    .min(
+      1,
+      'RESEND_FROM_EMAIL é obrigatório',
+    ),
+
+  RESEND_FROM_NAME: z
+    .string()
+    .min(2)
+    .default('Clínica Médica'),
 })
 
-const parsedEnv = envSchema.safeParse(process.env)
+const parsedEnv = envSchema.safeParse(
+  process.env,
+)
 
 if (!parsedEnv.success) {
-  console.error('Variáveis de ambiente inválidas:')
+  console.error(
+    'Variáveis de ambiente inválidas:',
+  )
 
   console.error(
     parsedEnv.error.flatten().fieldErrors,
