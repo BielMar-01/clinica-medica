@@ -18,9 +18,14 @@ export function generateAccessToken(
     perfil,
   }
 
-  return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRATION_SECONDS,
-  })
+  return jwt.sign(
+    payload,
+    env.JWT_SECRET,
+    {
+      expiresIn:
+        env.JWT_ACCESS_EXPIRATION_SECONDS,
+    },
+  )
 }
 
 export function verifyAccessToken(
@@ -46,10 +51,14 @@ export function verifyAccessToken(
 }
 
 export function generateRefreshToken() {
-  return crypto.randomBytes(64).toString('hex')
+  return crypto
+    .randomBytes(64)
+    .toString('hex')
 }
 
-export function hashRefreshToken(token: string) {
+export function hashRefreshToken(
+  token: string,
+) {
   return crypto
     .createHash('sha256')
     .update(token)
