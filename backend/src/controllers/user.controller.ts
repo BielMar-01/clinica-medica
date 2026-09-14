@@ -4,6 +4,7 @@ import type {
 } from 'express'
 
 import {
+  createUserSchema,
   updateUserSchema,
   updateUserStatusSchema,
   userIdSchema,
@@ -15,6 +16,7 @@ import {
   editUser,
   getUserById,
   getUsers,
+  registerUser,
 } from '../services/user.service.js'
 
 import {
@@ -88,6 +90,52 @@ export async function getUserController(
 
   res.status(200).json({
     status: 'ok',
+
+    data:
+      user,
+  })
+}
+
+export async function createUserController(
+  req: Request,
+  res: Response,
+) {
+  if (!req.user) {
+    throw new AppError(
+      'Usuário não autenticado',
+      401,
+      'USER_NOT_AUTHENTICATED',
+    )
+  }
+
+  const parsedBody =
+    createUserSchema.safeParse(
+      req.body,
+    )
+
+  if (
+    !parsedBody.success
+  ) {
+    throw new AppError(
+      'Dados do usuário inválidos',
+      400,
+      'USER_VALIDATION_ERROR',
+      parsedBody.error.flatten()
+        .fieldErrors,
+    )
+  }
+
+  const user =
+    await registerUser(
+      parsedBody.data,
+      req.user.id,
+    )
+
+  res.status(201).json({
+    status: 'ok',
+
+    message:
+      'Usuário cadastrado com sucesso. O código de primeiro acesso foi enviado por e-mail.',
 
     data:
       user,

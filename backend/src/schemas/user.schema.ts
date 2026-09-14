@@ -7,7 +7,7 @@ export const userRoleSchema =
     'MEDICO',
   ])
 
-export const updateUserSchema =
+export const createUserSchema =
   z.object({
     nome: z
       .string()
@@ -39,6 +39,9 @@ export const updateUserSchema =
     perfil:
       userRoleSchema,
   })
+
+export const updateUserSchema =
+  createUserSchema
 
 export const updateUserStatusSchema =
   z.object({
@@ -99,6 +102,11 @@ export const userListQuerySchema =
 export type UserRole =
   z.infer<
     typeof userRoleSchema
+  >
+
+export type CreateUserInput =
+  z.infer<
+    typeof createUserSchema
   >
 
 export type UpdateUserInput =

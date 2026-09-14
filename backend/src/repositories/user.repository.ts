@@ -19,6 +19,14 @@ type ListUsersParams = {
   ativo?: boolean
 }
 
+type CreateUserData = {
+  nome: string
+  email: string
+  senha: string
+  perfil: UserRole
+  criadoPor: bigint
+}
+
 type UpdateUserData = {
   nome: string
   email: string
@@ -57,7 +65,9 @@ export async function listUsers(
     where.nome = {
       contains:
         params.nome,
-      mode: 'insensitive',
+
+      mode:
+        'insensitive',
     }
   }
 
@@ -65,7 +75,9 @@ export async function listUsers(
     where.email = {
       contains:
         params.email,
-      mode: 'insensitive',
+
+      mode:
+        'insensitive',
     }
   }
 
@@ -113,6 +125,42 @@ export async function listUsers(
     users,
     total,
   }
+}
+
+export async function createUser(
+  data: CreateUserData,
+) {
+  return prisma.usuarios.create({
+    data: {
+      nome:
+        data.nome,
+
+      email:
+        data.email,
+
+      senha:
+        data.senha,
+
+      perfil:
+        data.perfil,
+
+      ativo:
+        true,
+
+      criado_por:
+        data.criadoPor,
+    },
+  })
+}
+
+export async function deleteUser(
+  id: bigint,
+) {
+  return prisma.usuarios.delete({
+    where: {
+      id,
+    },
+  })
 }
 
 export async function updateUser(

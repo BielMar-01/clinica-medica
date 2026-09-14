@@ -3,6 +3,7 @@ import {
 } from 'express'
 
 import {
+  createUserController,
   getUserController,
   listUsersController,
   updateUserController,
@@ -38,6 +39,14 @@ userRouter.get(
     'ADMIN',
   ),
   getUserController,
+)
+
+userRouter.post(
+  '/',
+  authorizeMiddleware(
+    'ADMIN',
+  ),
+  createUserController,
 )
 
 userRouter.put(

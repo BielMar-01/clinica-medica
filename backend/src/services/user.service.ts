@@ -1,4 +1,10 @@
+import crypto from 'node:crypto'
+
+import bcrypt from 'bcryptjs'
+
 import {
+  createUser,
+  deleteUser,
   findUserByEmail,
   findUserById,
   listUsers,
@@ -8,9 +14,14 @@ import {
 } from '../repositories/user.repository.js'
 
 import type {
+  CreateUserInput,
   UpdateUserInput,
   UserListQuery,
 } from '../schemas/user.schema.js'
+
+import {
+  createPasswordResetCode,
+} from './auth.service.js'
 
 import {
   AppError,
@@ -20,6 +31,9 @@ import {
   isPrismaRecordNotFoundError,
   isPrismaUniqueConstraintError,
 } from '../utils/prisma-error.js'
+
+const USER_PASSWORD_HASH_ROUNDS =
+  12
 
 function serializeUser(
   user: Awaited<
@@ -67,6 +81,21 @@ function serializeUser(
         ?.toString() ??
       null,
   }
+}
+
+function generateInternalPassword() {
+  return crypto
+    .randomBytes(64)
+    .toString('hex')
+}
+
+async function hashInternalPassword(
+  password: string,
+) {
+  return bcrypt.hash(
+    password,
+    USER_PASSWORD_HASH_ROUNDS,
+  )
 }
 
 export async function getUsers(
@@ -159,6 +188,99 @@ export async function getUserById(
   return serializeUser(
     user,
   )
+}
+
+export async function registerUser(
+  input: CreateUserInput,
+  authenticatedUserId: bigint,
+) {
+  const normalizedEmail =
+    input.email
+      .trim()
+      .toLowerCase()
+
+  const existingUser =
+    await findUserByEmail(
+      normalizedEmail,
+    )
+
+  if (existingUser) {
+    throw new AppError(
+      'Já existe um usuário cadastrado com este e-mail',
+      409,
+      'USER_EMAIL_ALREADY_EXISTS',
+    )
+  }
+
+  const internalPassword =
+    generateInternalPassword()
+
+  const passwordHash =
+    await hashInternalPassword(
+      internalPassword,
+    )
+
+  let createdUser:
+    Awaited<
+      ReturnType<
+        typeof createUser
+      >
+    >
+    | null = null
+
+  try {
+    createdUser =
+      await createUser({
+        nome:
+          input.nome,
+
+        email:
+          normalizedEmail,
+
+        senha:
+          passwordHash,
+
+        perfil:
+          input.perfil,
+
+        criadoPor:
+          authenticatedUserId,
+      })
+
+    try {
+      await createPasswordResetCode(
+        normalizedEmail,
+      )
+    } catch (error) {
+      await deleteUser(
+        createdUser.id,
+      )
+
+      throw new AppError(
+        'Não foi possível enviar o e-mail de primeiro acesso. O usuário não foi cadastrado.',
+        502,
+        'USER_INVITATION_EMAIL_FAILED',
+      )
+    }
+
+    return serializeUser(
+      createdUser,
+    )
+  } catch (error) {
+    if (
+      isPrismaUniqueConstraintError(
+        error,
+      )
+    ) {
+      throw new AppError(
+        'Já existe um usuário cadastrado com este e-mail',
+        409,
+        'USER_EMAIL_ALREADY_EXISTS',
+      )
+    }
+
+    throw error
+  }
 }
 
 export async function editUser(
