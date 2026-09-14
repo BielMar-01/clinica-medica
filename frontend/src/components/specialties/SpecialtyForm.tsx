@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useState,
   type FormEvent,
 } from 'react'
@@ -8,21 +7,27 @@ import type {
   SpecialtyFormData,
 } from '../../types/specialty'
 
-const emptyForm: SpecialtyFormData = {
-  nome: '',
-  descricao: '',
-}
+const emptyForm:
+  SpecialtyFormData = {
+    nome: '',
+    descricao: '',
+  }
 
 type SpecialtyFormProps = {
   open: boolean
+
   title: string
-  initialData?: SpecialtyFormData | null
+
+  initialData?:
+    SpecialtyFormData | null
+
   submitting: boolean
 
   onClose: () => void
 
   onSubmit: (
-    data: SpecialtyFormData,
+    data:
+      SpecialtyFormData,
   ) => Promise<void>
 }
 
@@ -37,56 +42,56 @@ export function SpecialtyForm({
   const [
     form,
     setForm,
-  ] = useState<SpecialtyFormData>(
-    emptyForm,
-  )
-
-  const [
-    error,
-    setError,
-  ] = useState('')
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    setForm(
+  ] =
+    useState<
+      SpecialtyFormData
+    >(
       initialData ??
         emptyForm,
     )
 
-    setError('')
-  }, [
-    open,
-    initialData,
-  ])
+  const [
+    error,
+    setError,
+  ] =
+    useState('')
 
   if (!open) {
     return null
   }
 
   function updateField(
-    field: keyof SpecialtyFormData,
+    field:
+      keyof SpecialtyFormData,
+
     value: string,
   ) {
     setForm(
       (current) => ({
         ...current,
-        [field]: value,
+
+        [field]:
+          value,
       }),
     )
+
+    if (error) {
+      setError('')
+    }
   }
 
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
+    event:
+      FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
 
     try {
       setError('')
 
-      await onSubmit(form)
+      await onSubmit(
+        form,
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -110,12 +115,17 @@ export function SpecialtyForm({
           data-testid="specialty-form-header"
         >
           <div>
-            <h2 data-testid="specialty-form-title">
+            <h2
+              data-testid="specialty-form-title"
+            >
               {title}
             </h2>
 
-            <p data-testid="specialty-form-description">
-              Preencha os dados da especialidade.
+            <p
+              data-testid="specialty-form-description"
+            >
+              Preencha os dados da
+              especialidade.
             </p>
           </div>
 
@@ -124,6 +134,9 @@ export function SpecialtyForm({
             type="button"
             className="icon-button"
             onClick={onClose}
+            disabled={
+              submitting
+            }
             aria-label="Fechar formulário"
           >
             ×
@@ -133,22 +146,32 @@ export function SpecialtyForm({
         <form
           className="patient-form"
           data-testid="specialty-form"
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
         >
           <div
             className="form-grid"
             data-testid="specialty-form-fields"
           >
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               Nome
 
               <input
                 data-testid="specialty-name-input"
-                value={form.nome}
-                onChange={(event) =>
+                value={
+                  form.nome
+                }
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'nome',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
                 required
@@ -156,18 +179,26 @@ export function SpecialtyForm({
               />
             </label>
 
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               Descrição
 
               <textarea
                 data-testid="specialty-description-input"
-                value={form.descricao}
+                value={
+                  form.descricao
+                }
                 rows={4}
                 maxLength={500}
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'descricao',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -192,8 +223,12 @@ export function SpecialtyForm({
               data-testid="specialty-form-cancel-button"
               type="button"
               className="secondary-button"
-              onClick={onClose}
-              disabled={submitting}
+              onClick={
+                onClose
+              }
+              disabled={
+                submitting
+              }
             >
               Cancelar
             </button>
@@ -201,7 +236,9 @@ export function SpecialtyForm({
             <button
               data-testid="specialty-form-submit-button"
               type="submit"
-              disabled={submitting}
+              disabled={
+                submitting
+              }
             >
               {submitting
                 ? 'Salvando...'

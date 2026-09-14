@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useState,
   type FormEvent,
 } from 'react'
@@ -46,20 +45,6 @@ export function UserForm({
     setError,
   ] =
     useState('')
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    setFormData(
-      initialData,
-    )
-
-    setError('')
-  }, [
-    open,
-  ])
 
   if (!open) {
     return null

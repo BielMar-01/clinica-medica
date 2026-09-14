@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useState,
 } from 'react'
@@ -144,58 +143,81 @@ export function UsersPage() {
     useState(false)
 
   const [
+    formKey,
+    setFormKey,
+  ] =
+    useState(0)
+
+  const [
     submitting,
     setSubmitting,
   ] =
     useState(false)
 
-  const loadUsers =
-    useCallback(
-      async () => {
-        if (
-          !user ||
-          user.perfil !==
-            'ADMIN'
-        ) {
+  const [
+    reloadKey,
+    setReloadKey,
+  ] =
+    useState(0)
+
+  useEffect(() => {
+    if (
+      !user ||
+      user.perfil !==
+        'ADMIN'
+    ) {
+      return
+    }
+
+    let cancelled =
+      false
+
+    async function loadUsers() {
+      try {
+        const response =
+          await listUsersRequest(
+            appliedFilters,
+          )
+
+        if (cancelled) {
           return
         }
 
-        try {
-          setLoading(true)
-          setError('')
+        setUsers(
+          response.data,
+        )
 
-          const response =
-            await listUsersRequest(
-              appliedFilters,
-            )
+        setPagination(
+          response.pagination,
+        )
 
-          setUsers(
-            response.data,
-          )
+        setError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
 
-          setPagination(
-            response.pagination,
-          )
-        } catch (error) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : 'Erro ao carregar usuários',
-          )
-        } finally {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Erro ao carregar usuários',
+        )
+      } finally {
+        if (!cancelled) {
           setLoading(false)
         }
-      },
-      [
-        user,
-        appliedFilters,
-      ],
-    )
+      }
+    }
 
-  useEffect(() => {
-    void loadUsers()
+    loadUsers()
+
+    return () => {
+      cancelled = true
+    }
   }, [
-    loadUsers,
+    user,
+    appliedFilters,
+    reloadKey,
   ])
 
   if (authLoading) {
@@ -242,6 +264,8 @@ export function UsersPage() {
     setAppliedFilters(
       nextFilters,
     )
+
+    setLoading(true)
   }
 
   function handleClear() {
@@ -254,11 +278,19 @@ export function UsersPage() {
     setAppliedFilters(
       initialFilters,
     )
+
+    setLoading(true)
   }
 
   function openCreateForm() {
     setError('')
     setSuccessMessage('')
+
+    setFormKey(
+      (current) =>
+        current + 1,
+    )
+
     setFormOpen(true)
   }
 
@@ -298,8 +330,15 @@ export function UsersPage() {
         appliedFilters.page ===
         1
       ) {
-        await loadUsers()
+        setLoading(true)
+
+        setReloadKey(
+          (current) =>
+            current + 1,
+        )
       } else {
+        setLoading(true)
+
         setAppliedFilters(
           firstPageFilters,
         )
@@ -321,6 +360,7 @@ export function UsersPage() {
     }
 
     setSuccessMessage('')
+    setLoading(true)
 
     setFilters(
       (current) => ({
@@ -750,6 +790,9 @@ export function UsersPage() {
         )}
 
       <UserForm
+        key={
+          formKey
+        }
         open={
           formOpen
         }

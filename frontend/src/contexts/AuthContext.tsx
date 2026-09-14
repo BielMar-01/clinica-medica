@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -22,27 +21,9 @@ import type {
   LoginRequest,
 } from '../types/auth'
 
-type AuthContextValue = {
-  user: AuthUser | null
-  accessToken: string | null
-
-  isAuthenticated: boolean
-  isLoading: boolean
-
-  login: (
-    credentials: LoginRequest,
-  ) => Promise<void>
-
-  logout: () => Promise<void>
-
-  refreshSession:
-    () => Promise<string | null>
-}
-
-export const AuthContext =
-  createContext<
-    AuthContextValue | undefined
-  >(undefined)
+import {
+  AuthContext,
+} from './auth-context'
 
 type AuthProviderProps = {
   children: ReactNode
@@ -76,6 +57,7 @@ export function AuthProvider({
   const clearSession =
     useCallback(() => {
       setAccessToken(null)
+
       setUser(null)
     }, [])
 
@@ -122,6 +104,41 @@ export function AuthProvider({
       ],
     )
 
+  const login =
+    useCallback(
+      async (
+        credentials:
+          LoginRequest,
+      ) => {
+        const response =
+          await loginRequest(
+            credentials,
+          )
+
+        setSession(
+          response.accessToken,
+          response.user,
+        )
+      },
+      [
+        setSession,
+      ],
+    )
+
+  const logout =
+    useCallback(
+      async () => {
+        try {
+          await logoutRequest()
+        } finally {
+          clearSession()
+        }
+      },
+      [
+        clearSession,
+      ],
+    )
+
   useEffect(() => {
     configureApiAuth({
       getAccessToken:
@@ -149,52 +166,33 @@ export function AuthProvider({
     refreshSession,
   ])
 
-  async function login(
-    credentials: LoginRequest,
-  ) {
-    const response =
-      await loginRequest(
-        credentials,
-      )
-
-    setSession(
-      response.accessToken,
-      response.user,
-    )
-  }
-
-  async function logout() {
-    try {
-      await logoutRequest()
-    } finally {
-      clearSession()
-    }
-  }
-
   const value =
-    useMemo<
-      AuthContextValue
-    >(
+    useMemo(
       () => ({
         user,
+
         accessToken,
 
         isAuthenticated:
           Boolean(
             user &&
-            accessToken,
+              accessToken,
           ),
 
         isLoading,
 
         login,
+
         logout,
+
         refreshSession,
       }),
       [
         user,
         accessToken,
         isLoading,
+        login,
+        logout,
         refreshSession,
       ],
     )

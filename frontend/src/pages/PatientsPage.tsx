@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useState,
 } from 'react'
@@ -181,6 +180,12 @@ export function PatientsPage() {
     useState(false)
 
   const [
+    formKey,
+    setFormKey,
+  ] =
+    useState(0)
+
+  const [
     formTitle,
     setFormTitle,
   ] =
@@ -210,58 +215,74 @@ export function PatientsPage() {
   ] =
     useState(false)
 
+  const [
+    reloadKey,
+    setReloadKey,
+  ] =
+    useState(0)
+
   const canManage =
     user?.perfil ===
       'ADMIN' ||
     user?.perfil ===
       'RECEPCIONISTA'
 
-  const loadPatients =
-    useCallback(
-      async () => {
-        if (
-          !isAuthenticated
-        ) {
+  useEffect(() => {
+    if (
+      !isAuthenticated
+    ) {
+      return
+    }
+
+    let cancelled =
+      false
+
+    async function loadPatients() {
+      try {
+        const response =
+          await listPatientsRequest(
+            appliedFilters,
+          )
+
+        if (cancelled) {
           return
         }
 
-        try {
-          setLoading(true)
-          setError('')
+        setPatients(
+          response.data,
+        )
 
-          const response =
-            await listPatientsRequest(
-              appliedFilters,
-            )
+        setPagination(
+          response.pagination,
+        )
 
-          setPatients(
-            response.data,
-          )
+        setError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
 
-          setPagination(
-            response.pagination,
-          )
-        } catch (error) {
-          setError(
-            error instanceof
-              Error
-              ? error.message
-              : 'Erro ao carregar pacientes',
-          )
-        } finally {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Erro ao carregar pacientes',
+        )
+      } finally {
+        if (!cancelled) {
           setLoading(false)
         }
-      },
-      [
-        isAuthenticated,
-        appliedFilters,
-      ],
-    )
+      }
+    }
 
-  useEffect(() => {
     void loadPatients()
+
+    return () => {
+      cancelled = true
+    }
   }, [
-    loadPatients,
+    isAuthenticated,
+    appliedFilters,
+    reloadKey,
   ])
 
   function handleApplyFilters(
@@ -273,6 +294,8 @@ export function PatientsPage() {
       page: 1,
     }
 
+    setLoading(true)
+
     setFilters(
       filtersToApply,
     )
@@ -283,6 +306,8 @@ export function PatientsPage() {
   }
 
   function handleClear() {
+    setLoading(true)
+
     setFilters(
       initialFilters,
     )
@@ -301,6 +326,11 @@ export function PatientsPage() {
 
     setFormTitle(
       'Novo paciente',
+    )
+
+    setFormKey(
+      (current) =>
+        current + 1,
     )
 
     setFormOpen(true)
@@ -332,11 +362,15 @@ export function PatientsPage() {
         'Editar paciente',
       )
 
+      setFormKey(
+        (current) =>
+          current + 1,
+      )
+
       setFormOpen(true)
     } catch (error) {
       setError(
-        error instanceof
-          Error
+        error instanceof Error
           ? error.message
           : 'Erro ao carregar paciente',
       )
@@ -365,7 +399,12 @@ export function PatientsPage() {
 
       setFormOpen(false)
 
-      await loadPatients()
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
     } finally {
       setSubmitting(false)
     }
@@ -397,11 +436,15 @@ export function PatientsPage() {
         !patient.ativo,
       )
 
-      await loadPatients()
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
     } catch (error) {
       setError(
-        error instanceof
-          Error
+        error instanceof Error
           ? error.message
           : 'Erro ao alterar status do paciente',
       )
@@ -418,6 +461,8 @@ export function PatientsPage() {
     ) {
       return
     }
+
+    setLoading(true)
 
     setFilters(
       (current) => ({
@@ -578,6 +623,9 @@ export function PatientsPage() {
         )}
 
       <PatientForm
+        key={
+          formKey
+        }
         open={
           formOpen
         }
@@ -591,7 +639,9 @@ export function PatientsPage() {
           submitting
         }
         onClose={() =>
-          setFormOpen(false)
+          setFormOpen(
+            false,
+          )
         }
         onSubmit={
           handleSubmit

@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useState,
 } from 'react'
@@ -123,6 +122,12 @@ export function SpecialtiesPage() {
     useState(false)
 
   const [
+    formKey,
+    setFormKey,
+  ] =
+    useState(0)
+
+  const [
     formTitle,
     setFormTitle,
   ] =
@@ -152,52 +157,70 @@ export function SpecialtiesPage() {
   ] =
     useState(false)
 
-  const canManage =
-    user?.perfil === 'ADMIN'
+  const [
+    reloadKey,
+    setReloadKey,
+  ] =
+    useState(0)
 
-  const loadSpecialties =
-    useCallback(
-      async () => {
-        if (!isAuthenticated) {
+  const canManage =
+    user?.perfil ===
+      'ADMIN'
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return
+    }
+
+    let cancelled =
+      false
+
+    async function loadSpecialties() {
+      try {
+        const response =
+          await listSpecialtiesRequest(
+            appliedFilters,
+          )
+
+        if (cancelled) {
           return
         }
 
-        try {
-          setLoading(true)
-          setError('')
+        setSpecialties(
+          response.data,
+        )
 
-          const response =
-            await listSpecialtiesRequest(
-              appliedFilters,
-            )
+        setPagination(
+          response.pagination,
+        )
 
-          setSpecialties(
-            response.data,
-          )
+        setError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
 
-          setPagination(
-            response.pagination,
-          )
-        } catch (error) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : 'Erro ao carregar especialidades',
-          )
-        } finally {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Erro ao carregar especialidades',
+        )
+      } finally {
+        if (!cancelled) {
           setLoading(false)
         }
-      },
-      [
-        isAuthenticated,
-        appliedFilters,
-      ],
-    )
+      }
+    }
 
-  useEffect(() => {
     void loadSpecialties()
+
+    return () => {
+      cancelled = true
+    }
   }, [
-    loadSpecialties,
+    isAuthenticated,
+    appliedFilters,
+    reloadKey,
   ])
 
   function handleSearch() {
@@ -205,6 +228,8 @@ export function SpecialtiesPage() {
       ...filters,
       page: 1,
     }
+
+    setLoading(true)
 
     setFilters(
       nextFilters,
@@ -216,6 +241,8 @@ export function SpecialtiesPage() {
   }
 
   function handleClear() {
+    setLoading(true)
+
     setFilters(
       initialFilters,
     )
@@ -236,11 +263,17 @@ export function SpecialtiesPage() {
       'Nova especialidade',
     )
 
+    setFormKey(
+      (current) =>
+        current + 1,
+    )
+
     setFormOpen(true)
   }
 
   async function openEditForm(
-    specialty: SpecialtySummary,
+    specialty:
+      SpecialtySummary,
   ) {
     try {
       setError('')
@@ -264,6 +297,11 @@ export function SpecialtiesPage() {
         'Editar especialidade',
       )
 
+      setFormKey(
+        (current) =>
+          current + 1,
+      )
+
       setFormOpen(true)
     } catch (error) {
       setError(
@@ -275,7 +313,8 @@ export function SpecialtiesPage() {
   }
 
   async function handleSubmit(
-    data: SpecialtyFormData,
+    data:
+      SpecialtyFormData,
   ) {
     try {
       setSubmitting(true)
@@ -295,14 +334,20 @@ export function SpecialtiesPage() {
 
       setFormOpen(false)
 
-      await loadSpecialties()
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
     } finally {
       setSubmitting(false)
     }
   }
 
   async function handleToggleStatus(
-    specialty: SpecialtySummary,
+    specialty:
+      SpecialtySummary,
   ) {
     const action =
       specialty.ativo
@@ -326,7 +371,12 @@ export function SpecialtiesPage() {
         !specialty.ativo,
       )
 
-      await loadSpecialties()
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -346,6 +396,8 @@ export function SpecialtiesPage() {
     ) {
       return
     }
+
+    setLoading(true)
 
     setFilters(
       (current) => ({
@@ -372,12 +424,17 @@ export function SpecialtiesPage() {
         data-testid="specialties-page-header"
       >
         <div>
-          <h1 data-testid="specialties-page-title">
+          <h1
+            data-testid="specialties-page-title"
+          >
             Especialidades
           </h1>
 
-          <p data-testid="specialties-page-description">
-            Cadastro e gerenciamento das especialidades médicas.
+          <p
+            data-testid="specialties-page-description"
+          >
+            Cadastro e gerenciamento das
+            especialidades médicas.
           </p>
         </div>
 
@@ -406,7 +463,9 @@ export function SpecialtiesPage() {
       )}
 
       <SpecialtyFiltersComponent
-        filters={filters}
+        filters={
+          filters
+        }
         onChange={
           setFilters
         }
@@ -471,7 +530,9 @@ export function SpecialtiesPage() {
                 pagination.totalPages
               }
               {' — '}
-              {pagination.total}{' '}
+              {
+                pagination.total
+              }{' '}
               especialidade(s)
             </span>
 
@@ -496,8 +557,15 @@ export function SpecialtiesPage() {
         )}
 
       <SpecialtyForm
-        open={formOpen}
-        title={formTitle}
+        key={
+          formKey
+        }
+        open={
+          formOpen
+        }
+        title={
+          formTitle
+        }
         initialData={
           formData
         }
@@ -505,7 +573,9 @@ export function SpecialtiesPage() {
           submitting
         }
         onClose={() =>
-          setFormOpen(false)
+          setFormOpen(
+            false,
+          )
         }
         onSubmit={
           handleSubmit

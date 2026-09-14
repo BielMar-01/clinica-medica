@@ -4,11 +4,13 @@ import {
 
 import {
   AuthContext,
-} from '../contexts/AuthContext'
+} from '../contexts/auth-context'
 
 export function useAuth() {
   const context =
-    useContext(AuthContext)
+    useContext(
+      AuthContext,
+    )
 
   if (!context) {
     throw new Error(

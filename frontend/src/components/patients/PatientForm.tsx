@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useState,
   type FormEvent,
 } from 'react'
@@ -8,24 +7,25 @@ import type {
   PatientFormData,
 } from '../../types/patient'
 
-const emptyForm: PatientFormData = {
-  nomeCompleto: '',
-  cpf: '',
-  dataNascimento: '',
-  sexo: '',
-  telefone: '',
-  telefoneSecundario: '',
-  email: '',
-  nomeMae: '',
-  cep: '',
-  logradouro: '',
-  numero: '',
-  complemento: '',
-  bairro: '',
-  cidade: '',
-  estado: '',
-  observacoes: '',
-}
+const emptyForm:
+  PatientFormData = {
+    nomeCompleto: '',
+    cpf: '',
+    dataNascimento: '',
+    sexo: '',
+    telefone: '',
+    telefoneSecundario: '',
+    email: '',
+    nomeMae: '',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    observacoes: '',
+  }
 
 type PatientFormProps = {
   open: boolean
@@ -40,7 +40,8 @@ type PatientFormProps = {
   onClose: () => void
 
   onSubmit: (
-    data: PatientFormData,
+    data:
+      PatientFormData,
   ) => Promise<void>
 }
 
@@ -56,30 +57,18 @@ export function PatientForm({
     form,
     setForm,
   ] =
-    useState<PatientFormData>(
-      emptyForm,
+    useState<
+      PatientFormData
+    >(
+      initialData ??
+        emptyForm,
     )
 
   const [
     error,
     setError,
-  ] = useState('')
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    setForm(
-      initialData ??
-        emptyForm,
-    )
-
-    setError('')
-  }, [
-    open,
-    initialData,
-  ])
+  ] =
+    useState('')
 
   if (!open) {
     return null
@@ -94,9 +83,15 @@ export function PatientForm({
     setForm(
       (current) => ({
         ...current,
-        [field]: value,
+
+        [field]:
+          value,
       }),
     )
+
+    if (error) {
+      setError('')
+    }
   }
 
   async function handleSubmit(
@@ -108,7 +103,9 @@ export function PatientForm({
     try {
       setError('')
 
-      await onSubmit(form)
+      await onSubmit(
+        form,
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -132,11 +129,15 @@ export function PatientForm({
           data-testid="patient-form-header"
         >
           <div>
-            <h2 data-testid="patient-form-title">
+            <h2
+              data-testid="patient-form-title"
+            >
               {title}
             </h2>
 
-            <p data-testid="patient-form-description">
+            <p
+              data-testid="patient-form-description"
+            >
               Preencha os dados
               cadastrais do
               paciente.
@@ -148,6 +149,9 @@ export function PatientForm({
             type="button"
             className="icon-button"
             onClick={onClose}
+            disabled={
+              submitting
+            }
             aria-label="Fechar formulário"
           >
             ×
@@ -155,7 +159,9 @@ export function PatientForm({
         </div>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
           className="patient-form"
           data-testid="patient-form"
         >
@@ -176,9 +182,12 @@ export function PatientForm({
             className="form-grid"
             data-testid="patient-form-fields"
           >
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               <span>
                 Nome completo{' '}
+
                 <span
                   className="required-field-mark"
                   aria-hidden="true"
@@ -192,10 +201,14 @@ export function PatientForm({
                 value={
                   form.nomeCompleto
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'nomeCompleto',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
                 required
@@ -205,6 +218,7 @@ export function PatientForm({
             <label>
               <span>
                 CPF{' '}
+
                 <span
                   className="required-field-mark"
                   aria-hidden="true"
@@ -215,11 +229,17 @@ export function PatientForm({
 
               <input
                 data-testid="patient-cpf-input"
-                value={form.cpf}
-                onChange={(event) =>
+                value={
+                  form.cpf
+                }
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'cpf',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
                 required
@@ -229,6 +249,7 @@ export function PatientForm({
             <label>
               <span>
                 Data de nascimento{' '}
+
                 <span
                   className="required-field-mark"
                   aria-hidden="true"
@@ -246,12 +267,18 @@ export function PatientForm({
                 max={
                   new Date()
                     .toISOString()
-                    .split('T')[0]
+                    .split(
+                      'T',
+                    )[0]
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'dataNascimento',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
                 required
@@ -263,11 +290,17 @@ export function PatientForm({
 
               <select
                 data-testid="patient-sex-select"
-                value={form.sexo}
-                onChange={(event) =>
+                value={
+                  form.sexo
+                }
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'sexo',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               >
@@ -292,6 +325,7 @@ export function PatientForm({
             <label>
               <span>
                 Telefone{' '}
+
                 <span
                   className="required-field-mark"
                   aria-hidden="true"
@@ -305,10 +339,14 @@ export function PatientForm({
                 value={
                   form.telefone
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'telefone',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
                 required
@@ -323,10 +361,14 @@ export function PatientForm({
                 value={
                   form.telefoneSecundario
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'telefoneSecundario',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -338,17 +380,25 @@ export function PatientForm({
               <input
                 data-testid="patient-email-input"
                 type="email"
-                value={form.email}
-                onChange={(event) =>
+                value={
+                  form.email
+                }
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'email',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
             </label>
 
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               Nome da mãe
 
               <input
@@ -356,10 +406,14 @@ export function PatientForm({
                 value={
                   form.nomeMae
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'nomeMae',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -370,11 +424,17 @@ export function PatientForm({
 
               <input
                 data-testid="patient-zip-code-input"
-                value={form.cep}
-                onChange={(event) =>
+                value={
+                  form.cep
+                }
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'cep',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -389,17 +449,23 @@ export function PatientForm({
                   form.estado
                 }
                 maxLength={2}
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'estado',
-                    event.target.value
+                    event
+                      .target
+                      .value
                       .toUpperCase(),
                   )
                 }
               />
             </label>
 
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               Logradouro
 
               <input
@@ -407,10 +473,14 @@ export function PatientForm({
                 value={
                   form.logradouro
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'logradouro',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -424,10 +494,14 @@ export function PatientForm({
                 value={
                   form.numero
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'numero',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -441,10 +515,14 @@ export function PatientForm({
                 value={
                   form.complemento
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'complemento',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -458,10 +536,14 @@ export function PatientForm({
                 value={
                   form.bairro
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'bairro',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
@@ -475,16 +557,22 @@ export function PatientForm({
                 value={
                   form.cidade
                 }
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'cidade',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
             </label>
 
-            <label className="full-field">
+            <label
+              className="full-field"
+            >
               Observações
 
               <textarea
@@ -493,10 +581,14 @@ export function PatientForm({
                   form.observacoes
                 }
                 rows={4}
-                onChange={(event) =>
+                onChange={(
+                  event,
+                ) =>
                   updateField(
                     'observacoes',
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               />
