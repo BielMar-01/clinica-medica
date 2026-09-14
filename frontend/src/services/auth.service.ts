@@ -14,6 +14,17 @@ type ForgotPasswordResponse = {
   message: string
 }
 
+type VerifyResetCodeRequest = {
+  email: string
+  codigo: string
+}
+
+type VerifyResetCodeResponse = {
+  status: 'ok'
+  message: string
+  resetToken: string
+}
+
 export async function loginRequest(
   credentials: LoginRequest,
 ) {
@@ -80,6 +91,24 @@ export async function forgotPasswordRequest(
       body: JSON.stringify({
         email,
       }),
+
+      retryOnUnauthorized:
+        false,
+    },
+  )
+}
+
+export async function verifyResetCodeRequest(
+  input: VerifyResetCodeRequest,
+) {
+  return apiRequest<VerifyResetCodeResponse>(
+    '/api/auth/verify-reset-code',
+    {
+      method: 'POST',
+
+      body: JSON.stringify(
+        input,
+      ),
 
       retryOnUnauthorized:
         false,
