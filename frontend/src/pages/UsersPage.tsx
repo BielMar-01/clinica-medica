@@ -9,15 +9,21 @@ import {
 } from 'react-router'
 
 import {
+  UserForm,
+} from '../components/users/UserForm'
+
+import {
   useAuth,
 } from '../hooks/useAuth'
 
 import {
+  createUserRequest,
   listUsersRequest,
 } from '../services/user.service'
 
 import type {
   UserFilters,
+  UserFormData,
   UserSummary,
 } from '../types/user'
 
@@ -125,6 +131,24 @@ export function UsersPage() {
   ] =
     useState('')
 
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] =
+    useState('')
+
+  const [
+    formOpen,
+    setFormOpen,
+  ] =
+    useState(false)
+
+  const [
+    submitting,
+    setSubmitting,
+  ] =
+    useState(false)
+
   const loadUsers =
     useCallback(
       async () => {
@@ -209,6 +233,8 @@ export function UsersPage() {
       page: 1,
     }
 
+    setSuccessMessage('')
+
     setFilters(
       nextFilters,
     )
@@ -219,6 +245,8 @@ export function UsersPage() {
   }
 
   function handleClear() {
+    setSuccessMessage('')
+
     setFilters(
       initialFilters,
     )
@@ -226,6 +254,59 @@ export function UsersPage() {
     setAppliedFilters(
       initialFilters,
     )
+  }
+
+  function openCreateForm() {
+    setError('')
+    setSuccessMessage('')
+    setFormOpen(true)
+  }
+
+  async function handleCreateUser(
+    data: UserFormData,
+  ) {
+    try {
+      setSubmitting(true)
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await createUserRequest(
+          data,
+        )
+
+      setFormOpen(false)
+
+      setSuccessMessage(
+        response.message ??
+          'Usuário cadastrado com sucesso.',
+      )
+
+      const firstPageFilters = {
+        ...appliedFilters,
+        page: 1,
+      }
+
+      setFilters(
+        (current) => ({
+          ...current,
+          page: 1,
+        }),
+      )
+
+      if (
+        appliedFilters.page ===
+        1
+      ) {
+        await loadUsers()
+      } else {
+        setAppliedFilters(
+          firstPageFilters,
+        )
+      }
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function changePage(
@@ -238,6 +319,8 @@ export function UsersPage() {
     ) {
       return
     }
+
+    setSuccessMessage('')
 
     setFilters(
       (current) => ({
@@ -281,13 +364,24 @@ export function UsersPage() {
         <button
           type="button"
           className="primary-button"
+          onClick={
+            openCreateForm
+          }
           data-testid="users-new-button"
-          disabled
-          title="Disponível na próxima etapa"
         >
           Novo usuário
         </button>
       </header>
+
+      {successMessage && (
+        <div
+          className="content-card"
+          role="status"
+          data-testid="users-success-message"
+        >
+          {successMessage}
+        </div>
+      )}
 
       {error && (
         <div
@@ -654,6 +748,23 @@ export function UsersPage() {
             </button>
           </div>
         )}
+
+      <UserForm
+        open={
+          formOpen
+        }
+        submitting={
+          submitting
+        }
+        onClose={() =>
+          setFormOpen(
+            false,
+          )
+        }
+        onSubmit={
+          handleCreateUser
+        }
+      />
     </section>
   )
 }

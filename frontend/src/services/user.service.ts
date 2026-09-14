@@ -1,5 +1,6 @@
 import type {
   UserFilters,
+  UserFormData,
   UserListResponse,
   UserResponse,
 } from '../types/user'
@@ -82,6 +83,24 @@ export async function getUserRequest(
     `/api/usuarios/${userId}`,
     {
       method: 'GET',
+    },
+  )
+}
+
+export async function createUserRequest(
+  data: UserFormData,
+) {
+  return apiRequest<
+    UserResponse
+  >(
+    '/api/usuarios',
+    {
+      method: 'POST',
+
+      body:
+        JSON.stringify(
+          data,
+        ),
     },
   )
 }

@@ -24,14 +24,22 @@ export type UserSummary = {
   ultimoLoginEm: string | null
 }
 
+export type UserFormData = {
+  nome: string
+  email: string
+  perfil: UserRole
+}
+
 export type UserFilters = {
   page: number
   limit: number
   nome: string
   email: string
+
   perfil:
     | ''
     | UserRole
+
   ativo:
     | ''
     | 'true'
