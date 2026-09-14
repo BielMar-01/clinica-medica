@@ -13,12 +13,15 @@ import {
   useAuth,
 } from '../hooks/useAuth'
 
-export function LoginPage() {
+import {
+  forgotPasswordRequest,
+} from '../services/auth.service'
+
+export function ForgotPasswordPage() {
   const navigate =
     useNavigate()
 
   const {
-    login,
     isAuthenticated,
     isLoading,
   } = useAuth()
@@ -26,11 +29,6 @@ export function LoginPage() {
   const [
     email,
     setEmail,
-  ] = useState('')
-
-  const [
-    senha,
-    setSenha,
   ] = useState('')
 
   const [
@@ -64,22 +62,29 @@ export function LoginPage() {
       setError('')
       setSubmitting(true)
 
-      await login({
-        email,
-        senha,
-      })
+      const normalizedEmail =
+        email
+          .trim()
+          .toLowerCase()
+
+      await forgotPasswordRequest(
+        normalizedEmail,
+      )
 
       navigate(
-        '/dashboard',
+        '/verify-reset-code',
         {
-          replace: true,
+          state: {
+            email:
+              normalizedEmail,
+          },
         },
       )
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Erro ao realizar login'
+          : 'Erro ao solicitar recuperação de senha'
 
       setError(message)
     } finally {
@@ -90,39 +95,42 @@ export function LoginPage() {
   return (
     <main
       className="login-page"
-      data-testid="login-page"
+      data-testid="forgot-password-page"
     >
       <section
         className="login-card"
-        data-testid="login-card"
+        data-testid="forgot-password-card"
       >
         <div
           className="login-header"
-          data-testid="login-header"
+          data-testid="forgot-password-header"
         >
           <h1
-            data-testid="login-title"
+            data-testid="forgot-password-title"
           >
-            Clínica Médica
+            Esqueceu sua senha?
           </h1>
 
           <p
-            data-testid="login-description"
+            data-testid="forgot-password-description"
           >
-            Entre para acessar o sistema.
+            Informe o e-mail da sua conta.
+            Enviaremos um código de
+            verificação para redefinir sua
+            senha.
           </p>
         </div>
 
         <form
           className="login-form"
           onSubmit={handleSubmit}
-          data-testid="login-form"
+          data-testid="forgot-password-form"
         >
           <label>
             E-mail
 
             <input
-              data-testid="login-email-input"
+              data-testid="forgot-password-email-input"
               type="email"
               value={email}
               onChange={(event) =>
@@ -137,57 +145,38 @@ export function LoginPage() {
             />
           </label>
 
-          <label>
-            Senha
-
-            <input
-              data-testid="login-password-input"
-              type="password"
-              value={senha}
-              onChange={(event) =>
-                setSenha(
-                  event.target.value,
-                )
-              }
-              placeholder="Sua senha"
-              required
-              autoComplete="current-password"
-              disabled={submitting}
-            />
-          </label>
-
-          <div
-            className="login-password-actions"
-            data-testid="login-password-actions"
-          >
-            <Link
-              to="/forgot-password"
-              data-testid="login-forgot-password-link"
-            >
-              Esqueci minha senha
-            </Link>
-          </div>
-
           {error && (
             <div
               className="form-error"
               role="alert"
-              data-testid="login-error-message"
+              data-testid="forgot-password-error-message"
             >
               {error}
             </div>
           )}
 
           <button
-            data-testid="login-submit-button"
+            data-testid="forgot-password-submit-button"
             type="submit"
             disabled={submitting}
           >
             {submitting
-              ? 'Entrando...'
-              : 'Entrar'}
+              ? 'Enviando...'
+              : 'Enviar código'}
           </button>
         </form>
+
+        <div
+          className="auth-card-footer"
+          data-testid="forgot-password-footer"
+        >
+          <Link
+            to="/login"
+            data-testid="forgot-password-back-login-link"
+          >
+            Voltar para o login
+          </Link>
+        </div>
       </section>
     </main>
   )

@@ -17,6 +17,10 @@ import {
 } from '../pages/DashboardPage'
 
 import {
+  ForgotPasswordPage,
+} from '../pages/ForgotPasswordPage'
+
+import {
   LoginPage,
 } from '../pages/LoginPage'
 
@@ -39,6 +43,13 @@ export function AppRoutes() {
         path="/login"
         element={
           <LoginPage />
+        }
+      />
+
+      <Route
+        path="/forgot-password"
+        element={
+          <ForgotPasswordPage />
         }
       />
 

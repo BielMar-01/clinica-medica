@@ -9,6 +9,11 @@ import {
   apiRequest,
 } from './api'
 
+type ForgotPasswordResponse = {
+  status: 'ok'
+  message: string
+}
+
 export async function loginRequest(
   credentials: LoginRequest,
 ) {
@@ -60,6 +65,24 @@ export async function meRequest(
       method: 'GET',
 
       accessToken,
+    },
+  )
+}
+
+export async function forgotPasswordRequest(
+  email: string,
+) {
+  return apiRequest<ForgotPasswordResponse>(
+    '/api/auth/forgot-password',
+    {
+      method: 'POST',
+
+      body: JSON.stringify({
+        email,
+      }),
+
+      retryOnUnauthorized:
+        false,
     },
   )
 }

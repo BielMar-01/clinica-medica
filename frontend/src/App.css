@@ -33,6 +33,7 @@
 .login-header p {
   margin: 0;
   color: #667085;
+  line-height: 1.5;
 }
 
 .login-form,
@@ -66,6 +67,11 @@
   background: #ffffff;
 }
 
+.login-form input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
 .patient-form textarea {
   resize: vertical;
 }
@@ -77,6 +83,33 @@
 .patient-filters input:focus,
 .patient-filters select:focus {
   border-color: #667085;
+}
+
+.login-password-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.login-password-actions a,
+.auth-card-footer a {
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-password-actions a:hover,
+.auth-card-footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-card-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eaecf0;
 }
 
 button {
@@ -140,6 +173,7 @@ button {
   border-radius: 8px;
   background: #fff4f4;
   border: 1px solid #fecdca;
+  color: #b42318;
 }
 
 .page-error {
@@ -439,6 +473,54 @@ button {
   font-size: 64px;
 }
 
+.required-field-mark {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.required-fields-hint {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.alphabet-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.alphabet-button {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.alphabet-button:hover {
+  background: rgba(
+    127,
+    127,
+    127,
+    0.1
+  );
+}
+
+.alphabet-button-active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
 @media (
   max-width: 1100px
 ) {
@@ -489,8 +571,30 @@ button {
 }
 
 @media (
+  max-width: 768px
+) {
+  .alphabet-filter {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+
+  .alphabet-button {
+    flex: 0 0 auto;
+  }
+}
+
+@media (
   max-width: 600px
 ) {
+  .login-page {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 24px 20px;
+  }
+
   .filter-group {
     grid-template-columns: 1fr;
   }
@@ -503,67 +607,5 @@ button {
 
   .patient-modal {
     padding: 18px;
-  }
-}
-
-.required-field-mark {
-  color: #dc2626;
-  font-weight: 700;
-}
-
-.required-fields-hint {
-  margin: 0 0 16px;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.alphabet-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 16px 0;
-}
-
-.alphabet-button {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition:
-    background-color 0.2s,
-    border-color 0.2s;
-}
-
-.alphabet-button:hover {
-  background: rgba(
-    127,
-    127,
-    127,
-    0.1
-  );
-}
-
-.alphabet-button-active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #ffffff;
-}
-
-@media (
-  max-width: 768px
-) {
-  .alphabet-filter {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 6px;
-  }
-
-  .alphabet-button {
-    flex: 0 0 auto;
   }
 }
