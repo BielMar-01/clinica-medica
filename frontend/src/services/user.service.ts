@@ -123,3 +123,22 @@ export async function updateUserRequest(
     },
   )
 }
+
+export async function updateUserStatusRequest(
+  userId: string,
+  ativo: boolean,
+) {
+  return apiRequest<
+    UserResponse
+  >(
+    `/api/usuarios/${userId}/status`,
+    {
+      method: 'PATCH',
+
+      body:
+        JSON.stringify({
+          ativo,
+        }),
+    },
+  )
+}

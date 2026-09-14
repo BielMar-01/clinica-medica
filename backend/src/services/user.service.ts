@@ -251,7 +251,7 @@ export async function registerUser(
       await createPasswordResetCode(
         normalizedEmail,
       )
-    } catch (error) {
+    } catch {
       await deleteUser(
         createdUser.id,
       )

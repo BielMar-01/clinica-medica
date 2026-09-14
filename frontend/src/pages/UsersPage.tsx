@@ -20,6 +20,7 @@ import {
   getUserRequest,
   listUsersRequest,
   updateUserRequest,
+  updateUserStatusRequest,
 } from '../services/user.service'
 
 import type {
@@ -217,6 +218,14 @@ export function UsersPage() {
     useState(false)
 
   const [
+    changingStatusUserId,
+    setChangingStatusUserId,
+  ] =
+    useState<
+      string | null
+    >(null)
+
+  const [
     reloadKey,
     setReloadKey,
   ] =
@@ -310,6 +319,9 @@ export function UsersPage() {
       />
     )
   }
+
+  const authenticatedUserId =
+    user.id
 
   function handleSearch() {
     const nextFilters = {
@@ -470,6 +482,86 @@ export function UsersPage() {
       )
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleToggleStatus(
+    systemUser:
+      UserSummary,
+  ) {
+    const isOwnUser =
+      systemUser.id ===
+      authenticatedUserId
+
+    if (
+      isOwnUser &&
+      systemUser.ativo
+    ) {
+      setSuccessMessage('')
+
+      setError(
+        'Você não pode inativar a própria conta.',
+      )
+
+      return
+    }
+
+    const nextStatus =
+      !systemUser.ativo
+
+    const action =
+      nextStatus
+        ? 'ativar'
+        : 'inativar'
+
+    const confirmed =
+      window.confirm(
+        `Deseja ${action} o usuário "${systemUser.nome}"?`,
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setChangingStatusUserId(
+        systemUser.id,
+      )
+
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await updateUserStatusRequest(
+          systemUser.id,
+          nextStatus,
+        )
+
+      setSuccessMessage(
+        response.message ??
+          (
+            nextStatus
+              ? 'Usuário ativado com sucesso.'
+              : 'Usuário inativado com sucesso.'
+          ),
+      )
+
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Erro ao alterar status do usuário',
+      )
+    } finally {
+      setChangingStatusUserId(
+        null,
+      )
     }
   }
 
@@ -794,81 +886,124 @@ export function UsersPage() {
                 users.map(
                   (
                     systemUser,
-                  ) => (
-                    <tr
-                      key={
-                        systemUser.id
-                      }
-                      data-testid={`users-row-${systemUser.id}`}
-                    >
-                      <td
-                        data-testid={`users-name-${systemUser.id}`}
-                      >
-                        {
-                          systemUser.nome
+                  ) => {
+                    const isOwnUser =
+                      systemUser.id ===
+                      authenticatedUserId
+
+                    const changingStatus =
+                      changingStatusUserId ===
+                      systemUser.id
+
+                    return (
+                      <tr
+                        key={
+                          systemUser.id
                         }
-                      </td>
-
-                      <td
-                        data-testid={`users-email-${systemUser.id}`}
+                        data-testid={`users-row-${systemUser.id}`}
                       >
-                        {
-                          systemUser.email
-                        }
-                      </td>
-
-                      <td
-                        data-testid={`users-role-${systemUser.id}`}
-                      >
-                        {formatRole(
-                          systemUser.perfil,
-                        )}
-                      </td>
-
-                      <td
-                        data-testid={`users-last-login-${systemUser.id}`}
-                      >
-                        {formatLastLogin(
-                          systemUser.ultimoLoginEm,
-                        )}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            systemUser.ativo
-                              ? 'active'
-                              : 'inactive'
-                          }`}
-                          data-testid={`users-status-${systemUser.id}`}
+                        <td
+                          data-testid={`users-name-${systemUser.id}`}
                         >
-                          {systemUser.ativo
-                            ? 'Ativo'
-                            : 'Inativo'}
-                        </span>
-                      </td>
+                          {
+                            systemUser.nome
+                          }
+                        </td>
 
-                      <td>
-                        <div
-                          className="table-actions"
-                          data-testid={`users-actions-${systemUser.id}`}
+                        <td
+                          data-testid={`users-email-${systemUser.id}`}
                         >
-                          <button
-                            type="button"
-                            className="small-button"
-                            onClick={() =>
-                              void openEditForm(
-                                systemUser,
-                              )
-                            }
-                            data-testid={`users-edit-button-${systemUser.id}`}
+                          {
+                            systemUser.email
+                          }
+                        </td>
+
+                        <td
+                          data-testid={`users-role-${systemUser.id}`}
+                        >
+                          {formatRole(
+                            systemUser.perfil,
+                          )}
+                        </td>
+
+                        <td
+                          data-testid={`users-last-login-${systemUser.id}`}
+                        >
+                          {formatLastLogin(
+                            systemUser.ultimoLoginEm,
+                          )}
+                        </td>
+
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              systemUser.ativo
+                                ? 'active'
+                                : 'inactive'
+                            }`}
+                            data-testid={`users-status-${systemUser.id}`}
                           >
-                            Editar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ),
+                            {systemUser.ativo
+                              ? 'Ativo'
+                              : 'Inativo'}
+                          </span>
+                        </td>
+
+                        <td>
+                          <div
+                            className="table-actions"
+                            data-testid={`users-actions-${systemUser.id}`}
+                          >
+                            <button
+                              type="button"
+                              className="small-button"
+                              onClick={() =>
+                                void openEditForm(
+                                  systemUser,
+                                )
+                              }
+                              disabled={
+                                changingStatus
+                              }
+                              data-testid={`users-edit-button-${systemUser.id}`}
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              type="button"
+                              className="small-button"
+                              onClick={() =>
+                                void handleToggleStatus(
+                                  systemUser,
+                                )
+                              }
+                              disabled={
+                                changingStatus ||
+                                (
+                                  isOwnUser &&
+                                  systemUser.ativo
+                                )
+                              }
+                              title={
+                                isOwnUser &&
+                                systemUser.ativo
+                                  ? 'Você não pode inativar a própria conta'
+                                  : undefined
+                              }
+                              data-testid={`users-status-button-${systemUser.id}`}
+                            >
+                              {changingStatus
+                                ? 'Salvando...'
+                                : systemUser.ativo
+                                  ? 'Inativar'
+                                  : 'Ativar'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  },
                 )}
             </tbody>
           </table>
