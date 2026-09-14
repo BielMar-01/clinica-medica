@@ -13,7 +13,9 @@ import type {
   UpdatePatientInput,
 } from '../schemas/patient.schema.js'
 
-import { AppError } from '../utils/app-error.js'
+import {
+  AppError,
+} from '../utils/app-error.js'
 
 import {
   isPrismaRecordNotFoundError,
@@ -128,6 +130,12 @@ export async function getPatients(
 
       ativo:
         query.ativo,
+
+      ordenarPor:
+        query.ordenarPor,
+
+      ordem:
+        query.ordem,
     })
 
   const data =
@@ -233,7 +241,8 @@ export async function registerPatient(
           ),
 
         sexo:
-          input.sexo || null,
+          input.sexo ||
+          null,
 
         telefone:
           input.telefone,
@@ -243,33 +252,40 @@ export async function registerPatient(
           null,
 
         email:
-          input.email || null,
+          input.email ||
+          null,
 
         nomeMae:
-          input.nomeMae || null,
+          input.nomeMae ||
+          null,
 
         cep:
-          input.cep || null,
+          input.cep ||
+          null,
 
         logradouro:
           input.logradouro ||
           null,
 
         numero:
-          input.numero || null,
+          input.numero ||
+          null,
 
         complemento:
           input.complemento ||
           null,
 
         bairro:
-          input.bairro || null,
+          input.bairro ||
+          null,
 
         cidade:
-          input.cidade || null,
+          input.cidade ||
+          null,
 
         estado:
-          input.estado || null,
+          input.estado ||
+          null,
 
         observacoes:
           input.observacoes ||
@@ -349,7 +365,8 @@ export async function editPatient(
             ),
 
           sexo:
-            input.sexo || null,
+            input.sexo ||
+            null,
 
           telefone:
             input.telefone,
@@ -359,33 +376,40 @@ export async function editPatient(
             null,
 
           email:
-            input.email || null,
+            input.email ||
+            null,
 
           nomeMae:
-            input.nomeMae || null,
+            input.nomeMae ||
+            null,
 
           cep:
-            input.cep || null,
+            input.cep ||
+            null,
 
           logradouro:
             input.logradouro ||
             null,
 
           numero:
-            input.numero || null,
+            input.numero ||
+            null,
 
           complemento:
             input.complemento ||
             null,
 
           bairro:
-            input.bairro || null,
+            input.bairro ||
+            null,
 
           cidade:
-            input.cidade || null,
+            input.cidade ||
+            null,
 
           estado:
-            input.estado || null,
+            input.estado ||
+            null,
 
           observacoes:
             input.observacoes ||

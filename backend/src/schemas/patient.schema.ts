@@ -92,7 +92,9 @@ function isFutureDate(
   value: string,
 ) {
   const inputDate =
-    new Date(`${value}T00:00:00`)
+    new Date(
+      `${value}T00:00:00`,
+    )
 
   const today =
     new Date()
@@ -137,19 +139,23 @@ export const createPatientSchema =
     dataNascimento:
       birthDateSchema,
 
-    sexo: optionalString(30),
+    sexo:
+      optionalString(30),
 
-    telefone: phoneSchema,
+    telefone:
+      phoneSchema,
 
     telefoneSecundario:
       optionalPhoneSchema,
 
-    email: optionalEmailSchema,
+    email:
+      optionalEmailSchema,
 
     nomeMae:
       optionalString(180),
 
-    cep: cepSchema,
+    cep:
+      cepSchema,
 
     logradouro:
       optionalString(180),
@@ -192,7 +198,8 @@ export const updatePatientSchema =
 
 export const updatePatientStatusSchema =
   z.object({
-    ativo: z.boolean(),
+    ativo:
+      z.boolean(),
   })
 
 export const patientIdSchema =
@@ -228,13 +235,17 @@ export const patientListQuerySchema =
     cpf: z
       .string()
       .trim()
-      .transform(onlyDigits)
+      .transform(
+        onlyDigits,
+      )
       .optional(),
 
     telefone: z
       .string()
       .trim()
-      .transform(onlyDigits)
+      .transform(
+        onlyDigits,
+      )
       .optional(),
 
     ativo: z
@@ -247,6 +258,20 @@ export const patientListQuerySchema =
           value === 'true',
       )
       .optional(),
+
+    ordenarPor: z
+      .enum([
+        'nome',
+        'criadoEm',
+      ])
+      .default('nome'),
+
+    ordem: z
+      .enum([
+        'asc',
+        'desc',
+      ])
+      .default('asc'),
   })
 
 export type CreatePatientInput =

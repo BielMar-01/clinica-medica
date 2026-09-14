@@ -1,6 +1,10 @@
-import type { Prisma } from '@prisma/client'
+import type {
+  Prisma,
+} from '@prisma/client'
 
-import { prisma } from '../database/prisma.js'
+import {
+  prisma,
+} from '../database/prisma.js'
 
 type CreatePatientData = {
   nomeCompleto: string
@@ -49,6 +53,12 @@ type ListPatientsParams = {
   cpf?: string
   telefone?: string
   ativo?: boolean
+  ordenarPor:
+    | 'nome'
+    | 'criadoEm'
+  ordem:
+    | 'asc'
+    | 'desc'
 }
 
 export async function findPatientByCpf(
@@ -74,18 +84,23 @@ export async function findPatientById(
 export async function listPatients(
   params: ListPatientsParams,
 ) {
-  const where: Prisma.pacientesWhereInput = {}
+  const where:
+    Prisma.pacientesWhereInput = {}
 
   if (params.nome) {
     where.nome_completo = {
-      contains: params.nome,
-      mode: 'insensitive',
+      contains:
+        params.nome,
+
+      mode:
+        'insensitive',
     }
   }
 
   if (params.cpf) {
     where.cpf = {
-      contains: params.cpf,
+      contains:
+        params.cpf,
     }
   }
 
@@ -93,34 +108,58 @@ export async function listPatients(
     where.OR = [
       {
         telefone: {
-          contains: params.telefone,
+          contains:
+            params.telefone,
         },
       },
       {
         telefone_secundario: {
-          contains: params.telefone,
+          contains:
+            params.telefone,
         },
       },
     ]
   }
 
-  if (params.ativo !== undefined) {
-    where.ativo = params.ativo
+  if (
+    params.ativo !==
+    undefined
+  ) {
+    where.ativo =
+      params.ativo
   }
 
   const skip =
     (params.page - 1) *
     params.limit
 
-  const [patients, total] =
+  const orderBy:
+    Prisma.pacientesOrderByWithRelationInput =
+      params.ordenarPor ===
+      'criadoEm'
+        ? {
+            criado_em:
+              params.ordem,
+          }
+        : {
+            nome_completo:
+              params.ordem,
+          }
+
+  const [
+    patients,
+    total,
+  ] =
     await prisma.$transaction([
       prisma.pacientes.findMany({
         where,
+
         skip,
-        take: params.limit,
-        orderBy: {
-          nome_completo: 'asc',
-        },
+
+        take:
+          params.limit,
+
+        orderBy,
       }),
 
       prisma.pacientes.count({
@@ -174,7 +213,8 @@ export async function createPatient(
         data.numero ?? null,
 
       complemento:
-        data.complemento ?? null,
+        data.complemento ??
+        null,
 
       bairro:
         data.bairro ?? null,
@@ -186,7 +226,8 @@ export async function createPatient(
         data.estado ?? null,
 
       observacoes:
-        data.observacoes ?? null,
+        data.observacoes ??
+        null,
 
       criado_por:
         data.criadoPor,
@@ -239,7 +280,8 @@ export async function updatePatient(
         data.numero ?? null,
 
       complemento:
-        data.complemento ?? null,
+        data.complemento ??
+        null,
 
       bairro:
         data.bairro ?? null,
@@ -251,7 +293,8 @@ export async function updatePatient(
         data.estado ?? null,
 
       observacoes:
-        data.observacoes ?? null,
+        data.observacoes ??
+        null,
 
       atualizado_em:
         new Date(),
