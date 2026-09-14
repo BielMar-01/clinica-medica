@@ -1,5 +1,6 @@
 import { env } from '../config/env.js'
 import {
+  completePasswordReset,
   createRefreshToken,
   findLatestActivePasswordResetCode,
   findPasswordResetByTokenHash,
@@ -14,8 +15,14 @@ import {
   revokeRefreshToken,
   revokeRefreshTokenByHash,
 } from '../repositories/auth.repository.js'
-import type { LoginInput } from '../schemas/auth.schema.js'
-import { comparePassword } from '../utils/password.js'
+import type {
+  LoginInput,
+  ResetPasswordInput,
+} from '../schemas/auth.schema.js'
+import {
+  comparePassword,
+  hashPassword,
+} from '../utils/password.js'
 import {
   comparePasswordResetCode,
   generatePasswordResetCode,
@@ -97,35 +104,44 @@ export async function login(
   input: LoginInput,
   context: LoginContext,
 ) {
-  const user = await findUserByEmail(input.email)
+  const user =
+    await findUserByEmail(
+      input.email,
+    )
 
   if (!user || !user.ativo) {
     return null
   }
 
-  const validPassword = await comparePassword(
-    input.senha,
-    user.senha,
-  )
+  const validPassword =
+    await comparePassword(
+      input.senha,
+      user.senha,
+    )
 
   if (!validPassword) {
     return null
   }
 
-  const accessToken = generateAccessToken(
-    user.id,
-    user.perfil,
-  )
+  const accessToken =
+    generateAccessToken(
+      user.id,
+      user.perfil,
+    )
 
-  const refreshToken = generateRefreshToken()
+  const refreshToken =
+    generateRefreshToken()
 
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
   await createRefreshToken({
     usuarioId: user.id,
     tokenHash,
-    expiraEm: calculateRefreshExpiration(),
+    expiraEm:
+      calculateRefreshExpiration(),
     ipOrigem: context.ip,
     userAgent: context.userAgent,
   })
@@ -148,16 +164,21 @@ export async function refreshSession(
   context: RefreshContext,
 ) {
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
   const storedToken =
-    await findRefreshTokenByHash(tokenHash)
+    await findRefreshTokenByHash(
+      tokenHash,
+    )
 
   if (!storedToken) {
     return null
   }
 
-  const user = storedToken.usuarios
+  const user =
+    storedToken.usuarios
 
   if (!user || !user.ativo) {
     return null
@@ -171,36 +192,55 @@ export async function refreshSession(
     return null
   }
 
-  if (storedToken.expira_em <= new Date()) {
-    await revokeRefreshToken(storedToken.id)
+  if (
+    storedToken.expira_em <=
+    new Date()
+  ) {
+    await revokeRefreshToken(
+      storedToken.id,
+    )
 
     return null
   }
 
-  await revokeRefreshToken(storedToken.id)
+  await revokeRefreshToken(
+    storedToken.id,
+  )
 
   const newRefreshToken =
     generateRefreshToken()
 
   const newRefreshTokenHash =
-    hashRefreshToken(newRefreshToken)
+    hashRefreshToken(
+      newRefreshToken,
+    )
 
   await createRefreshToken({
     usuarioId: user.id,
-    tokenHash: newRefreshTokenHash,
-    expiraEm: calculateRefreshExpiration(),
+
+    tokenHash:
+      newRefreshTokenHash,
+
+    expiraEm:
+      calculateRefreshExpiration(),
+
     ipOrigem: context.ip,
-    userAgent: context.userAgent,
+
+    userAgent:
+      context.userAgent,
   })
 
-  const accessToken = generateAccessToken(
-    user.id,
-    user.perfil,
-  )
+  const accessToken =
+    generateAccessToken(
+      user.id,
+      user.perfil,
+    )
 
   return {
     accessToken,
-    refreshToken: newRefreshToken,
+
+    refreshToken:
+      newRefreshToken,
 
     user: {
       id: user.id.toString(),
@@ -215,32 +255,45 @@ export async function logout(
   refreshToken: string,
 ) {
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
-  await revokeRefreshTokenByHash(tokenHash)
+  await revokeRefreshTokenByHash(
+    tokenHash,
+  )
 }
 
 export async function createPasswordResetCode(
   email: string,
 ) {
   const normalizedEmail =
-    email.trim().toLowerCase()
+    email
+      .trim()
+      .toLowerCase()
 
   const user =
-    await findUserByEmail(normalizedEmail)
+    await findUserByEmail(
+      normalizedEmail,
+    )
 
   if (!user || !user.ativo) {
     return null
   }
 
-  const code = generatePasswordResetCode()
+  const code =
+    generatePasswordResetCode()
 
   const codeHash =
-    await hashPasswordResetCode(code)
+    await hashPasswordResetCode(
+      code,
+    )
 
   await replacePasswordResetCode({
     usuarioId: user.id,
+
     codigoHash: codeHash,
+
     expiraEm:
       calculatePasswordResetCodeExpiration(),
   })
@@ -261,10 +314,14 @@ export async function verifyPasswordResetCode(
   code: string,
 ): Promise<VerifyPasswordResetCodeResult> {
   const normalizedEmail =
-    email.trim().toLowerCase()
+    email
+      .trim()
+      .toLowerCase()
 
   const user =
-    await findUserByEmail(normalizedEmail)
+    await findUserByEmail(
+      normalizedEmail,
+    )
 
   if (!user || !user.ativo) {
     return {
@@ -287,18 +344,24 @@ export async function verifyPasswordResetCode(
     resetCode.tentativas >=
     PASSWORD_RESET_MAX_ATTEMPTS
   ) {
-    if (!resetCode.invalidado_em) {
+    if (
+      !resetCode.invalidado_em
+    ) {
       await invalidatePasswordResetCode(
         resetCode.id,
       )
     }
 
     return {
-      status: 'attempts_exceeded',
+      status:
+        'attempts_exceeded',
     }
   }
 
-  if (resetCode.expira_em <= new Date()) {
+  if (
+    resetCode.expira_em <=
+    new Date()
+  ) {
     await invalidatePasswordResetCode(
       resetCode.id,
     )
@@ -308,7 +371,9 @@ export async function verifyPasswordResetCode(
     }
   }
 
-  if (resetCode.verificado_em) {
+  if (
+    resetCode.verificado_em
+  ) {
     return {
       status: 'invalid',
     }
@@ -337,7 +402,8 @@ export async function verifyPasswordResetCode(
       )
 
       return {
-        status: 'attempts_exceeded',
+        status:
+          'attempts_exceeded',
       }
     }
 
@@ -350,11 +416,15 @@ export async function verifyPasswordResetCode(
     generatePasswordResetToken()
 
   const resetTokenHash =
-    hashPasswordResetToken(resetToken)
+    hashPasswordResetToken(
+      resetToken,
+    )
 
   await markPasswordResetCodeAsVerified({
     id: resetCode.id,
+
     resetTokenHash,
+
     resetTokenExpiraEm:
       calculatePasswordResetTokenExpiration(),
   })
@@ -369,7 +439,9 @@ export async function validatePasswordResetToken(
   resetToken: string,
 ) {
   const resetTokenHash =
-    hashPasswordResetToken(resetToken)
+    hashPasswordResetToken(
+      resetToken,
+    )
 
   const reset =
     await findPasswordResetByTokenHash(
@@ -390,7 +462,8 @@ export async function validatePasswordResetToken(
   }
 
   if (
-    reset.reset_token_expira_em <= new Date()
+    reset.reset_token_expira_em <=
+    new Date()
   ) {
     await invalidatePasswordResetCode(
       reset.id,
@@ -409,5 +482,38 @@ export async function validatePasswordResetToken(
 export async function consumePasswordResetToken(
   resetId: bigint,
 ) {
-  await markPasswordResetCodeAsUsed(resetId)
+  await markPasswordResetCodeAsUsed(
+    resetId,
+  )
+}
+
+export async function resetPassword(
+  input: ResetPasswordInput,
+) {
+  const reset =
+    await validatePasswordResetToken(
+      input.resetToken,
+    )
+
+  if (!reset) {
+    return false
+  }
+
+  const passwordHash =
+    await hashPassword(
+      input.novaSenha,
+    )
+
+  const completed =
+    await completePasswordReset({
+      resetId: reset.id,
+
+      usuarioId:
+        reset.usuario_id,
+
+      senhaHash:
+        passwordHash,
+    })
+
+  return completed
 }

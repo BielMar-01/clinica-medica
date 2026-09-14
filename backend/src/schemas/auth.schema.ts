@@ -36,6 +36,41 @@ export const verifyResetCodeSchema = z.object({
     ),
 })
 
+export const resetPasswordSchema = z
+  .object({
+    resetToken: z
+      .string()
+      .trim()
+      .min(
+        1,
+        'Token de redefinição é obrigatório',
+      ),
+
+    novaSenha: z
+      .string()
+      .min(
+        8,
+        'A nova senha deve possuir pelo menos 8 caracteres',
+      ),
+
+    confirmarSenha: z
+      .string()
+      .min(
+        1,
+        'A confirmação da senha é obrigatória',
+      ),
+  })
+  .refine(
+    (data) =>
+      data.novaSenha ===
+      data.confirmarSenha,
+    {
+      message:
+        'As senhas não coincidem',
+      path: ['confirmarSenha'],
+    },
+  )
+
 export type LoginInput = z.infer<
   typeof loginSchema
 >
@@ -46,4 +81,8 @@ export type ForgotPasswordInput = z.infer<
 
 export type VerifyResetCodeInput = z.infer<
   typeof verifyResetCodeSchema
+>
+
+export type ResetPasswordInput = z.infer<
+  typeof resetPasswordSchema
 >

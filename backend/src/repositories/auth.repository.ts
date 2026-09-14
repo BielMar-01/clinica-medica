@@ -1,6 +1,8 @@
 import { prisma } from '../database/prisma.js'
 
-export async function findUserByEmail(email: string) {
+export async function findUserByEmail(
+  email: string,
+) {
   return prisma.usuarios.findUnique({
     where: {
       email,
@@ -8,7 +10,9 @@ export async function findUserByEmail(email: string) {
   })
 }
 
-export async function findUserById(id: bigint) {
+export async function findUserById(
+  id: bigint,
+) {
   return prisma.usuarios.findUnique({
     where: {
       id,
@@ -138,28 +142,30 @@ export async function replacePasswordResetCode(
 ) {
   const now = new Date()
 
-  return prisma.$transaction(async (tx) => {
-    await tx.codigos_redefinicao_senha.updateMany({
-      where: {
-        usuario_id: input.usuarioId,
-        usado_em: null,
-        invalidado_em: null,
-      },
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.codigos_redefinicao_senha.updateMany({
+        where: {
+          usuario_id: input.usuarioId,
+          usado_em: null,
+          invalidado_em: null,
+        },
 
-      data: {
-        invalidado_em: now,
-      },
-    })
+        data: {
+          invalidado_em: now,
+        },
+      })
 
-    return tx.codigos_redefinicao_senha.create({
-      data: {
-        usuario_id: input.usuarioId,
-        codigo_hash: input.codigoHash,
-        expira_em: input.expiraEm,
-        tentativas: 0,
-      },
-    })
-  })
+      return tx.codigos_redefinicao_senha.create({
+        data: {
+          usuario_id: input.usuarioId,
+          codigo_hash: input.codigoHash,
+          expira_em: input.expiraEm,
+          tentativas: 0,
+        },
+      })
+    },
+  )
 }
 
 export async function findLatestActivePasswordResetCode(
@@ -210,7 +216,10 @@ export async function markPasswordResetCodeAsVerified(
 
     data: {
       verificado_em: new Date(),
-      reset_token_hash: input.resetTokenHash,
+
+      reset_token_hash:
+        input.resetTokenHash,
+
       reset_token_expira_em:
         input.resetTokenExpiraEm,
     },
@@ -222,7 +231,8 @@ export async function findPasswordResetByTokenHash(
 ) {
   return prisma.codigos_redefinicao_senha.findUnique({
     where: {
-      reset_token_hash: resetTokenHash,
+      reset_token_hash:
+        resetTokenHash,
     },
 
     include: {
@@ -257,4 +267,73 @@ export async function invalidatePasswordResetCode(
       invalidado_em: new Date(),
     },
   })
+}
+
+type CompletePasswordResetInput = {
+  resetId: bigint
+  usuarioId: bigint
+  senhaHash: string
+}
+
+export async function completePasswordReset(
+  input: CompletePasswordResetInput,
+) {
+  const now = new Date()
+
+  return prisma.$transaction(
+    async (tx) => {
+      const consumed =
+        await tx.codigos_redefinicao_senha.updateMany({
+          where: {
+            id: input.resetId,
+
+            usado_em: null,
+
+            invalidado_em: null,
+
+            verificado_em: {
+              not: null,
+            },
+
+            reset_token_expira_em: {
+              gt: now,
+            },
+          },
+
+          data: {
+            usado_em: now,
+          },
+        })
+
+      if (consumed.count !== 1) {
+        return false
+      }
+
+      await tx.usuarios.update({
+        where: {
+          id: input.usuarioId,
+        },
+
+        data: {
+          senha: input.senhaHash,
+          atualizado_em: now,
+        },
+      })
+
+      await tx.refresh_tokens.updateMany({
+        where: {
+          usuario_id:
+            input.usuarioId,
+
+          revogado_em: null,
+        },
+
+        data: {
+          revogado_em: now,
+        },
+      })
+
+      return true
+    },
+  )
 }
