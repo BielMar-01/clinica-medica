@@ -41,6 +41,10 @@ import {
 } from '../pages/SpecialtiesPage'
 
 import {
+  UsersPage,
+} from '../pages/UsersPage'
+
+import {
   VerifyResetCodePage,
 } from '../pages/VerifyResetCodePage'
 
@@ -103,6 +107,13 @@ export function AppRoutes() {
             path="/especialidades"
             element={
               <SpecialtiesPage />
+            }
+          />
+
+          <Route
+            path="/usuarios"
+            element={
+              <UsersPage />
             }
           />
 

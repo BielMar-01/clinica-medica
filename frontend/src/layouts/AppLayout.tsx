@@ -28,6 +28,9 @@ export function AppLayout() {
     )
   }
 
+  const isAdmin =
+    user?.perfil === 'ADMIN'
+
   return (
     <div
       className="app-layout"
@@ -41,11 +44,15 @@ export function AppLayout() {
           className="sidebar-brand"
           data-testid="sidebar-brand"
         >
-          <strong data-testid="sidebar-brand-title">
+          <strong
+            data-testid="sidebar-brand-title"
+          >
             Clínica Médica
           </strong>
 
-          <span data-testid="sidebar-brand-description">
+          <span
+            data-testid="sidebar-brand-description"
+          >
             Gestão clínica
           </span>
         </div>
@@ -74,6 +81,15 @@ export function AppLayout() {
           >
             Especialidades
           </NavLink>
+
+          {isAdmin && (
+            <NavLink
+              to="/usuarios"
+              data-testid="nav-users-link"
+            >
+              Usuários
+            </NavLink>
+          )}
         </nav>
 
         <div
@@ -81,11 +97,15 @@ export function AppLayout() {
           data-testid="sidebar-user-section"
         >
           <div>
-            <strong data-testid="sidebar-user-name">
+            <strong
+              data-testid="sidebar-user-name"
+            >
               {user?.nome}
             </strong>
 
-            <span data-testid="sidebar-user-role">
+            <span
+              data-testid="sidebar-user-role"
+            >
               {user?.perfil}
             </span>
           </div>
@@ -93,7 +113,9 @@ export function AppLayout() {
           <button
             data-testid="logout-button"
             type="button"
-            onClick={handleLogout}
+            onClick={
+              handleLogout
+            }
           >
             Sair
           </button>
