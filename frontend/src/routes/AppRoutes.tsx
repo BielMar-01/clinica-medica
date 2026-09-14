@@ -33,6 +33,10 @@ import {
 } from '../pages/PatientsPage'
 
 import {
+  ResetPasswordPage,
+} from '../pages/ResetPasswordPage'
+
+import {
   SpecialtiesPage,
 } from '../pages/SpecialtiesPage'
 
@@ -61,6 +65,13 @@ export function AppRoutes() {
         path="/verify-reset-code"
         element={
           <VerifyResetCodePage />
+        }
+      />
+
+      <Route
+        path="/reset-password"
+        element={
+          <ResetPasswordPage />
         }
       />
 

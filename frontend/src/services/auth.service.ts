@@ -25,6 +25,17 @@ type VerifyResetCodeResponse = {
   resetToken: string
 }
 
+type ResetPasswordRequest = {
+  resetToken: string
+  novaSenha: string
+  confirmarSenha: string
+}
+
+type ResetPasswordResponse = {
+  status: 'ok'
+  message: string
+}
+
 export async function loginRequest(
   credentials: LoginRequest,
 ) {
@@ -103,6 +114,24 @@ export async function verifyResetCodeRequest(
 ) {
   return apiRequest<VerifyResetCodeResponse>(
     '/api/auth/verify-reset-code',
+    {
+      method: 'POST',
+
+      body: JSON.stringify(
+        input,
+      ),
+
+      retryOnUnauthorized:
+        false,
+    },
+  )
+}
+
+export async function resetPasswordRequest(
+  input: ResetPasswordRequest,
+) {
+  return apiRequest<ResetPasswordResponse>(
+    '/api/auth/reset-password',
     {
       method: 'POST',
 
