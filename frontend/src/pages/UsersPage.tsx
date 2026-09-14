@@ -17,7 +17,9 @@ import {
 
 import {
   createUserRequest,
+  getUserRequest,
   listUsersRequest,
+  updateUserRequest,
 } from '../services/user.service'
 
 import type {
@@ -37,7 +39,8 @@ const initialFilters:
   }
 
 function formatRole(
-  role: UserSummary['perfil'],
+  role:
+    UserSummary['perfil'],
 ) {
   switch (role) {
     case 'ADMIN':
@@ -70,6 +73,25 @@ function formatLastLogin(
   ).format(
     new Date(value),
   )
+}
+
+function userToFormData(
+  systemUser: Awaited<
+    ReturnType<
+      typeof getUserRequest
+    >
+  >['data'],
+): UserFormData {
+  return {
+    nome:
+      systemUser.nome,
+
+    email:
+      systemUser.email,
+
+    perfil:
+      systemUser.perfil,
+  }
 }
 
 export function UsersPage() {
@@ -149,6 +171,46 @@ export function UsersPage() {
     useState(0)
 
   const [
+    formTitle,
+    setFormTitle,
+  ] =
+    useState(
+      'Novo usuário',
+    )
+
+  const [
+    formDescription,
+    setFormDescription,
+  ] =
+    useState(
+      'Cadastre um novo usuário para acessar o sistema. Um código de primeiro acesso será enviado por e-mail.',
+    )
+
+  const [
+    formSubmitLabel,
+    setFormSubmitLabel,
+  ] =
+    useState(
+      'Cadastrar usuário',
+    )
+
+  const [
+    formData,
+    setFormData,
+  ] =
+    useState<
+      UserFormData | null
+    >(null)
+
+  const [
+    editingUserId,
+    setEditingUserId,
+  ] =
+    useState<
+      string | null
+    >(null)
+
+  const [
     submitting,
     setSubmitting,
   ] =
@@ -209,7 +271,7 @@ export function UsersPage() {
       }
     }
 
-    loadUsers()
+    void loadUsers()
 
     return () => {
       cancelled = true
@@ -286,6 +348,26 @@ export function UsersPage() {
     setError('')
     setSuccessMessage('')
 
+    setEditingUserId(
+      null,
+    )
+
+    setFormData(
+      null,
+    )
+
+    setFormTitle(
+      'Novo usuário',
+    )
+
+    setFormDescription(
+      'Cadastre um novo usuário para acessar o sistema. Um código de primeiro acesso será enviado por e-mail.',
+    )
+
+    setFormSubmitLabel(
+      'Cadastrar usuário',
+    )
+
     setFormKey(
       (current) =>
         current + 1,
@@ -294,55 +376,98 @@ export function UsersPage() {
     setFormOpen(true)
   }
 
-  async function handleCreateUser(
-    data: UserFormData,
+  async function openEditForm(
+    systemUser:
+      UserSummary,
+  ) {
+    try {
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await getUserRequest(
+          systemUser.id,
+        )
+
+      setEditingUserId(
+        systemUser.id,
+      )
+
+      setFormData(
+        userToFormData(
+          response.data,
+        ),
+      )
+
+      setFormTitle(
+        'Editar usuário',
+      )
+
+      setFormDescription(
+        'Altere os dados de acesso e o perfil do usuário.',
+      )
+
+      setFormSubmitLabel(
+        'Salvar alterações',
+      )
+
+      setFormKey(
+        (current) =>
+          current + 1,
+      )
+
+      setFormOpen(true)
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Erro ao carregar usuário',
+      )
+    }
+  }
+
+  async function handleSubmitUser(
+    data:
+      UserFormData,
   ) {
     try {
       setSubmitting(true)
       setError('')
       setSuccessMessage('')
 
-      const response =
-        await createUserRequest(
-          data,
+      if (
+        editingUserId
+      ) {
+        const response =
+          await updateUserRequest(
+            editingUserId,
+            data,
+          )
+
+        setSuccessMessage(
+          response.message ??
+            'Usuário atualizado com sucesso.',
         )
+      } else {
+        const response =
+          await createUserRequest(
+            data,
+          )
+
+        setSuccessMessage(
+          response.message ??
+            'Usuário cadastrado com sucesso.',
+        )
+      }
 
       setFormOpen(false)
 
-      setSuccessMessage(
-        response.message ??
-          'Usuário cadastrado com sucesso.',
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
       )
-
-      const firstPageFilters = {
-        ...appliedFilters,
-        page: 1,
-      }
-
-      setFilters(
-        (current) => ({
-          ...current,
-          page: 1,
-        }),
-      )
-
-      if (
-        appliedFilters.page ===
-        1
-      ) {
-        setLoading(true)
-
-        setReloadKey(
-          (current) =>
-            current + 1,
-        )
-      } else {
-        setLoading(true)
-
-        setAppliedFilters(
-          firstPageFilters,
-        )
-      }
     } finally {
       setSubmitting(false)
     }
@@ -633,6 +758,10 @@ export function UsersPage() {
                 <th>
                   Status
                 </th>
+
+                <th>
+                  Ações
+                </th>
               </tr>
             </thead>
 
@@ -640,7 +769,7 @@ export function UsersPage() {
               {loading && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     data-testid="users-loading"
                   >
                     Carregando usuários...
@@ -653,7 +782,7 @@ export function UsersPage() {
                   0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       data-testid="users-empty-message"
                     >
                       Nenhum usuário encontrado.
@@ -717,6 +846,26 @@ export function UsersPage() {
                             ? 'Ativo'
                             : 'Inativo'}
                         </span>
+                      </td>
+
+                      <td>
+                        <div
+                          className="table-actions"
+                          data-testid={`users-actions-${systemUser.id}`}
+                        >
+                          <button
+                            type="button"
+                            className="small-button"
+                            onClick={() =>
+                              void openEditForm(
+                                systemUser,
+                              )
+                            }
+                            data-testid={`users-edit-button-${systemUser.id}`}
+                          >
+                            Editar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ),
@@ -796,8 +945,20 @@ export function UsersPage() {
         open={
           formOpen
         }
+        title={
+          formTitle
+        }
+        description={
+          formDescription
+        }
+        initialData={
+          formData
+        }
         submitting={
           submitting
+        }
+        submitLabel={
+          formSubmitLabel
         }
         onClose={() =>
           setFormOpen(
@@ -805,7 +966,7 @@ export function UsersPage() {
           )
         }
         onSubmit={
-          handleCreateUser
+          handleSubmitUser
         }
       />
     </section>

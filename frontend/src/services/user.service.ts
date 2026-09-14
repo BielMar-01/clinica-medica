@@ -104,3 +104,22 @@ export async function createUserRequest(
     },
   )
 }
+
+export async function updateUserRequest(
+  userId: string,
+  data: UserFormData,
+) {
+  return apiRequest<
+    UserResponse
+  >(
+    `/api/usuarios/${userId}`,
+    {
+      method: 'PUT',
+
+      body:
+        JSON.stringify(
+          data,
+        ),
+    },
+  )
+}

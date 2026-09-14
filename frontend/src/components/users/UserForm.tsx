@@ -9,7 +9,15 @@ import type {
 
 type UserFormProps = {
   open: boolean
+  title: string
+  description: string
+
+  initialData?:
+    UserFormData | null
+
   submitting: boolean
+
+  submitLabel: string
 
   onClose: () => void
 
@@ -18,7 +26,7 @@ type UserFormProps = {
   ) => Promise<void>
 }
 
-const initialData:
+const emptyForm:
   UserFormData = {
     nome: '',
     email: '',
@@ -28,7 +36,11 @@ const initialData:
 
 export function UserForm({
   open,
+  title,
+  description,
+  initialData,
   submitting,
+  submitLabel,
   onClose,
   onSubmit,
 }: UserFormProps) {
@@ -37,7 +49,8 @@ export function UserForm({
     setFormData,
   ] =
     useState<UserFormData>(
-      initialData,
+      initialData ??
+        emptyForm,
     )
 
   const [
@@ -56,6 +69,12 @@ export function UserForm({
     }
 
     onClose()
+  }
+
+  function clearError() {
+    if (error) {
+      setError('')
+    }
   }
 
   async function handleSubmit(
@@ -107,7 +126,7 @@ export function UserForm({
       setError(
         error instanceof Error
           ? error.message
-          : 'Erro ao cadastrar usuário',
+          : 'Erro ao salvar usuário',
       )
     }
   }
@@ -143,17 +162,13 @@ export function UserForm({
               id="user-form-title"
               data-testid="user-form-title"
             >
-              Novo usuário
+              {title}
             </h2>
 
             <p
               data-testid="user-form-description"
             >
-              Cadastre um novo usuário
-              para acessar o sistema.
-              Um código de primeiro
-              acesso será enviado por
-              e-mail.
+              {description}
             </p>
           </div>
 
@@ -201,6 +216,7 @@ export function UserForm({
             >
               <span>
                 Nome{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -229,9 +245,7 @@ export function UserForm({
                     }),
                   )
 
-                  if (error) {
-                    setError('')
-                  }
+                  clearError()
                 }}
                 maxLength={150}
                 placeholder="Nome completo"
@@ -249,6 +263,7 @@ export function UserForm({
             >
               <span>
                 E-mail{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -277,9 +292,7 @@ export function UserForm({
                     }),
                   )
 
-                  if (error) {
-                    setError('')
-                  }
+                  clearError()
                 }}
                 maxLength={180}
                 placeholder="usuario@clinica.com"
@@ -297,6 +310,7 @@ export function UserForm({
             >
               <span>
                 Perfil{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -310,7 +324,7 @@ export function UserForm({
                 }
                 onChange={(
                   event,
-                ) =>
+                ) => {
                   setFormData(
                     (
                       current,
@@ -324,7 +338,9 @@ export function UserForm({
                           UserFormData['perfil'],
                     }),
                   )
-                }
+
+                  clearError()
+                }}
                 disabled={
                   submitting
                 }
@@ -387,8 +403,8 @@ export function UserForm({
               data-testid="user-form-submit-button"
             >
               {submitting
-                ? 'Cadastrando...'
-                : 'Cadastrar usuário'}
+                ? 'Salvando...'
+                : submitLabel}
             </button>
           </div>
         </form>
