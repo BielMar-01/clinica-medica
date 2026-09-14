@@ -42,6 +42,11 @@ export const openApiDocument = {
         'Cadastro e gerenciamento das especialidades médicas.',
     },
     {
+      name: 'Usuários',
+      description:
+        'Gerenciamento de usuários internos. Operações restritas ao perfil ADMIN.',
+    },
+    {
       name: 'Internal',
       description:
         'Rotas temporárias utilizadas durante o desenvolvimento.',
@@ -612,6 +617,261 @@ export const openApiDocument = {
         },
       },
 
+      ForgotPasswordRequest: {
+        type: 'object',
+
+        required: [
+          'email',
+        ],
+
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'usuario@clinica.local',
+          },
+        },
+      },
+
+      VerifyResetCodeRequest: {
+        type: 'object',
+
+        required: [
+          'email',
+          'codigo',
+        ],
+
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'usuario@clinica.local',
+          },
+
+          codigo: {
+            type: 'string',
+            pattern: '^\\d{6}$',
+            example: '123456',
+          },
+        },
+      },
+
+      VerifyResetCodeResponse: {
+        type: 'object',
+
+        properties: {
+          status: {
+            type: 'string',
+            example: 'ok',
+          },
+
+          resetToken: {
+            type: 'string',
+            description:
+              'Token temporário utilizado exclusivamente na etapa de redefinição da senha.',
+            example: 'token-temporario-de-redefinicao',
+          },
+        },
+      },
+
+      ResetPasswordRequest: {
+        type: 'object',
+
+        required: [
+          'resetToken',
+          'novaSenha',
+          'confirmarSenha',
+        ],
+
+        properties: {
+          resetToken: {
+            type: 'string',
+            example: 'token-temporario-de-redefinicao',
+          },
+
+          novaSenha: {
+            type: 'string',
+            format: 'password',
+            minLength: 8,
+            example: 'NovaSenha@123',
+          },
+
+          confirmarSenha: {
+            type: 'string',
+            format: 'password',
+            minLength: 8,
+            example: 'NovaSenha@123',
+          },
+        },
+      },
+
+      MessageResponse: {
+        type: 'object',
+
+        properties: {
+          status: {
+            type: 'string',
+            example: 'ok',
+          },
+
+          message: {
+            type: 'string',
+            example: 'Operação realizada com sucesso.',
+          },
+        },
+      },
+
+      UserSummary: {
+        type: 'object',
+
+        properties: {
+          id: {
+            type: 'string',
+            example: '2',
+          },
+
+          nome: {
+            type: 'string',
+            example: 'Maria da Silva',
+          },
+
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'maria@clinica.local',
+          },
+
+          perfil: {
+            type: 'string',
+            enum: [
+              'ADMIN',
+              'RECEPCIONISTA',
+              'MEDICO',
+            ],
+            example: 'RECEPCIONISTA',
+          },
+
+          ativo: {
+            type: 'boolean',
+            example: true,
+          },
+
+          ultimoLoginEm: {
+            type: 'string',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+
+      SystemUser: {
+        allOf: [
+          {
+            $ref: '#/components/schemas/UserSummary',
+          },
+          {
+            type: 'object',
+
+            properties: {
+              criadoEm: {
+                type: 'string',
+                format: 'date-time',
+              },
+
+              criadoPor: {
+                type: 'string',
+                nullable: true,
+                example: '1',
+              },
+
+              atualizadoEm: {
+                type: 'string',
+                format: 'date-time',
+                nullable: true,
+              },
+
+              atualizadoPor: {
+                type: 'string',
+                nullable: true,
+                example: '1',
+              },
+            },
+          },
+        ],
+      },
+
+      UserFormRequest: {
+        type: 'object',
+
+        required: [
+          'nome',
+          'email',
+          'perfil',
+        ],
+
+        properties: {
+          nome: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 150,
+            example: 'Maria da Silva',
+          },
+
+          email: {
+            type: 'string',
+            format: 'email',
+            maxLength: 180,
+            example: 'maria@clinica.local',
+          },
+
+          perfil: {
+            type: 'string',
+            enum: [
+              'ADMIN',
+              'RECEPCIONISTA',
+              'MEDICO',
+            ],
+            example: 'RECEPCIONISTA',
+          },
+        },
+      },
+
+      UserStatusRequest: {
+        type: 'object',
+
+        required: [
+          'ativo',
+        ],
+
+        properties: {
+          ativo: {
+            type: 'boolean',
+            example: false,
+          },
+        },
+      },
+
+      UserResponse: {
+        type: 'object',
+
+        properties: {
+          status: {
+            type: 'string',
+            example: 'ok',
+          },
+
+          message: {
+            type: 'string',
+            nullable: true,
+            example: 'Usuário atualizado com sucesso',
+          },
+
+          data: {
+            $ref: '#/components/schemas/SystemUser',
+          },
+        },
+      },
+
       Pagination: {
         type: 'object',
 
@@ -882,6 +1142,168 @@ export const openApiDocument = {
 
           '401': {
             description: 'Token ausente ou inválido',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/auth/forgot-password': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Solicitar recuperação de senha',
+        description:
+          'Gera um código temporário de recuperação e, quando o e-mail pertence a um usuário válido, envia o código por e-mail. A resposta não revela se a conta existe.',
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ForgotPasswordRequest',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description:
+              'Solicitação processada. A resposta é genérica para evitar enumeração de usuários.',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/MessageResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'E-mail inválido',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/auth/verify-reset-code': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Validar código de recuperação',
+        description:
+          'Valida o código de 6 dígitos e retorna um resetToken temporário quando a validação é concluída com sucesso.',
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/VerifyResetCodeRequest',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description: 'Código validado com sucesso',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/VerifyResetCodeResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description:
+              'Dados inválidos, código incorreto ou código expirado',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '429': {
+            description:
+              'Quantidade máxima de tentativas do código excedida',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/auth/reset-password': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Redefinir senha',
+        description:
+          'Altera a senha utilizando um resetToken válido e de uso único. Após a redefinição, as sessões anteriores do usuário são revogadas.',
+
+        requestBody: {
+          required: true,
+
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ResetPasswordRequest',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description: 'Senha redefinida com sucesso',
+
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/MessageResponse',
+                },
+
+                example: {
+                  status: 'ok',
+                  message: 'Senha redefinida com sucesso.',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description:
+              'Dados inválidos, senhas divergentes ou resetToken inválido/expirado',
 
             content: {
               'application/json': {
@@ -1481,6 +1903,604 @@ export const openApiDocument = {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/usuarios': {
+      get: {
+        tags: ['Usuários'],
+        summary: 'Listar usuários',
+        description:
+          'Lista usuários internos com paginação e filtros opcionais. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            schema: {
+              type: 'integer',
+              minimum: 1,
+              default: 1,
+            },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 10,
+            },
+          },
+          {
+            name: 'nome',
+            in: 'query',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'email',
+            in: 'query',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'perfil',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: [
+                'ADMIN',
+                'RECEPCIONISTA',
+                'MEDICO',
+              ],
+            },
+          },
+          {
+            name: 'ativo',
+            in: 'query',
+            schema: {
+              type: 'boolean',
+            },
+          },
+        ],
+
+        responses: {
+          '200': {
+            description: 'Usuários encontrados',
+
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+
+                  properties: {
+                    status: {
+                      type: 'string',
+                      example: 'ok',
+                    },
+
+                    data: {
+                      type: 'array',
+
+                      items: {
+                        $ref: '#/components/schemas/UserSummary',
+                      },
+                    },
+
+                    pagination: {
+                      $ref: '#/components/schemas/Pagination',
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'Filtros inválidos',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+
+      post: {
+        tags: ['Usuários'],
+        summary: 'Cadastrar usuário',
+        description:
+          'Cadastra um usuário interno e inicia o fluxo de primeiro acesso por e-mail. O administrador não define a senha definitiva. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UserFormRequest',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '201': {
+            description: 'Usuário cadastrado com sucesso',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'Dados do usuário inválidos',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description: 'E-mail já cadastrado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+                example: {
+                  status: 'error',
+                  message:
+                    'Já existe um usuário cadastrado com este e-mail',
+                  code: 'USER_EMAIL_ALREADY_EXISTS',
+                },
+              },
+            },
+          },
+
+          '502': {
+            description:
+              'Falha no envio do e-mail de primeiro acesso. O cadastro é desfeito.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+                example: {
+                  status: 'error',
+                  message:
+                    'Não foi possível enviar o e-mail de primeiro acesso. O usuário não foi cadastrado.',
+                  code: 'USER_INVITATION_EMAIL_FAILED',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/usuarios/{id}': {
+      get: {
+        tags: ['Usuários'],
+        summary: 'Buscar usuário por ID',
+        description: 'Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              pattern: '^\\d+$',
+              example: '2',
+            },
+          },
+        ],
+
+        responses: {
+          '200': {
+            description: 'Usuário encontrado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'ID inválido',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Usuário não encontrado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+                example: {
+                  status: 'error',
+                  message: 'Usuário não encontrado',
+                  code: 'USER_NOT_FOUND',
+                },
+              },
+            },
+          },
+        },
+      },
+
+      put: {
+        tags: ['Usuários'],
+        summary: 'Atualizar usuário',
+        description:
+          'Atualiza nome, e-mail e perfil. O administrador autenticado não pode remover o próprio perfil ADMIN. Permitido somente para ADMIN.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              pattern: '^\\d+$',
+              example: '2',
+            },
+          },
+        ],
+
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UserFormRequest',
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description: 'Usuário atualizado com sucesso',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'ID ou dados do usuário inválidos',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Usuário não encontrado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description:
+              'E-mail já cadastrado ou tentativa de remover o próprio perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+                examples: {
+                  emailExists: {
+                    value: {
+                      status: 'error',
+                      message:
+                        'Já existe um usuário cadastrado com este e-mail',
+                      code: 'USER_EMAIL_ALREADY_EXISTS',
+                    },
+                  },
+                  ownAdminRole: {
+                    value: {
+                      status: 'error',
+                      message:
+                        'Você não pode remover o perfil ADMIN da própria conta',
+                      code: 'CANNOT_CHANGE_OWN_ADMIN_ROLE',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/usuarios/{id}/status': {
+      patch: {
+        tags: ['Usuários'],
+        summary: 'Ativar ou inativar usuário',
+        description:
+          'Altera o status do usuário. Ao inativar uma conta, os Refresh Tokens ativos são revogados. O administrador não pode inativar a própria conta.',
+
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              pattern: '^\\d+$',
+              example: '2',
+            },
+          },
+        ],
+
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UserStatusRequest',
+              },
+              examples: {
+                inativar: {
+                  value: {
+                    ativo: false,
+                  },
+                },
+                ativar: {
+                  value: {
+                    ativo: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        responses: {
+          '200': {
+            description: 'Status do usuário atualizado com sucesso',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+
+          '400': {
+            description: 'ID ou status inválido',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '401': {
+            description: 'Usuário não autenticado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '403': {
+            description: 'Usuário sem perfil ADMIN',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '404': {
+            description: 'Usuário não encontrado',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+
+          '409': {
+            description:
+              'Operação incompatível com o estado atual do usuário',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+                examples: {
+                  ownUser: {
+                    value: {
+                      status: 'error',
+                      message:
+                        'Você não pode inativar a própria conta',
+                      code: 'CANNOT_DISABLE_OWN_USER',
+                    },
+                  },
+                  alreadyActive: {
+                    value: {
+                      status: 'error',
+                      message: 'Usuário já está ativo',
+                      code: 'USER_ALREADY_ACTIVE',
+                    },
+                  },
+                  alreadyInactive: {
+                    value: {
+                      status: 'error',
+                      message: 'Usuário já está inativo',
+                      code: 'USER_ALREADY_INACTIVE',
+                    },
+                  },
                 },
               },
             },
