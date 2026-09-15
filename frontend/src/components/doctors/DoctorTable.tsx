@@ -36,6 +36,16 @@ function getOtherSpecialties(
   )
 }
 
+function getSpecialtyName(
+  specialty:
+    DoctorSummary['especialidades'][number],
+) {
+  return specialty
+    .especialidade
+    ?.nome ??
+    '-'
+}
+
 export function DoctorTable({
   doctors,
   loading,
@@ -83,18 +93,28 @@ export function DoctorTable({
           >
             <tr>
               <th>Nome</th>
+
               <th>CRM</th>
+
               <th>
                 Especialidade principal
               </th>
+
               <th>
                 Outras especialidades
               </th>
+
               <th>
                 Duração
               </th>
-              <th>Status</th>
-              <th>Ações</th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Ações
+              </th>
             </tr>
           </thead>
 
@@ -113,6 +133,21 @@ export function DoctorTable({
                     doctor,
                   )
 
+                const otherSpecialtyNames =
+                  otherSpecialties
+                    .map(
+                      (
+                        specialty,
+                      ) =>
+                        getSpecialtyName(
+                          specialty,
+                        ),
+                    )
+                    .filter(
+                      (name) =>
+                        name !== '-',
+                    )
+
                 return (
                   <tr
                     key={doctor.id}
@@ -121,41 +156,43 @@ export function DoctorTable({
                     <td
                       data-testid={`doctors-name-${doctor.id}`}
                     >
-                      {doctor.nomeCompleto}
+                      {
+                        doctor.nomeCompleto
+                      }
                     </td>
 
                     <td
                       data-testid={`doctors-crm-${doctor.id}`}
                     >
-                      {doctor.crmNumero}
+                      {
+                        doctor.crmNumero
+                      }
+
                       {' / '}
-                      {doctor.crmUf}
+
+                      {
+                        doctor.crmUf
+                      }
                     </td>
 
                     <td
                       data-testid={`doctors-main-specialty-${doctor.id}`}
                     >
                       {mainSpecialty
-                        ?.especialidade
-                        .nome ??
-                        '-'}
+                        ? getSpecialtyName(
+                            mainSpecialty,
+                          )
+                        : '-'}
                     </td>
 
                     <td
                       data-testid={`doctors-other-specialties-${doctor.id}`}
                     >
-                      {otherSpecialties
+                      {otherSpecialtyNames
                         .length > 0
-                        ? otherSpecialties
-                            .map(
-                              (
-                                specialty,
-                              ) =>
-                                specialty
-                                  .especialidade
-                                  .nome,
-                            )
-                            .join(', ')
+                        ? otherSpecialtyNames.join(
+                            ', ',
+                          )
                         : '-'}
                     </td>
 

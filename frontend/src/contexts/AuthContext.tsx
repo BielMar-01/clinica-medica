@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -48,6 +49,11 @@ export function AuthProvider({
       string | null
     >(null)
 
+  const accessTokenRef =
+    useRef<string | null>(
+      null,
+    )
+
   const [
     isLoading,
     setIsLoading,
@@ -56,6 +62,9 @@ export function AuthProvider({
 
   const clearSession =
     useCallback(() => {
+      accessTokenRef.current =
+        null
+
       setAccessToken(null)
 
       setUser(null)
@@ -67,6 +76,9 @@ export function AuthProvider({
         newAccessToken: string,
         newUser: AuthUser,
       ) => {
+        accessTokenRef.current =
+          newAccessToken
+
         setAccessToken(
           newAccessToken,
         )
@@ -142,23 +154,25 @@ export function AuthProvider({
   useEffect(() => {
     configureApiAuth({
       getAccessToken:
-        () => accessToken,
+        () =>
+          accessTokenRef.current,
 
       setSession,
 
       clearSession,
     })
   }, [
-    accessToken,
     setSession,
     clearSession,
   ])
 
   useEffect(() => {
     async function restoreSession() {
-      await refreshSession()
-
-      setIsLoading(false)
+      try {
+        await refreshSession()
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     void restoreSession()
