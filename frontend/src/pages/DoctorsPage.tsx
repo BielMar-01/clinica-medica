@@ -4,6 +4,10 @@ import {
 } from 'react'
 
 import {
+  DoctorFilters,
+} from '../components/doctors/DoctorFilters'
+
+import {
   DoctorTable,
 } from '../components/doctors/DoctorTable'
 
@@ -15,13 +19,21 @@ import {
   listDoctorsRequest,
 } from '../services/doctor.service'
 
+import {
+  listSpecialtiesRequest,
+} from '../services/specialty.service'
+
 import type {
-  DoctorFilters,
+  DoctorFilters as DoctorFiltersType,
   DoctorSummary,
 } from '../types/doctor'
 
+import type {
+  SpecialtySummary,
+} from '../types/specialty'
+
 const initialFilters:
-  DoctorFilters = {
+  DoctorFiltersType = {
     page: 1,
     limit: 10,
     nome: '',
@@ -46,6 +58,34 @@ export function DoctorsPage() {
     >([])
 
   const [
+    specialties,
+    setSpecialties,
+  ] =
+    useState<
+      SpecialtySummary[]
+    >([])
+
+  const [
+    filters,
+    setFilters,
+  ] =
+    useState<
+      DoctorFiltersType
+    >(
+      initialFilters,
+    )
+
+  const [
+    appliedFilters,
+    setAppliedFilters,
+  ] =
+    useState<
+      DoctorFiltersType
+    >(
+      initialFilters,
+    )
+
+  const [
     pagination,
     setPagination,
   ] =
@@ -59,6 +99,12 @@ export function DoctorsPage() {
   const [
     loading,
     setLoading,
+  ] =
+    useState(true)
+
+  const [
+    specialtiesLoading,
+    setSpecialtiesLoading,
   ] =
     useState(true)
 
@@ -79,11 +125,64 @@ export function DoctorsPage() {
     let cancelled =
       false
 
+    async function loadSpecialties() {
+      try {
+        const response =
+          await listSpecialtiesRequest({
+            page: 1,
+            limit: 100,
+            nome: '',
+            ativo: 'true',
+          })
+
+        if (cancelled) {
+          return
+        }
+
+        setSpecialties(
+          response.data,
+        )
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Erro ao carregar especialidades',
+        )
+      } finally {
+        if (!cancelled) {
+          setSpecialtiesLoading(
+            false,
+          )
+        }
+      }
+    }
+
+    void loadSpecialties()
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    isAuthenticated,
+  ])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return
+    }
+
+    let cancelled =
+      false
+
     async function loadDoctors() {
       try {
         const response =
           await listDoctorsRequest(
-            initialFilters,
+            appliedFilters,
           )
 
         if (cancelled) {
@@ -123,13 +222,74 @@ export function DoctorsPage() {
     }
   }, [
     isAuthenticated,
+    appliedFilters,
   ])
+
+  function handleSearch() {
+    const nextFilters = {
+      ...filters,
+      page: 1,
+    }
+
+    setError('')
+    setLoading(true)
+
+    setFilters(
+      nextFilters,
+    )
+
+    setAppliedFilters(
+      nextFilters,
+    )
+  }
+
+  function handleClear() {
+    setError('')
+    setLoading(true)
+
+    setFilters(
+      initialFilters,
+    )
+
+    setAppliedFilters(
+      initialFilters,
+    )
+  }
+
+  function changePage(
+    page: number,
+  ) {
+    if (
+      page < 1 ||
+      page >
+        pagination.totalPages
+    ) {
+      return
+    }
+
+    setError('')
+    setLoading(true)
+
+    setFilters(
+      (current) => ({
+        ...current,
+        page,
+      }),
+    )
+
+    setAppliedFilters(
+      (current) => ({
+        ...current,
+        page,
+      }),
+    )
+  }
 
   function handleEdit(
     doctor: DoctorSummary,
   ) {
     setError(
-      `A edição do médico "${doctor.nomeCompleto}" será implementada na próxima etapa.`,
+      `A edição do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
     )
   }
 
@@ -137,7 +297,7 @@ export function DoctorsPage() {
     doctor: DoctorSummary,
   ) {
     setError(
-      `A alteração de status do médico "${doctor.nomeCompleto}" será implementada na próxima etapa.`,
+      `A alteração de status do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
     )
   }
 
@@ -170,7 +330,7 @@ export function DoctorsPage() {
             className="primary-button"
             disabled
             data-testid="doctors-new-button"
-            title="Cadastro será disponibilizado na próxima etapa"
+            title="Cadastro será disponibilizado em uma próxima etapa"
           >
             Novo médico
           </button>
@@ -186,6 +346,27 @@ export function DoctorsPage() {
           {error}
         </div>
       )}
+
+      <DoctorFilters
+        filters={
+          filters
+        }
+        specialties={
+          specialties
+        }
+        specialtiesLoading={
+          specialtiesLoading
+        }
+        onChange={
+          setFilters
+        }
+        onSearch={
+          handleSearch
+        }
+        onClear={
+          handleClear
+        }
+      />
 
       <DoctorTable
         doctors={
@@ -212,6 +393,23 @@ export function DoctorsPage() {
             className="pagination"
             data-testid="doctors-pagination"
           >
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={
+                pagination.page <= 1
+              }
+              onClick={() =>
+                changePage(
+                  pagination.page -
+                    1,
+                )
+              }
+              data-testid="doctors-previous-page-button"
+            >
+              Anterior
+            </button>
+
             <span
               data-testid="doctors-pagination-info"
             >
@@ -229,6 +427,24 @@ export function DoctorsPage() {
               }{' '}
               médico(s)
             </span>
+
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={
+                pagination.page >=
+                pagination.totalPages
+              }
+              onClick={() =>
+                changePage(
+                  pagination.page +
+                    1,
+                )
+              }
+              data-testid="doctors-next-page-button"
+            >
+              Próxima
+            </button>
           </div>
         )}
     </section>
