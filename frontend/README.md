@@ -45,15 +45,15 @@ O frontend nunca acessa diretamente o banco de dados.
 Fluxo:
 
 Usuário
-  ↓
+↓
 React
-  ↓
+↓
 Camada HTTP
-  ↓
+↓
 API Node / Express
-  ↓
+↓
 Prisma
-  ↓
+↓
 PostgreSQL
 
 Todas as regras de negócio relevantes devem ser validadas pelo backend.
@@ -75,7 +75,8 @@ frontend/
 │   ├── components/
 │   │   ├── patients/
 │   │   ├── specialties/
-│   │   └── users/
+│   │   ├── users/
+│   │   └── doctors/
 │   ├── contexts/
 │   ├── hooks/
 │   ├── layouts/
@@ -174,11 +175,11 @@ src/services/api.ts
 Fluxo:
 
 Página / Componente
-       ↓
+↓
 Service do módulo
-       ↓
+↓
 api.ts
-       ↓
+↓
 Backend
 
 Services atuais incluem:
@@ -187,6 +188,7 @@ auth.service.ts
 patient.service.ts
 specialty.service.ts
 user.service.ts
+doctor.service.ts
 
 Essa estrutura facilita:
 
@@ -209,15 +211,15 @@ evolução dos módulos.
 Fluxo principal:
 
 Tela de Login
-     ↓
+↓
 POST /api/auth/login
-     ↓
+↓
 API valida usuário
-     ↓
+↓
 Sessão criada
-     ↓
+↓
 Frontend recebe autenticação
-     ↓
+↓
 Usuário entra no sistema
 
 A aplicação possui fluxo de autenticação integrado ao backend.
@@ -227,13 +229,13 @@ A aplicação possui fluxo de autenticação integrado ao backend.
 A camada HTTP trata a expiração do Access Token.
 
 Request
-   ↓
+↓
 401
-   ↓
+↓
 Refresh
-   ↓
+↓
 Novo Access Token
-   ↓
+↓
 Repete Request
 
 Isso evita redirecionar imediatamente o usuário para login quando ainda existe uma sessão válida.
@@ -261,23 +263,23 @@ Rotas:
 Fluxo:
 
 /login
-  ↓
+↓
 /forgot-password
-  ↓
+↓
 Usuário informa e-mail
-  ↓
+↓
 API envia código
-  ↓
+↓
 /verify-reset-code
-  ↓
+↓
 Usuário informa código
-  ↓
+↓
 API retorna resetToken
-  ↓
+↓
 /reset-password
-  ↓
+↓
 Usuário define nova senha
-  ↓
+↓
 /login
 
 Esqueci minha senha
@@ -338,6 +340,7 @@ Rotas internas atualmente implementadas:
 /pacientes
 /especialidades
 /usuarios
+/medicos
 
 Rotas públicas relacionadas à autenticação:
 
@@ -348,7 +351,6 @@ Rotas públicas relacionadas à autenticação:
 
 Rotas futuras incluem:
 
-/medicos
 /agendamentos
 /consultas
 
@@ -367,19 +369,22 @@ MEDICO
 Visão atual:
 
 ADMIN
- ├── Dashboard
- ├── Pacientes
- ├── Especialidades
- └── Usuários
+├── Dashboard
+├── Pacientes
+├── Especialidades
+├── Usuários
+└── Médicos
 
 RECEPCIONISTA
- ├── Dashboard
- └── Pacientes
+├── Dashboard
+├── Pacientes
+└── Consulta de Médicos
 
 MEDICO
- ├── Dashboard
- ├── Consulta de pacientes
- └── Consulta de especialidades
+├── Dashboard
+├── Consulta de pacientes
+├── Consulta de especialidades
+└── Consulta de Médicos
 
 As funcionalidades futuras ampliarão as permissões de RECEPCIONISTA e MEDICO conforme os módulos forem implementados.
 
@@ -461,13 +466,13 @@ Ao executar nova busca, a paginação retorna para a primeira página.
 Fluxo:
 
 Página
-  ↓
+↓
 API
-  ↓
+↓
 Resultados + paginação
-  ↓
+↓
 Tabela
-  ↓
+↓
 Anterior / Próxima
 
 🔐 Permissões de pacientes
@@ -556,13 +561,13 @@ O formulário trata erros retornados pela API, inclusive duplicidade de nome.
 Fluxo:
 
 Usuário seleciona ação
-        ↓
+↓
 Confirmação
-        ↓
-PATCH /api/especialidades/:id/status
-        ↓
+↓
+PATCH /api/especialidades//status
+↓
 Backend atualiza
-        ↓
+↓
 Frontend recarrega a listagem
 
 🔐 Permissões de especialidades
@@ -677,13 +682,13 @@ Antes da alteração, é exibida confirmação.
 Fluxo:
 
 ADMIN seleciona Ativar/Inativar
-        ↓
+↓
 Confirmação
-        ↓
-PATCH /api/usuarios/:id/status
-        ↓
+↓
+PATCH /api/usuarios//status
+↓
 Backend valida regra
-        ↓
+↓
 Frontend atualiza listagem
 
 A própria conta autenticada não pode ser inativada pela interface.
@@ -695,15 +700,15 @@ A regra também é validada pelo backend.
 Fluxo conceitual:
 
 ADMIN cadastra usuário
-        ↓
+↓
 Backend cria usuário
-        ↓
+↓
 Backend envia código por e-mail
-        ↓
+↓
 Usuário segue recuperação de senha
-        ↓
+↓
 Usuário define a própria senha
-        ↓
+↓
 Login normal
 
 Um usuário com perfil MEDICO não cria automaticamente um registro de médico.
@@ -713,10 +718,123 @@ O vínculo com o domínio de Médicos será tratado no módulo correspondente.
 🌐 APIs utilizadas pelo módulo de usuários
 
 GET    /api/usuarios
-GET    /api/usuarios/:id
+GET    /api/usuarios/
 POST   /api/usuarios
-PUT    /api/usuarios/:id
-PATCH  /api/usuarios/:id/status
+PUT    /api/usuarios/
+PATCH  /api/usuarios//status
+
+👨‍⚕️ Módulo de Médicos
+
+Rota:
+
+/medicos
+
+O módulo de Médicos representa o cadastro profissional do médico dentro da clínica.
+
+O registro de médico é separado do usuário utilizado para autenticação. Criar um usuário com perfil MEDICO não cria automaticamente um registro profissional de médico.
+
+📋 Funcionalidades
+
+O módulo contempla:
+
+listagem;
+pesquisa;
+filtros;
+paginação;
+cadastro;
+edição;
+ativação;
+inativação;
+vínculo com usuário MEDICO;
+vínculo com especialidades;
+especialidade principal;
+duração de consulta;
+mensagens de sucesso;
+mensagens de erro;
+loading;
+estado vazio;
+responsividade;
+controle visual de permissões.
+
+🔎 Filtros de médicos
+
+Filtros disponíveis:
+
+Nome
+CRM
+UF do CRM
+Especialidade
+Status
+
+Ao executar uma nova pesquisa, a paginação retorna para a primeira página.
+
+➕ Cadastro de médico
+
+O cadastro é realizado através de modal.
+
+Campos:
+
+Usuário
+Nome completo
+CRM
+UF do CRM
+Telefone
+E-mail
+Duração da consulta
+Especialidades
+Especialidade principal
+
+O médico deve estar vinculado a um usuário com perfil MEDICO. O CRM é identificado pela combinação CRM + UF, cuja unicidade é validada pela API.
+
+🩺 Especialidades do médico
+
+Um médico pode possuir uma ou mais especialidades e deve existir exatamente uma especialidade principal. Ao selecionar a primeira especialidade no formulário, ela pode ser definida automaticamente como principal.
+
+⏱️ Duração da consulta
+
+Cada médico possui uma duração padrão de consulta, atualmente validada entre 5 e 480 minutos. Essa informação será utilizada futuramente pelo módulo de Agenda Médica.
+
+✏️ Edição de médico
+
+A edição recupera o cadastro completo através da API. Podem ser atualizados os dados profissionais e os vínculos permitidos pelas regras de negócio. O usuário associado ao médico não é alterado pelo formulário de edição atual.
+
+🔄 Ativação e inativação
+
+O perfil ADMIN pode ativar ou inativar médicos. A inativação não equivale à exclusão do registro.
+
+🔐 Permissões de médicos
+
+Consulta:
+
+ADMIN
+RECEPCIONISTA
+MEDICO
+
+Gerenciamento:
+
+ADMIN
+
+A autorização definitiva continua sendo responsabilidade do backend.
+
+🌐 APIs utilizadas pelo módulo de médicos
+
+GET    /api/medicos
+GET    /api/medicos/
+POST   /api/medicos
+PUT    /api/medicos/
+PATCH  /api/medicos//status
+
+📱 Responsividade
+
+Em telas menores, filtros e formulário são reorganizados em uma coluna, ações se adaptam à largura disponível, o modal respeita a viewport e a tabela utiliza rolagem horizontal.
+
+🧪 Testabilidade
+
+O módulo utiliza data-testid estáveis nos principais elementos de filtros, tabela, formulário, paginação, estados e ações.
+
+⚠️ Pendência conhecida
+
+A seleção de usuários disponíveis para criação de médico ainda precisa ser aprimorada. Antes do encerramento definitivo do módulo, a listagem deverá excluir usuários que já estejam vinculados a outro registro de médico, inclusive quando o médico vinculado estiver inativo. A restrição de unicidade também permanece protegida pelo backend.
 
 ⏳ Estados da interface
 
@@ -763,11 +881,11 @@ Erro de comunicação com a API
 As telas devem considerar primeiro dispositivos menores.
 
 Smartphone
-   ↓
+↓
 Tablet
-   ↓
+↓
 Notebook
-   ↓
+↓
 Desktop
 
 Isso é importante para uso futuro da aplicação em diferentes dispositivos dentro da clínica.
@@ -860,15 +978,17 @@ npm run build
 Depois valide manualmente:
 
 Login
- ↓
+↓
 Dashboard
- ↓
+↓
 Pacientes
- ↓
+↓
 Especialidades
- ↓
+↓
 Usuários
- ↓
+↓
+Médicos
+↓
 Logout
 
 Também validar:
@@ -894,15 +1014,15 @@ https://clinica-medica-galera-do-ti.vercel.app
 Fluxo:
 
 Código
-  ↓
+↓
 Git
-  ↓
+↓
 GitHub
-  ↓
+↓
 Vercel
-  ↓
+↓
 Build
-  ↓
+↓
 Deploy
 
 ⚙️ Configuração na Vercel
@@ -954,9 +1074,9 @@ npm run dev
 Fluxo:
 
 localhost:5173
-      ↓
+↓
 localhost:3000
-      ↓
+↓
 Supabase PostgreSQL
 
 📌 Comandos úteis
@@ -1320,6 +1440,92 @@ users-pagination-info
 users-previous-page-button
 users-next-page-button
 
+👨‍⚕️ Seletores de Médicos
+
+Página
+
+doctors-page
+doctors-page-header
+doctors-page-title
+doctors-page-description
+doctors-new-button
+
+Mensagens e estados
+
+doctors-loading
+doctors-empty-message
+doctors-success-message
+doctors-error-message
+doctors-edit-loading
+doctors-status-loading
+
+Filtros
+
+doctors-filters
+doctors-filters-fields
+doctors-name-filter
+doctors-crm-filter
+doctors-crm-uf-filter
+doctors-specialty-filter
+doctors-status-filter
+doctors-filter-actions
+doctors-search-button
+doctors-clear-filters-button
+
+Tabela
+
+doctors-table-card
+doctors-table-wrapper
+doctors-table
+doctors-table-header
+doctors-table-body
+
+Registros dinâmicos
+
+doctors-row-{id}
+doctors-name-{id}
+doctors-crm-{id}
+doctors-main-specialty-{id}
+doctors-other-specialties-{id}
+doctors-duration-{id}
+doctors-status-{id}
+doctors-actions-{id}
+doctors-edit-button-{id}
+doctors-status-button-{id}
+
+Paginação
+
+doctors-pagination
+doctors-pagination-info
+doctors-previous-page-button
+doctors-next-page-button
+
+Formulário
+
+doctor-form-backdrop
+doctor-form-modal
+doctor-form-header
+doctor-form-title
+doctor-form-description
+doctor-form
+doctor-user-select
+doctor-users-empty-message
+doctor-name-input
+doctor-crm-input
+doctor-crm-uf-input
+doctor-phone-input
+doctor-email-input
+doctor-duration-input
+doctor-specialties-section
+doctor-specialties-empty
+doctor-specialty-row-{id}
+doctor-specialty-{id}
+doctor-main-specialty-{id}
+doctor-form-error-message
+doctor-form-close-button
+doctor-form-cancel-button
+doctor-form-submit-button
+
 🔄 Elementos dinâmicos
 
 Para registros específicos, utilizar o ID da entidade.
@@ -1420,56 +1626,56 @@ quando existir data-testid específico.
 🧪 Exemplo com Cypress
 
 cy.get(
-  '[data-testid="login-email-input"]',
+'[data-testid="login-email-input"]',
 ).type('admin@clinica.local')
 
 cy.get(
-  '[data-testid="login-password-input"]',
+'[data-testid="login-password-input"]',
 ).type('senha')
 
 cy.get(
-  '[data-testid="login-submit-button"]',
+'[data-testid="login-submit-button"]',
 ).click()
 
 cy.get(
-  '[data-testid="dashboard-page"]',
+'[data-testid="dashboard-page"]',
 ).should('be.visible')
 
 🧪 Exemplo com Playwright
 
 await page
-  .getByTestId('login-email-input')
-  .fill('admin@clinica.local')
+.getByTestId('login-email-input')
+.fill('admin@clinica.local')
 
 await page
-  .getByTestId('login-password-input')
-  .fill('senha')
+.getByTestId('login-password-input')
+.fill('senha')
 
 await page
-  .getByTestId('login-submit-button')
-  .click()
+.getByTestId('login-submit-button')
+.click()
 
 await expect(
-  page.getByTestId('dashboard-page'),
+page.getByTestId('dashboard-page'),
 ).toBeVisible()
 
 Usuários:
 
 await page
-  .getByTestId('nav-users-link')
-  .click()
+.getByTestId('nav-users-link')
+.click()
 
 await expect(
-  page.getByTestId('users-page'),
+page.getByTestId('users-page'),
 ).toBeVisible()
 
 await page
-  .getByTestId('users-name-filter')
-  .fill('QA')
+.getByTestId('users-name-filter')
+.fill('QA')
 
 await page
-  .getByTestId('users-search-button')
-  .click()
+.getByTestId('users-search-button')
+.click()
 
 📌 Regra para novos módulos
 
@@ -1533,37 +1739,37 @@ evidências.
 Fluxo planejado:
 
 Autenticação
-     ↓
+↓
 Recuperação de senha
-     ↓
+↓
 Pacientes
-     ↓
+↓
 Especialidades
-     ↓
+↓
 Usuários
-     ↓
+↓
 Médicos
-     ↓
+↓
 Médico x Especialidade
-     ↓
+↓
 Agenda Médica
-     ↓
+↓
 Bloqueios de Agenda
-     ↓
+↓
 Agendamentos
-     ↓
+↓
 Histórico de Agendamentos
-     ↓
+↓
 Consultas
-     ↓
+↓
 Prontuário
-     ↓
+↓
 Alergias
-     ↓
+↓
 Receitas
-     ↓
+↓
 Atestados
-     ↓
+↓
 Auditoria
 
 Atualmente:
@@ -1573,7 +1779,7 @@ Dashboard          ✅
 Pacientes          ✅
 Especialidades     ✅
 Usuários           ✅
-Médicos            ⏳
+Médicos            🔄
 Agenda Médica      ⏳
 Agendamentos       ⏳
 Consultas          ⏳
