@@ -82,6 +82,13 @@ export function AppLayout() {
             Especialidades
           </NavLink>
 
+          <NavLink
+            to="/medicos"
+            data-testid="nav-doctors-link"
+          >
+            Médicos
+          </NavLink>
+
           {isAdmin && (
             <NavLink
               to="/usuarios"

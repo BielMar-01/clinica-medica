@@ -17,6 +17,10 @@ import {
 } from '../pages/DashboardPage'
 
 import {
+  DoctorsPage,
+} from '../pages/DoctorsPage'
+
+import {
   ForgotPasswordPage,
 } from '../pages/ForgotPasswordPage'
 
@@ -107,6 +111,13 @@ export function AppRoutes() {
             path="/especialidades"
             element={
               <SpecialtiesPage />
+            }
+          />
+
+          <Route
+            path="/medicos"
+            element={
+              <DoctorsPage />
             }
           />
 
