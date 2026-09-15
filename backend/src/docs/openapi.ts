@@ -47,6 +47,11 @@ export const openApiDocument = {
         'Gerenciamento de usuários internos. Operações restritas ao perfil ADMIN.',
     },
     {
+      name: 'Médicos',
+      description:
+        'Cadastro e gerenciamento de médicos, vínculo com usuários MEDICO e especialidades.',
+    },
+    {
       name: 'Internal',
       description:
         'Rotas temporárias utilizadas durante o desenvolvimento.',
@@ -869,6 +874,102 @@ export const openApiDocument = {
           data: {
             $ref: '#/components/schemas/SystemUser',
           },
+        },
+      },
+
+      DoctorSpecialty: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '1' },
+          nome: { type: 'string', example: 'Cardiologia' },
+          descricao: { type: 'string', nullable: true, example: 'Especialidade médica.' },
+          ativo: { type: 'boolean', example: true },
+          principal: { type: 'boolean', example: true },
+        },
+      },
+
+      DoctorUser: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '10' },
+          nome: { type: 'string', example: 'João da Silva' },
+          email: { type: 'string', format: 'email', example: 'joao@clinica.local' },
+          perfil: { type: 'string', enum: ['MEDICO'], example: 'MEDICO' },
+          ativo: { type: 'boolean', example: true },
+        },
+      },
+
+      DoctorSummary: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '1' },
+          usuarioId: { type: 'string', example: '10' },
+          nomeCompleto: { type: 'string', example: 'Dr. João da Silva' },
+          crmNumero: { type: 'string', example: '123456' },
+          crmUf: { type: 'string', example: 'SP' },
+          telefone: { type: 'string', nullable: true, example: '11999999999' },
+          email: { type: 'string', format: 'email', nullable: true, example: 'medico@clinica.local' },
+          duracaoConsultaMinutos: { type: 'integer', example: 30 },
+          ativo: { type: 'boolean', example: true },
+          usuario: { $ref: '#/components/schemas/DoctorUser' },
+          especialidades: { type: 'array', items: { $ref: '#/components/schemas/DoctorSpecialty' } },
+        },
+      },
+
+      Doctor: {
+        allOf: [
+          { $ref: '#/components/schemas/DoctorSummary' },
+          {
+            type: 'object',
+            properties: {
+              criadoEm: { type: 'string', format: 'date-time' },
+              criadoPor: { type: 'string', nullable: true, example: '1' },
+              atualizadoEm: { type: 'string', format: 'date-time', nullable: true },
+              atualizadoPor: { type: 'string', nullable: true, example: '1' },
+            },
+          },
+        ],
+      },
+
+      DoctorRequest: {
+        type: 'object',
+        required: ['usuarioId', 'nomeCompleto', 'crmNumero', 'crmUf', 'duracaoConsultaMinutos', 'especialidades'],
+        properties: {
+          usuarioId: { type: 'string', pattern: '^\\d+$', example: '10' },
+          nomeCompleto: { type: 'string', minLength: 2, maxLength: 180, example: 'Dr. João da Silva' },
+          crmNumero: { type: 'string', maxLength: 20, example: '123456' },
+          crmUf: { type: 'string', minLength: 2, maxLength: 2, example: 'SP' },
+          telefone: { type: 'string', nullable: true, maxLength: 20, example: '11999999999' },
+          email: { type: 'string', format: 'email', nullable: true, maxLength: 180, example: 'medico@clinica.local' },
+          duracaoConsultaMinutos: { type: 'integer', minimum: 5, maximum: 480, example: 30 },
+          especialidades: {
+            type: 'array',
+            minItems: 1,
+            description: 'Deve existir exatamente uma especialidade com principal=true.',
+            items: {
+              type: 'object',
+              required: ['especialidadeId'],
+              properties: {
+                especialidadeId: { type: 'string', pattern: '^\\d+$', example: '1' },
+                principal: { type: 'boolean', default: false, example: true },
+              },
+            },
+          },
+        },
+      },
+
+      DoctorStatusRequest: {
+        type: 'object',
+        required: ['ativo'],
+        properties: { ativo: { type: 'boolean', example: false } },
+      },
+
+      DoctorResponse: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', example: 'ok' },
+          message: { type: 'string', nullable: true, example: 'Médico atualizado com sucesso.' },
+          data: { $ref: '#/components/schemas/Doctor' },
         },
       },
 
@@ -3207,6 +3308,100 @@ export const openApiDocument = {
               },
             },
           },
+        },
+      },
+    },
+
+    '/api/medicos': {
+      get: {
+        tags: ['Médicos'],
+        summary: 'Listar médicos',
+        description: 'Lista médicos com paginação e filtros. Permitido para ADMIN, RECEPCIONISTA e MEDICO.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 } },
+          { name: 'nome', in: 'query', schema: { type: 'string' } },
+          { name: 'crm', in: 'query', schema: { type: 'string' } },
+          { name: 'crmUf', in: 'query', schema: { type: 'string', minLength: 2, maxLength: 2, example: 'SP' } },
+          { name: 'especialidadeId', in: 'query', schema: { type: 'string', pattern: '^\\d+$' } },
+          { name: 'ativo', in: 'query', schema: { type: 'boolean' } },
+        ],
+        responses: {
+          '200': {
+            description: 'Médicos encontrados',
+            content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/DoctorSummary' } }, pagination: { $ref: '#/components/schemas/Pagination' } } } } },
+          },
+          '400': { description: 'Filtros inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '401': { description: 'Usuário não autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '403': { description: 'Usuário sem permissão', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+      post: {
+        tags: ['Médicos'],
+        summary: 'Cadastrar médico',
+        description: 'Cadastra o registro profissional de um usuário ativo com perfil MEDICO e associa suas especialidades. Permitido somente para ADMIN.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorRequest' } } } },
+        responses: {
+          '201': { description: 'Médico cadastrado com sucesso', content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorResponse' } } } },
+          '400': { description: 'Dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '401': { description: 'Usuário não autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '403': { description: 'Usuário sem perfil ADMIN', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '404': { description: 'Usuário ou especialidade não encontrada', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '409': { description: 'CRM duplicado, usuário já vinculado, usuário inválido/inativo ou especialidade inativa', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+
+    '/api/medicos/{id}': {
+      get: {
+        tags: ['Médicos'],
+        summary: 'Buscar médico por ID',
+        description: 'Permitido para ADMIN, RECEPCIONISTA e MEDICO.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', pattern: '^\\d+$', example: '1' } }],
+        responses: {
+          '200': { description: 'Médico encontrado', content: { 'application/json': { schema: { type: 'object', properties: { data: { $ref: '#/components/schemas/Doctor' } } } } } },
+          '400': { description: 'ID inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '401': { description: 'Usuário não autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '403': { description: 'Usuário sem permissão', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '404': { description: 'Médico não encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+      put: {
+        tags: ['Médicos'],
+        summary: 'Atualizar médico',
+        description: 'Atualiza os dados profissionais e substitui os vínculos de especialidades. Permitido somente para ADMIN.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', pattern: '^\\d+$', example: '1' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorRequest' } } } },
+        responses: {
+          '200': { description: 'Médico atualizado com sucesso', content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorResponse' } } } },
+          '400': { description: 'ID ou dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '401': { description: 'Usuário não autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '403': { description: 'Usuário sem perfil ADMIN', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '404': { description: 'Médico, usuário ou especialidade não encontrada', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '409': { description: 'Conflito de CRM, usuário ou especialidade', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+
+    '/api/medicos/{id}/status': {
+      patch: {
+        tags: ['Médicos'],
+        summary: 'Ativar ou inativar médico',
+        description: 'Altera somente o status profissional do médico. Não altera automaticamente o status do usuário vinculado. Permitido somente para ADMIN.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', pattern: '^\\d+$', example: '1' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorStatusRequest' }, examples: { inativar: { value: { ativo: false } }, ativar: { value: { ativo: true } } } } } },
+        responses: {
+          '200': { description: 'Status do médico atualizado com sucesso', content: { 'application/json': { schema: { $ref: '#/components/schemas/DoctorResponse' } } } },
+          '400': { description: 'ID ou status inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '401': { description: 'Usuário não autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '403': { description: 'Usuário sem perfil ADMIN', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '404': { description: 'Médico não encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '409': { description: 'Médico já possui o status solicitado', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },
