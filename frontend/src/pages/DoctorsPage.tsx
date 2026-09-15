@@ -21,7 +21,9 @@ import {
 
 import {
   createDoctorRequest,
+  getDoctorRequest,
   listDoctorsRequest,
+  updateDoctorRequest,
 } from '../services/doctor.service'
 
 import {
@@ -33,6 +35,7 @@ import {
 } from '../services/user.service'
 
 import type {
+  Doctor,
   DoctorFilters as DoctorFiltersType,
   DoctorFormData,
   DoctorSummary,
@@ -56,6 +59,49 @@ const initialFilters:
     especialidadeId: '',
     ativo: '',
   }
+
+type FormMode =
+  | 'create'
+  | 'edit'
+
+function doctorToFormData(
+  doctor: Doctor,
+): DoctorFormData {
+  return {
+    usuarioId:
+      doctor.usuarioId,
+
+    nomeCompleto:
+      doctor.nomeCompleto,
+
+    crmNumero:
+      doctor.crmNumero,
+
+    crmUf:
+      doctor.crmUf,
+
+    telefone:
+      doctor.telefone,
+
+    email:
+      doctor.email,
+
+    duracaoConsultaMinutos:
+      doctor
+        .duracaoConsultaMinutos,
+
+    especialidades:
+      doctor.especialidades.map(
+        (specialty) => ({
+          especialidadeId:
+            specialty.id,
+
+          principal:
+            specialty.principal,
+        }),
+      ),
+  }
+}
 
 export function DoctorsPage() {
   const {
@@ -141,6 +187,30 @@ export function DoctorsPage() {
     setFormOpen,
   ] =
     useState(false)
+
+  const [
+    formMode,
+    setFormMode,
+  ] =
+    useState<FormMode>(
+      'create',
+    )
+
+  const [
+    formInitialData,
+    setFormInitialData,
+  ] =
+    useState<
+      DoctorFormData | null
+    >(null)
+
+  const [
+    editingDoctorId,
+    setEditingDoctorId,
+  ] =
+    useState<
+      string | null
+    >(null)
 
   const [
     formKey,
@@ -301,6 +371,8 @@ export function DoctorsPage() {
       setDoctorUsers(
         response.data,
       )
+
+      return response.data
     } catch (error) {
       setError(
         error instanceof Error
@@ -384,6 +456,18 @@ export function DoctorsPage() {
 
       await loadDoctorUsers()
 
+      setFormMode(
+        'create',
+      )
+
+      setFormInitialData(
+        null,
+      )
+
+      setEditingDoctorId(
+        null,
+      )
+
       setFormKey(
         (current) =>
           current + 1,
@@ -426,13 +510,192 @@ export function DoctorsPage() {
     }
   }
 
-  function handleEdit(
+  async function handleEdit(
     doctor: DoctorSummary,
   ) {
-    setSuccessMessage('')
+    try {
+      setError('')
+      setSuccessMessage('')
+      setUsersLoading(true)
 
-    setError(
-      `A edição do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
+      const [
+        doctorResponse,
+        usersResponse,
+      ] =
+        await Promise.all([
+          getDoctorRequest(
+            doctor.id,
+          ),
+
+          listUsersRequest({
+            page: 1,
+            limit: 100,
+            nome: '',
+            email: '',
+            perfil: 'MEDICO',
+            ativo: 'true',
+          }),
+        ])
+
+      const completeDoctor =
+        doctorResponse.data
+
+      const currentUser:
+        UserSummary = {
+          id:
+            completeDoctor
+              .usuario.id,
+
+          nome:
+            completeDoctor
+              .usuario.nome,
+
+          email:
+            completeDoctor
+              .usuario.email,
+
+          perfil:
+            completeDoctor
+              .usuario.perfil,
+
+          ativo:
+            completeDoctor
+              .usuario.ativo,
+
+          ultimoLoginEm:
+            null,
+        }
+
+      const availableUsers =
+        usersResponse.data.some(
+          (systemUser) =>
+            systemUser.id ===
+            currentUser.id,
+        )
+          ? usersResponse.data
+          : [
+              currentUser,
+              ...usersResponse.data,
+            ]
+
+      setDoctorUsers(
+        availableUsers,
+      )
+
+      setFormMode(
+        'edit',
+      )
+
+      setEditingDoctorId(
+        completeDoctor.id,
+      )
+
+      setFormInitialData(
+        doctorToFormData(
+          completeDoctor,
+        ),
+      )
+
+      setFormKey(
+        (current) =>
+          current + 1,
+      )
+
+      setFormOpen(true)
+    } catch (error) {
+      setFormOpen(false)
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Erro ao carregar médico para edição',
+      )
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  async function handleUpdateDoctor(
+    data: DoctorFormData,
+  ) {
+    if (!editingDoctorId) {
+      throw new Error(
+        'Médico não identificado para edição.',
+      )
+    }
+
+    try {
+      setSubmitting(true)
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await updateDoctorRequest(
+          editingDoctorId,
+          data,
+        )
+
+      setFormOpen(false)
+
+      setFormInitialData(
+        null,
+      )
+
+      setEditingDoctorId(
+        null,
+      )
+
+      setSuccessMessage(
+        response.message ??
+          'Médico atualizado com sucesso.',
+      )
+
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleFormSubmit(
+    data: DoctorFormData,
+  ) {
+    if (
+      formMode === 'edit'
+    ) {
+      await handleUpdateDoctor(
+        data,
+      )
+
+      return
+    }
+
+    await handleCreateDoctor(
+      data,
+    )
+  }
+
+  function handleCloseForm() {
+    if (submitting) {
+      return
+    }
+
+    setFormOpen(false)
+
+    setFormInitialData(
+      null,
+    )
+
+    setEditingDoctorId(
+      null,
+    )
+
+    setFormMode(
+      'create',
     )
   }
 
@@ -528,8 +791,10 @@ export function DoctorsPage() {
         canManage={
           canManage
         }
-        onEdit={
-          handleEdit
+        onEdit={(doctor) =>
+          void handleEdit(
+            doctor,
+          )
         }
         onToggleStatus={
           handleToggleStatus
@@ -599,6 +864,10 @@ export function DoctorsPage() {
       <DoctorForm
         key={formKey}
         open={formOpen}
+        mode={formMode}
+        initialData={
+          formInitialData
+        }
         users={doctorUsers}
         specialties={
           specialties
@@ -609,11 +878,11 @@ export function DoctorsPage() {
         submitting={
           submitting
         }
-        onClose={() =>
-          setFormOpen(false)
+        onClose={
+          handleCloseForm
         }
         onSubmit={
-          handleCreateDoctor
+          handleFormSubmit
         }
       />
     </section>

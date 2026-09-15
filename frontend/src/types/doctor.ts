@@ -10,10 +10,9 @@ export interface DoctorUser {
   ativo: boolean
 }
 
-export interface DoctorSpecialty {
-  especialidadeId: string
+export interface DoctorSpecialty
+  extends SpecialtySummary {
   principal: boolean
-  especialidade: SpecialtySummary
 }
 
 export interface DoctorSummary {
@@ -30,7 +29,8 @@ export interface DoctorSummary {
   especialidades: DoctorSpecialty[]
 }
 
-export interface Doctor extends DoctorSummary {
+export interface Doctor
+  extends DoctorSummary {
   criadoEm: string
   criadoPor: string | null
   atualizadoEm: string | null

@@ -15,17 +15,18 @@ import type {
   UserSummary,
 } from '../../types/user'
 
+type DoctorFormMode =
+  | 'create'
+  | 'edit'
+
 type DoctorFormProps = {
   open: boolean
-
+  mode: DoctorFormMode
+  initialData?: DoctorFormData | null
   users: UserSummary[]
-
   specialties: SpecialtySummary[]
-
   loadingUsers: boolean
-
   submitting: boolean
-
   onClose: () => void
 
   onSubmit: (
@@ -47,6 +48,8 @@ const emptyForm:
 
 export function DoctorForm({
   open,
+  mode,
+  initialData,
   users,
   specialties,
   loadingUsers,
@@ -59,18 +62,20 @@ export function DoctorForm({
     setFormData,
   ] =
     useState<DoctorFormData>(
-      emptyForm,
+      initialData ?? emptyForm,
     )
 
   const [
     error,
     setError,
-  ] =
-    useState('')
+  ] = useState('')
 
   if (!open) {
     return null
   }
+
+  const editing =
+    mode === 'edit'
 
   function clearError() {
     if (error) {
@@ -144,7 +149,6 @@ export function DoctorForm({
 
             especialidades: [
               ...current.especialidades,
-
               {
                 especialidadeId:
                   specialtyId,
@@ -380,7 +384,9 @@ export function DoctorForm({
       setError(
         error instanceof Error
           ? error.message
-          : 'Erro ao cadastrar médico',
+          : editing
+            ? 'Erro ao atualizar médico'
+            : 'Erro ao cadastrar médico',
       )
     }
   }
@@ -414,13 +420,17 @@ export function DoctorForm({
               id="doctor-form-title"
               data-testid="doctor-form-title"
             >
-              Novo médico
+              {editing
+                ? 'Editar médico'
+                : 'Novo médico'}
             </h2>
 
             <p
               data-testid="doctor-form-description"
             >
-              Vincule um usuário médico e informe os dados profissionais.
+              {editing
+                ? 'Atualize os dados profissionais do médico.'
+                : 'Vincule um usuário médico e informe os dados profissionais.'}
             </p>
           </div>
 
@@ -454,9 +464,7 @@ export function DoctorForm({
             são obrigatórios.
           </p>
 
-          <div
-            className="form-grid"
-          >
+          <div className="form-grid">
             <label
               className="full-field"
             >
@@ -481,7 +489,8 @@ export function DoctorForm({
                 }
                 disabled={
                   submitting ||
-                  loadingUsers
+                  loadingUsers ||
+                  editing
                 }
                 required
                 data-testid="doctor-user-select"
@@ -489,9 +498,7 @@ export function DoctorForm({
                 <option value="">
                   {loadingUsers
                     ? 'Carregando usuários...'
-                    : users.length === 0
-                      ? 'Nenhum usuário médico disponível'
-                      : 'Selecione o usuário'}
+                    : 'Selecione o usuário'}
                 </option>
 
                 {users.map(
@@ -517,7 +524,8 @@ export function DoctorForm({
               </select>
             </label>
 
-            {users.length === 0 &&
+            {!editing &&
+              users.length === 0 &&
               !loadingUsers && (
                 <div
                   className="form-error full-field"
@@ -543,8 +551,7 @@ export function DoctorForm({
               <input
                 type="text"
                 value={
-                  formData
-                    .nomeCompleto
+                  formData.nomeCompleto
                 }
                 onChange={(event) => {
                   setFormData(
@@ -814,9 +821,7 @@ export function DoctorForm({
                         data-testid={`doctor-specialty-${specialty.id}`}
                       />
 
-                      {
-                        specialty.nome
-                      }
+                      {specialty.nome}
                     </label>
 
                     <label>
@@ -872,7 +877,8 @@ export function DoctorForm({
               disabled={
                 submitting ||
                 loadingUsers ||
-                users.length === 0 ||
+                (!editing &&
+                  users.length === 0) ||
                 specialties.length ===
                   0
               }
@@ -880,7 +886,9 @@ export function DoctorForm({
             >
               {submitting
                 ? 'Salvando...'
-                : 'Cadastrar médico'}
+                : editing
+                  ? 'Salvar alterações'
+                  : 'Cadastrar médico'}
             </button>
           </div>
         </form>
