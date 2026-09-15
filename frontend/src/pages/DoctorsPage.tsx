@@ -184,6 +184,14 @@ export function DoctorsPage() {
     useState(false)
 
   const [
+    editLoadingId,
+    setEditLoadingId,
+  ] =
+    useState<
+      string | null
+    >(null)
+
+  const [
     formOpen,
     setFormOpen,
   ] =
@@ -254,6 +262,16 @@ export function DoctorsPage() {
   const canManage =
     user?.perfil === 'ADMIN'
 
+  const pageBusy =
+    loading ||
+    editLoadingId !== null ||
+    statusUpdatingId !== null
+
+  function clearMessages() {
+    setError('')
+    setSuccessMessage('')
+  }
+
   useEffect(() => {
     if (!isAuthenticated) {
       return
@@ -264,6 +282,10 @@ export function DoctorsPage() {
 
     async function loadSpecialties() {
       try {
+        setSpecialtiesLoading(
+          true,
+        )
+
         const response =
           await listSpecialtiesRequest({
             page: 1,
@@ -317,6 +339,8 @@ export function DoctorsPage() {
 
     async function loadDoctors() {
       try {
+        setLoading(true)
+
         const response =
           await listDoctorsRequest(
             appliedFilters,
@@ -333,8 +357,6 @@ export function DoctorsPage() {
         setPagination(
           response.pagination,
         )
-
-        setError('')
       } catch (error) {
         if (cancelled) {
           return
@@ -401,9 +423,7 @@ export function DoctorsPage() {
       page: 1,
     }
 
-    setError('')
-    setSuccessMessage('')
-    setLoading(true)
+    clearMessages()
 
     setFilters(
       nextFilters,
@@ -415,9 +435,7 @@ export function DoctorsPage() {
   }
 
   function handleClear() {
-    setError('')
-    setSuccessMessage('')
-    setLoading(true)
+    clearMessages()
 
     setFilters(
       initialFilters,
@@ -434,14 +452,13 @@ export function DoctorsPage() {
     if (
       page < 1 ||
       page >
-        pagination.totalPages
+        pagination.totalPages ||
+      pageBusy
     ) {
       return
     }
 
-    setError('')
-    setSuccessMessage('')
-    setLoading(true)
+    clearMessages()
 
     setFilters(
       (current) => ({
@@ -459,9 +476,15 @@ export function DoctorsPage() {
   }
 
   async function openCreateForm() {
+    if (
+      usersLoading ||
+      pageBusy
+    ) {
+      return
+    }
+
     try {
-      setError('')
-      setSuccessMessage('')
+      clearMessages()
 
       await loadDoctorUsers()
 
@@ -493,8 +516,8 @@ export function DoctorsPage() {
   ) {
     try {
       setSubmitting(true)
-      setError('')
-      setSuccessMessage('')
+
+      clearMessages()
 
       const response =
         await createDoctorRequest(
@@ -508,8 +531,6 @@ export function DoctorsPage() {
           'Médico cadastrado com sucesso.',
       )
 
-      setLoading(true)
-
       setReloadKey(
         (current) =>
           current + 1,
@@ -522,9 +543,20 @@ export function DoctorsPage() {
   async function handleEdit(
     doctor: DoctorSummary,
   ) {
+    if (
+      editLoadingId !== null ||
+      statusUpdatingId !== null
+    ) {
+      return
+    }
+
     try {
-      setError('')
-      setSuccessMessage('')
+      clearMessages()
+
+      setEditLoadingId(
+        doctor.id,
+      )
+
       setUsersLoading(true)
 
       const [
@@ -621,6 +653,7 @@ export function DoctorsPage() {
       )
     } finally {
       setUsersLoading(false)
+      setEditLoadingId(null)
     }
   }
 
@@ -635,8 +668,8 @@ export function DoctorsPage() {
 
     try {
       setSubmitting(true)
-      setError('')
-      setSuccessMessage('')
+
+      clearMessages()
 
       const response =
         await updateDoctorRequest(
@@ -658,8 +691,6 @@ export function DoctorsPage() {
         response.message ??
           'Médico atualizado com sucesso.',
       )
-
-      setLoading(true)
 
       setReloadKey(
         (current) =>
@@ -712,7 +743,8 @@ export function DoctorsPage() {
     doctor: DoctorSummary,
   ) {
     if (
-      statusUpdatingId !== null
+      statusUpdatingId !== null ||
+      editLoadingId !== null
     ) {
       return
     }
@@ -739,8 +771,7 @@ export function DoctorsPage() {
         doctor.id,
       )
 
-      setError('')
-      setSuccessMessage('')
+      clearMessages()
 
       const response =
         await updateDoctorStatusRequest(
@@ -756,8 +787,6 @@ export function DoctorsPage() {
               : 'Médico inativado com sucesso.'
           ),
       )
-
-      setLoading(true)
 
       setReloadKey(
         (current) =>
@@ -781,6 +810,9 @@ export function DoctorsPage() {
   return (
     <section
       className="page"
+      aria-busy={
+        pageBusy
+      }
       data-testid="doctors-page"
     >
       <header
@@ -805,12 +837,19 @@ export function DoctorsPage() {
           <button
             type="button"
             className="primary-button"
+            disabled={
+              usersLoading ||
+              pageBusy
+            }
             onClick={() =>
               void openCreateForm()
             }
             data-testid="doctors-new-button"
           >
-            Novo médico
+            {usersLoading &&
+            !formOpen
+              ? 'Carregando...'
+              : 'Novo médico'}
           </button>
         )}
       </header>
@@ -819,6 +858,7 @@ export function DoctorsPage() {
         <div
           className="content-card"
           role="status"
+          aria-live="polite"
           data-testid="doctors-success-message"
         >
           {successMessage}
@@ -829,9 +869,32 @@ export function DoctorsPage() {
         <div
           className="page-error"
           role="alert"
+          aria-live="assertive"
           data-testid="doctors-error-message"
         >
           {error}
+        </div>
+      )}
+
+      {editLoadingId && (
+        <div
+          className="content-card"
+          role="status"
+          aria-live="polite"
+          data-testid="doctors-edit-loading"
+        >
+          Carregando dados do médico...
+        </div>
+      )}
+
+      {statusUpdatingId && (
+        <div
+          className="content-card"
+          role="status"
+          aria-live="polite"
+          data-testid="doctors-status-loading"
+        >
+          Atualizando status do médico...
         </div>
       )}
 
@@ -883,7 +946,9 @@ export function DoctorsPage() {
               type="button"
               className="secondary-button"
               disabled={
-                pagination.page <= 1
+                pagination.page <=
+                  1 ||
+                pageBusy
               }
               onClick={() =>
                 changePage(
@@ -917,7 +982,8 @@ export function DoctorsPage() {
               className="secondary-button"
               disabled={
                 pagination.page >=
-                pagination.totalPages
+                  pagination.totalPages ||
+                pageBusy
               }
               onClick={() =>
                 changePage(
