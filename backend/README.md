@@ -37,29 +37,29 @@ Vercel
 A aplicação segue uma arquitetura baseada em responsabilidades:
 
 Frontend React
-      │
-      │ HTTPS
-      ▼
+│
+│ HTTPS
+▼
 Node.js / Express
-      │
-      ├── Rotas
-      ├── Middlewares
-      ├── Validações
-      ├── Controllers
-      ├── Services
-      ├── Repositories
-      ├── Autenticação
-      ├── Autorização
-      └── Regras de negócio
-      │
-      ▼
-    Prisma
-      │
-      ▼
- PostgreSQL
-      │
-      ▼
-   Supabase
+│
+├── Rotas
+├── Middlewares
+├── Validações
+├── Controllers
+├── Services
+├── Repositories
+├── Autenticação
+├── Autorização
+└── Regras de negócio
+│
+▼
+Prisma
+│
+▼
+PostgreSQL
+│
+▼
+Supabase
 
 O frontend não acessa diretamente o banco de dados.
 
@@ -101,23 +101,23 @@ backend/
 Uma requisição normalmente percorre:
 
 Request
-   ↓
+↓
 Route
-   ↓
+↓
 Middleware
-   ↓
+↓
 Validação
-   ↓
+↓
 Controller
-   ↓
+↓
 Service
-   ↓
+↓
 Repository
-   ↓
+↓
 Prisma
-   ↓
+↓
 PostgreSQL
-   ↓
+↓
 Response
 
 Essa separação ajuda a manter regras de negócio, acesso a dados e transporte HTTP desacoplados.
@@ -191,11 +191,11 @@ Em produção, o domínio/remetente utilizado pelo Resend deve ser devidamente c
 O banco utilizado é PostgreSQL hospedado no Supabase.
 
 Express
-   ↓
+↓
 Prisma
-   ↓
+↓
 PostgreSQL
-   ↓
+↓
 Supabase
 
 O projeto utiliza conexões separadas para runtime e operações administrativas.
@@ -207,11 +207,11 @@ Utilizada pela aplicação em execução.
 Em produção:
 
 Vercel
-   ↓
+↓
 Node.js
-   ↓
+↓
 Prisma
-   ↓
+↓
 Supabase
 
 Para ambiente serverless, a conexão deve seguir a configuração apropriada do Supabase.
@@ -306,13 +306,13 @@ A autenticação é gerenciada pela própria API.
 Fluxo principal:
 
 E-mail + senha
-      ↓
+↓
 POST /api/auth/login
-      ↓
+↓
 Validação
-      ↓
+↓
 bcrypt
-      ↓
+↓
 Access Token
 +
 Refresh Token
@@ -346,11 +346,11 @@ Senhas nunca devem ser armazenadas em texto puro.
 O sistema utiliza bcrypt para geração do hash.
 
 Senha
-  ↓
+↓
 bcrypt
-  ↓
+↓
 Hash
-  ↓
+↓
 Banco
 
 A senha informada durante login também é comparada através do bcrypt.
@@ -362,23 +362,23 @@ O sistema possui fluxo de recuperação de senha por código enviado por e-mail.
 Fluxo:
 
 Usuário informa e-mail
-        ↓
+↓
 POST /api/auth/forgot-password
-        ↓
+↓
 Código de 6 dígitos
-        ↓
+↓
 Hash do código no banco
-        ↓
+↓
 Envio pelo Resend
-        ↓
+↓
 POST /api/auth/verify-reset-code
-        ↓
+↓
 resetToken temporário
-        ↓
+↓
 POST /api/auth/reset-password
-        ↓
+↓
 Nova senha
-        ↓
+↓
 Sessões anteriores revogadas
 
 Regras atuais
@@ -478,10 +478,10 @@ inativação.
 Endpoints
 
 GET   /api/usuarios
-GET   /api/usuarios/:id
+GET   /api/usuarios/
 POST  /api/usuarios
-PUT   /api/usuarios/:id
-PATCH /api/usuarios/:id/status
+PUT   /api/usuarios/
+PATCH /api/usuarios//status
 
 Cadastro
 
@@ -506,15 +506,15 @@ MEDICO
 Ao criar um usuário:
 
 ADMIN cadastra usuário
-        ↓
+↓
 API gera senha interna aleatória
-        ↓
+↓
 Senha interna é armazenada com hash
-        ↓
+↓
 API gera código de redefinição
-        ↓
+↓
 Resend envia o código
-        ↓
+↓
 Usuário define a própria senha
 
 O administrador não recebe e não conhece a senha definitiva do novo usuário.
@@ -620,6 +620,152 @@ Consultas são permitidas aos perfis autorizados.
 
 Operações administrativas de escrita são restritas conforme RBAC.
 
+🩺 Médicos
+
+O módulo de médicos gerencia o cadastro profissional dos usuários com perfil MEDICO.
+
+O cadastro de autenticação e o cadastro profissional são entidades distintas:
+
+usuarios
+   ↓ 1:1
+medicos
+   ↓ N:N
+medicos_especialidades
+   ↓
+especialidades
+
+Um usuário deve ser criado primeiro pelo módulo de Usuários. O cadastro de um usuário com perfil MEDICO não cria automaticamente o registro profissional em medicos.
+
+Funcionalidades
+
+cadastro de médico;
+
+listagem;
+
+consulta por ID;
+
+atualização;
+
+ativação e inativação;
+
+paginação;
+
+filtro por nome;
+
+filtro por CRM;
+
+filtro por UF do CRM;
+
+filtro por especialidade;
+
+filtro por status;
+
+associação de múltiplas especialidades;
+
+definição de uma especialidade principal.
+
+Endpoints
+
+GET   /api/medicos
+GET   /api/medicos/:id
+POST  /api/medicos
+PUT   /api/medicos/:id
+PATCH /api/medicos/:id/status
+
+RBAC
+
+Consultas (GET) são permitidas para:
+
+ADMIN;
+
+RECEPCIONISTA;
+
+MEDICO.
+
+Cadastro, edição e alteração de status são restritos ao perfil:
+
+ADMIN.
+
+Regras de negócio
+
+Para cadastrar ou editar um médico:
+
+o usuário vinculado deve existir;
+
+o usuário deve estar ativo;
+
+o usuário deve possuir perfil MEDICO;
+
+um usuário não pode estar vinculado a mais de um médico;
+
+a combinação CRM + UF deve ser única;
+
+deve existir pelo menos uma especialidade;
+
+deve existir exatamente uma especialidade principal;
+
+uma mesma especialidade não pode ser informada duas vezes;
+
+novas associações somente podem utilizar especialidades existentes e ativas.
+
+A inativação do registro profissional não inativa automaticamente a conta em usuarios. Os dois status possuem responsabilidades diferentes.
+
+Exemplo de cadastro
+
+{
+  "usuarioId": "2",
+  "nomeCompleto": "Dr. João da Silva",
+  "crmNumero": "123456",
+  "crmUf": "SP",
+  "telefone": "11999999999",
+  "email": "medico@clinica.local",
+  "duracaoConsultaMinutos": 30,
+  "especialidades": [
+    {
+      "especialidadeId": "1",
+      "principal": true
+    }
+  ]
+}
+
+Filtros e paginação
+
+Exemplo:
+
+GET /api/medicos?page=1&limit=20&nome=João&crmUf=SP&especialidadeId=1&ativo=true
+
+Os filtros disponíveis são:
+
+nome;
+
+crm;
+
+crmUf;
+
+especialidadeId;
+
+ativo;
+
+page;
+
+limit.
+
+Arquitetura do módulo
+
+doctor.schema.ts
+      ↓
+doctor.controller.ts
+      ↓
+doctor.service.ts
+      ↓
+doctor.repository.ts
+      ↓
+Prisma
+      ↓
+PostgreSQL
+
+O schema valida o formato da entrada; o service concentra as regras de negócio; o repository concentra o acesso aos dados e utiliza transações nas operações que alteram médico e especialidades.
+
 📑 Paginação
 
 Listagens devem evitar retornar quantidades ilimitadas de registros.
@@ -629,6 +775,7 @@ Exemplos:
 GET /api/pacientes?page=1&limit=20
 GET /api/especialidades?page=1&limit=20
 GET /api/usuarios?page=1&limit=20
+GET /api/medicos?page=1&limit=20
 
 Filtros podem ser combinados conforme o contrato de cada rota.
 
@@ -699,8 +846,8 @@ https://clinica-medica-api.vercel.app/api/health
 Resposta esperada:
 
 {
-  "status": "ok",
-  "service": "clinica-medica-api"
+"status": "ok",
+"service": "clinica-medica-api"
 }
 
 🗄️ Database Health
@@ -708,9 +855,9 @@ Resposta esperada:
 A API também possui validação da comunicação com o banco de dados.
 
 API
- ↓
+↓
 Prisma
- ↓
+↓
 Supabase
 
 📖 Swagger
@@ -729,6 +876,7 @@ Authentication
 Pacientes
 Especialidades
 Usuários
+Médicos
 Internal
 
 O Swagger deve acompanhar a evolução das rotas.
@@ -812,6 +960,26 @@ ativação/inativação;
 
 permissões por perfil.
 
+Para alterações no módulo de médicos, validar também:
+
+cadastro com usuário MEDICO ativo;
+
+CRM + UF duplicado;
+
+vínculo de usuário já utilizado;
+
+especialidades existentes e ativas;
+
+exatamente uma especialidade principal;
+
+edição;
+
+ativação/inativação;
+
+filtros e paginação;
+
+permissões por perfil.
+
 🚀 Deploy
 
 O backend está hospedado na Vercel.
@@ -823,15 +991,15 @@ https://clinica-medica-api.vercel.app
 Fluxo:
 
 Código
-  ↓
+↓
 Git
-  ↓
+↓
 GitHub
-  ↓
+↓
 Vercel
-  ↓
+↓
 Build
-  ↓
+↓
 Deploy
 
 ⚙️ Variáveis na Vercel
@@ -909,7 +1077,7 @@ Dashboard          ✅
 Pacientes          ✅
 Especialidades     ✅
 Usuários           ✅
-Médicos            ⏳
+Médicos            ✅
 Agenda Médica      ⏳
 Agendamentos       ⏳
 Consultas          ⏳
@@ -918,7 +1086,7 @@ Receitas           ⏳
 Atestados          ⏳
 Auditoria          ⏳
 
-A próxima grande etapa de domínio é o módulo de Médicos.
+A próxima grande etapa de domínio é o módulo de Agenda Médica.
 
 📚 Documentação relacionada
 
