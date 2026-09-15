@@ -98,6 +98,7 @@ export function DoctorForm({
     setFormData(
       (current) => ({
         ...current,
+
         usuarioId: userId,
 
         nomeCompleto:
@@ -119,40 +120,86 @@ export function DoctorForm({
   ) {
     setFormData(
       (current) => {
-        if (!checked) {
+        if (checked) {
+          const alreadySelected =
+            current.especialidades.some(
+              (specialty) =>
+                specialty
+                  .especialidadeId ===
+                specialtyId,
+            )
+
+          if (alreadySelected) {
+            return current
+          }
+
+          const hasMainSpecialty =
+            current.especialidades.some(
+              (specialty) =>
+                specialty.principal,
+            )
+
+          return {
+            ...current,
+
+            especialidades: [
+              ...current.especialidades,
+
+              {
+                especialidadeId:
+                  specialtyId,
+
+                principal:
+                  !hasMainSpecialty,
+              },
+            ],
+          }
+        }
+
+        const removedSpecialty =
+          current.especialidades.find(
+            (specialty) =>
+              specialty
+                .especialidadeId ===
+              specialtyId,
+          )
+
+        const remainingSpecialties =
+          current.especialidades.filter(
+            (specialty) =>
+              specialty
+                .especialidadeId !==
+              specialtyId,
+          )
+
+        if (
+          removedSpecialty?.principal &&
+          remainingSpecialties.length >
+            0
+        ) {
           return {
             ...current,
 
             especialidades:
-              current.especialidades
-                .filter(
-                  (specialty) =>
-                    specialty
-                      .especialidadeId !==
-                    specialtyId,
-                ),
+              remainingSpecialties.map(
+                (
+                  specialty,
+                  index,
+                ) => ({
+                  ...specialty,
+
+                  principal:
+                    index === 0,
+                }),
+              ),
           }
         }
-
-        const hasMainSpecialty =
-          current.especialidades.some(
-            (specialty) =>
-              specialty.principal,
-          )
 
         return {
           ...current,
 
-          especialidades: [
-            ...current.especialidades,
-            {
-              especialidadeId:
-                specialtyId,
-
-              principal:
-                !hasMainSpecialty,
-            },
-          ],
+          especialidades:
+            remainingSpecialties,
         }
       },
     )
@@ -268,6 +315,25 @@ export function DoctorForm({
     ) {
       setError(
         'Selecione pelo menos uma especialidade.',
+      )
+
+      return
+    }
+
+    const specialtyIds =
+      formData.especialidades.map(
+        (specialty) =>
+          specialty.especialidadeId,
+      )
+
+    if (
+      new Set(
+        specialtyIds,
+      ).size !==
+      specialtyIds.length
+    ) {
+      setError(
+        'Não é permitido selecionar a mesma especialidade mais de uma vez.',
       )
 
       return
@@ -396,6 +462,7 @@ export function DoctorForm({
             >
               <span>
                 Usuário{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -422,7 +489,9 @@ export function DoctorForm({
                 <option value="">
                   {loadingUsers
                     ? 'Carregando usuários...'
-                    : 'Selecione o usuário'}
+                    : users.length === 0
+                      ? 'Nenhum usuário médico disponível'
+                      : 'Selecione o usuário'}
                 </option>
 
                 {users.map(
@@ -448,11 +517,22 @@ export function DoctorForm({
               </select>
             </label>
 
+            {users.length === 0 &&
+              !loadingUsers && (
+                <div
+                  className="form-error full-field"
+                  data-testid="doctor-users-empty-message"
+                >
+                  Nenhum usuário com perfil Médico está disponível para vínculo.
+                </div>
+              )}
+
             <label
               className="full-field"
             >
               <span>
                 Nome completo{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -489,6 +569,7 @@ export function DoctorForm({
             <label>
               <span>
                 CRM{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -524,6 +605,7 @@ export function DoctorForm({
             <label>
               <span>
                 UF do CRM{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -533,7 +615,9 @@ export function DoctorForm({
 
               <input
                 type="text"
-                value={formData.crmUf}
+                value={
+                  formData.crmUf
+                }
                 maxLength={2}
                 placeholder="SP"
                 onChange={(event) => {
@@ -615,6 +699,7 @@ export function DoctorForm({
             <label>
               <span>
                 Duração da consulta{' '}
+
                 <span
                   className="required-field-mark"
                 >
@@ -658,6 +743,7 @@ export function DoctorForm({
           >
             <h3>
               Especialidades{' '}
+
               <span
                 className="required-field-mark"
               >
@@ -702,7 +788,9 @@ export function DoctorForm({
 
                 return (
                   <div
-                    key={specialty.id}
+                    key={
+                      specialty.id
+                    }
                     data-testid={`doctor-specialty-row-${specialty.id}`}
                   >
                     <label>
@@ -726,7 +814,9 @@ export function DoctorForm({
                         data-testid={`doctor-specialty-${specialty.id}`}
                       />
 
-                      {specialty.nome}
+                      {
+                        specialty.nome
+                      }
                     </label>
 
                     <label>
@@ -782,6 +872,7 @@ export function DoctorForm({
               disabled={
                 submitting ||
                 loadingUsers ||
+                users.length === 0 ||
                 specialties.length ===
                   0
               }
