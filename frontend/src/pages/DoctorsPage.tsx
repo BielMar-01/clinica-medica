@@ -24,6 +24,7 @@ import {
   getDoctorRequest,
   listDoctorsRequest,
   updateDoctorRequest,
+  updateDoctorStatusRequest,
 } from '../services/doctor.service'
 
 import {
@@ -223,6 +224,14 @@ export function DoctorsPage() {
     setSubmitting,
   ] =
     useState(false)
+
+  const [
+    statusUpdatingId,
+    setStatusUpdatingId,
+  ] =
+    useState<
+      string | null
+    >(null)
 
   const [
     reloadKey,
@@ -699,14 +708,74 @@ export function DoctorsPage() {
     )
   }
 
-  function handleToggleStatus(
+  async function handleToggleStatus(
     doctor: DoctorSummary,
   ) {
-    setSuccessMessage('')
+    if (
+      statusUpdatingId !== null
+    ) {
+      return
+    }
 
-    setError(
-      `A alteração de status do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
-    )
+    const nextStatus =
+      !doctor.ativo
+
+    const action =
+      nextStatus
+        ? 'ativar'
+        : 'inativar'
+
+    const confirmed =
+      window.confirm(
+        `Deseja realmente ${action} o médico "${doctor.nomeCompleto}"?`,
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setStatusUpdatingId(
+        doctor.id,
+      )
+
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await updateDoctorStatusRequest(
+          doctor.id,
+          nextStatus,
+        )
+
+      setSuccessMessage(
+        response.message ??
+          (
+            nextStatus
+              ? 'Médico ativado com sucesso.'
+              : 'Médico inativado com sucesso.'
+          ),
+      )
+
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : nextStatus
+            ? 'Erro ao ativar médico'
+            : 'Erro ao inativar médico',
+      )
+    } finally {
+      setStatusUpdatingId(
+        null,
+      )
+    }
   }
 
   return (
@@ -796,8 +865,10 @@ export function DoctorsPage() {
             doctor,
           )
         }
-        onToggleStatus={
-          handleToggleStatus
+        onToggleStatus={(doctor) =>
+          void handleToggleStatus(
+            doctor,
+          )
         }
       />
 
