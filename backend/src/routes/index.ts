@@ -3,19 +3,13 @@ import {
 } from 'express'
 
 import authRouter from './auth.routes.js'
-
 import authorizationTestRouter from './authorization-test.routes.js'
-
 import databaseRouter from './database.routes.js'
-
 import docsRouter from './docs.routes.js'
-
+import doctorRouter from './doctor.routes.js'
 import healthRouter from './health.routes.js'
-
 import patientRouter from './patient.routes.js'
-
 import specialtyRouter from './specialty.routes.js'
-
 import userRouter from './user.routes.js'
 
 const router =
@@ -51,6 +45,11 @@ router.use(
 router.use(
   '/usuarios',
   userRouter,
+)
+
+router.use(
+  '/medicos',
+  doctorRouter,
 )
 
 router.use(
