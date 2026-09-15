@@ -8,6 +8,10 @@ import {
 } from '../components/doctors/DoctorFilters'
 
 import {
+  DoctorForm,
+} from '../components/doctors/DoctorForm'
+
+import {
   DoctorTable,
 } from '../components/doctors/DoctorTable'
 
@@ -16,6 +20,7 @@ import {
 } from '../hooks/useAuth'
 
 import {
+  createDoctorRequest,
   listDoctorsRequest,
 } from '../services/doctor.service'
 
@@ -23,14 +28,23 @@ import {
   listSpecialtiesRequest,
 } from '../services/specialty.service'
 
+import {
+  listUsersRequest,
+} from '../services/user.service'
+
 import type {
   DoctorFilters as DoctorFiltersType,
+  DoctorFormData,
   DoctorSummary,
 } from '../types/doctor'
 
 import type {
   SpecialtySummary,
 } from '../types/specialty'
+
+import type {
+  UserSummary,
+} from '../types/user'
 
 const initialFilters:
   DoctorFiltersType = {
@@ -63,6 +77,14 @@ export function DoctorsPage() {
   ] =
     useState<
       SpecialtySummary[]
+    >([])
+
+  const [
+    doctorUsers,
+    setDoctorUsers,
+  ] =
+    useState<
+      UserSummary[]
     >([])
 
   const [
@@ -109,8 +131,44 @@ export function DoctorsPage() {
     useState(true)
 
   const [
+    usersLoading,
+    setUsersLoading,
+  ] =
+    useState(false)
+
+  const [
+    formOpen,
+    setFormOpen,
+  ] =
+    useState(false)
+
+  const [
+    formKey,
+    setFormKey,
+  ] =
+    useState(0)
+
+  const [
+    submitting,
+    setSubmitting,
+  ] =
+    useState(false)
+
+  const [
+    reloadKey,
+    setReloadKey,
+  ] =
+    useState(0)
+
+  const [
     error,
     setError,
+  ] =
+    useState('')
+
+  const [
+    successMessage,
+    setSuccessMessage,
   ] =
     useState('')
 
@@ -223,7 +281,38 @@ export function DoctorsPage() {
   }, [
     isAuthenticated,
     appliedFilters,
+    reloadKey,
   ])
+
+  async function loadDoctorUsers() {
+    try {
+      setUsersLoading(true)
+
+      const response =
+        await listUsersRequest({
+          page: 1,
+          limit: 100,
+          nome: '',
+          email: '',
+          perfil: 'MEDICO',
+          ativo: 'true',
+        })
+
+      setDoctorUsers(
+        response.data,
+      )
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Erro ao carregar usuários médicos',
+      )
+
+      throw error
+    } finally {
+      setUsersLoading(false)
+    }
+  }
 
   function handleSearch() {
     const nextFilters = {
@@ -232,6 +321,7 @@ export function DoctorsPage() {
     }
 
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
     setFilters(
@@ -245,6 +335,7 @@ export function DoctorsPage() {
 
   function handleClear() {
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
     setFilters(
@@ -268,6 +359,7 @@ export function DoctorsPage() {
     }
 
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
     setFilters(
@@ -285,9 +377,60 @@ export function DoctorsPage() {
     )
   }
 
+  async function openCreateForm() {
+    try {
+      setError('')
+      setSuccessMessage('')
+
+      await loadDoctorUsers()
+
+      setFormKey(
+        (current) =>
+          current + 1,
+      )
+
+      setFormOpen(true)
+    } catch {
+      setFormOpen(false)
+    }
+  }
+
+  async function handleCreateDoctor(
+    data: DoctorFormData,
+  ) {
+    try {
+      setSubmitting(true)
+      setError('')
+      setSuccessMessage('')
+
+      const response =
+        await createDoctorRequest(
+          data,
+        )
+
+      setFormOpen(false)
+
+      setSuccessMessage(
+        response.message ??
+          'Médico cadastrado com sucesso.',
+      )
+
+      setLoading(true)
+
+      setReloadKey(
+        (current) =>
+          current + 1,
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   function handleEdit(
     doctor: DoctorSummary,
   ) {
+    setSuccessMessage('')
+
     setError(
       `A edição do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
     )
@@ -296,6 +439,8 @@ export function DoctorsPage() {
   function handleToggleStatus(
     doctor: DoctorSummary,
   ) {
+    setSuccessMessage('')
+
     setError(
       `A alteração de status do médico "${doctor.nomeCompleto}" será implementada em uma próxima etapa.`,
     )
@@ -328,14 +473,25 @@ export function DoctorsPage() {
           <button
             type="button"
             className="primary-button"
-            disabled
+            onClick={() =>
+              void openCreateForm()
+            }
             data-testid="doctors-new-button"
-            title="Cadastro será disponibilizado em uma próxima etapa"
           >
             Novo médico
           </button>
         )}
       </header>
+
+      {successMessage && (
+        <div
+          className="content-card"
+          role="status"
+          data-testid="doctors-success-message"
+        >
+          {successMessage}
+        </div>
+      )}
 
       {error && (
         <div
@@ -348,9 +504,7 @@ export function DoctorsPage() {
       )}
 
       <DoctorFilters
-        filters={
-          filters
-        }
+        filters={filters}
         specialties={
           specialties
         }
@@ -369,12 +523,8 @@ export function DoctorsPage() {
       />
 
       <DoctorTable
-        doctors={
-          doctors
-        }
-        loading={
-          loading
-        }
+        doctors={doctors}
+        loading={loading}
         canManage={
           canManage
         }
@@ -414,9 +564,7 @@ export function DoctorsPage() {
               data-testid="doctors-pagination-info"
             >
               Página{' '}
-              {
-                pagination.page
-              }{' '}
+              {pagination.page}{' '}
               de{' '}
               {
                 pagination.totalPages
@@ -447,6 +595,27 @@ export function DoctorsPage() {
             </button>
           </div>
         )}
+
+      <DoctorForm
+        key={formKey}
+        open={formOpen}
+        users={doctorUsers}
+        specialties={
+          specialties
+        }
+        loadingUsers={
+          usersLoading
+        }
+        submitting={
+          submitting
+        }
+        onClose={() =>
+          setFormOpen(false)
+        }
+        onSubmit={
+          handleCreateDoctor
+        }
+      />
     </section>
   )
 }
