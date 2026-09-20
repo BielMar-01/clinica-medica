@@ -1,0 +1,13 @@
+.not-found-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  flex-direction: column;
+}
+
+.not-found-page h1 {
+  margin: 0;
+  font-size: 64px;
+}
