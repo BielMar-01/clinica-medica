@@ -20,8 +20,13 @@
     box-shadow var(--transition-normal);
 }
 
+.table-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
 .table-wrapper {
   width: 100%;
+
   max-width: 100%;
 
   overflow-x: auto;
@@ -62,19 +67,23 @@
 .patient-table th {
   color: var(--color-text-secondary);
 
-  background:
-    var(--color-surface-secondary);
+  background: var(--color-surface-secondary);
 
   font-size: var(--font-size-xs);
+
   font-weight: var(--font-weight-bold);
 
-  letter-spacing: 0.025em;
+  letter-spacing: 0.035em;
+
+  text-transform: uppercase;
 }
 
 .patient-table td {
   color: var(--color-text-primary);
 
   font-size: var(--font-size-sm);
+
+  vertical-align: middle;
 }
 
 .patient-table tbody tr {
@@ -92,22 +101,57 @@
   border-bottom: 0;
 }
 
+.patient-table tbody td:first-child {
+  font-weight: var(--font-weight-medium);
+}
+
 .table-actions {
   display: flex;
   align-items: center;
 
+  flex-wrap: nowrap;
+
   gap: var(--space-2);
 }
 
+/*
+ * Loading e empty state quando utilizados
+ * dentro das tabelas atuais.
+ */
+
+.patient-table
+tbody
+tr
+td[colspan] {
+  height: 120px;
+
+  color: var(--color-text-muted);
+
+  text-align: center;
+
+  white-space: normal;
+}
+
+/*
+ * Paginação compartilhada.
+ */
+
 .pagination {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
+
   flex-wrap: wrap;
 
   gap: var(--space-4);
 
-  margin-top: var(--space-5);
+  width: 100%;
+
+  margin-top: var(--space-1);
+
+  padding:
+    var(--space-3)
+    var(--space-1);
 
   color: var(--color-text-secondary);
 
@@ -116,7 +160,82 @@
 
 .pagination span {
   color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+
+  font-weight: var(--font-weight-medium);
 }
+
+.pagination button {
+  min-width: 100px;
+}
+
+/*
+ * Badges.
+ */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  min-height: 26px;
+
+  padding:
+    4px
+    9px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-size-xs);
+
+  font-weight: var(--font-weight-semibold);
+
+  line-height: 1;
+}
+
+.status-badge::before {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 auto;
+
+  content: "";
+
+  border-radius: var(--radius-full);
+
+  background: currentColor;
+}
+
+.status-badge.active {
+  color: var(--color-success);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-success) 20%,
+      transparent
+    );
+
+  background: var(--color-success-soft);
+}
+
+.status-badge.inactive {
+  color: var(--color-text-muted);
+
+  border-color: var(--color-border);
+
+  background: var(--color-surface-secondary);
+}
+
+/*
+ * Dark mode.
+ */
 
 [data-theme="dark"]
 .table-card {
@@ -154,6 +273,40 @@
   background: var(--color-surface-hover);
 }
 
+[data-theme="dark"]
+.status-badge.active {
+  color: #7ad9b3;
+
+  border-color:
+    rgba(
+      22,
+      132,
+      91,
+      0.28
+    );
+
+  background:
+    rgba(
+      22,
+      132,
+      91,
+      0.1
+    );
+}
+
+[data-theme="dark"]
+.status-badge.inactive {
+  color: var(--color-text-secondary);
+
+  border-color: var(--color-border);
+
+  background: var(--color-surface-secondary);
+}
+
+/*
+ * Scroll horizontal.
+ */
+
 .table-wrapper::-webkit-scrollbar {
   height: 8px;
 }
@@ -181,7 +334,12 @@
 @media (max-width: 600px) {
   .pagination {
     align-items: stretch;
+
     flex-direction: column;
+
+    padding:
+      var(--space-2)
+      0;
   }
 
   .pagination button {
@@ -189,6 +347,10 @@
   }
 
   .pagination span {
+    order: -1;
+
+    padding-bottom: var(--space-1);
+
     text-align: center;
   }
 }
@@ -196,5 +358,12 @@
 @media (max-width: 400px) {
   .table-actions {
     gap: var(--space-1);
+  }
+
+  .patient-table th,
+  .patient-table td {
+    padding:
+      var(--space-3)
+      var(--space-3);
   }
 }

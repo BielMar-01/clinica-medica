@@ -1,8 +1,11 @@
 .patient-filters {
+  position: relative;
+
   width: 100%;
   min-width: 0;
 
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-1);
+
   padding: var(--space-5);
 
   background: var(--color-surface);
@@ -21,6 +24,44 @@
     box-shadow var(--transition-normal);
 }
 
+.patient-filters::before {
+  position: absolute;
+
+  top: 0;
+  left: var(--space-5);
+  right: var(--space-5);
+
+  height: 2px;
+
+  content: "";
+
+  border-radius:
+    0
+    0
+    var(--radius-full)
+    var(--radius-full);
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--color-primary-500),
+      transparent
+    );
+
+  opacity: 0.45;
+}
+
+.patient-filters:focus-within {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-primary-500) 30%,
+      var(--color-border)
+    );
+
+  box-shadow: var(--shadow-sm);
+}
+
 .filter-group {
   display: grid;
 
@@ -30,21 +71,36 @@
       minmax(0, 1fr)
     );
 
-  gap: var(--space-4);
+  gap:
+    var(--space-4)
+    var(--space-4);
+}
+
+.filter-group label {
+  min-width: 0;
 }
 
 .filter-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+
   flex-wrap: wrap;
 
   gap: var(--space-3);
 
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
+
+  padding-top: var(--space-4);
+
+  border-top:
+    1px solid
+    var(--color-border);
 }
 
 .alphabet-filter {
   display: flex;
+
   flex-wrap: wrap;
 
   gap: var(--space-2);
@@ -75,6 +131,7 @@
   cursor: pointer;
 
   font-size: var(--font-size-sm);
+
   font-weight: var(--font-weight-semibold);
 
   transition:
@@ -111,6 +168,24 @@
   background: var(--color-primary-600);
 
   border-color: var(--color-primary-600);
+}
+
+[data-theme="dark"]
+.patient-filters {
+  background: var(--color-surface);
+
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"]
+.patient-filters:focus-within {
+  border-color:
+    rgba(
+      80,
+      193,
+      199,
+      0.26
+    );
 }
 
 [data-theme="dark"]
@@ -155,6 +230,7 @@
 @media (max-width: 768px) {
   .alphabet-filter {
     overflow-x: auto;
+
     flex-wrap: nowrap;
 
     padding-bottom: var(--space-2);
@@ -168,6 +244,12 @@
     padding: var(--space-4);
   }
 
+  .patient-filters::before {
+    left: var(--space-4);
+
+    right: var(--space-4);
+  }
+
   .filter-group {
     grid-template-columns: 1fr;
   }
@@ -175,12 +257,15 @@
 
 @media (max-width: 600px) {
   .patient-filters {
-    padding: var(--space-3);
+    padding: var(--space-4);
   }
 
   .filter-actions {
     align-items: stretch;
+
     flex-direction: column;
+
+    margin-top: var(--space-4);
   }
 
   .filter-actions button {
@@ -191,5 +276,11 @@
 @media (max-width: 400px) {
   .patient-filters {
     padding: var(--space-3);
+  }
+
+  .patient-filters::before {
+    left: var(--space-3);
+
+    right: var(--space-3);
   }
 }
