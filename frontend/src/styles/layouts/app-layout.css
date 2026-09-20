@@ -1,0 +1,152 @@
+.app-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns:
+    260px minmax(0, 1fr);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  background: #101828;
+  color: white;
+}
+
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 24px;
+}
+
+.sidebar-brand strong {
+  font-size: 20px;
+}
+
+.sidebar-brand span {
+  color: #98a2b3;
+  font-size: 14px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-nav a {
+  padding: 11px 12px;
+  border-radius: 8px;
+  color: #d0d5dd;
+}
+
+.sidebar-nav a.active {
+  background: #344054;
+  color: #ffffff;
+}
+
+.sidebar-user {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 12px 0;
+  border-top: 1px solid #344054;
+}
+
+.sidebar-user div {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-user span {
+  font-size: 12px;
+  color: #98a2b3;
+}
+
+.sidebar-user button {
+  background: #ffffff;
+  color: #101828;
+}
+
+.app-content {
+  min-width: 0;
+  padding: 32px;
+}
+
+.page {
+  width: 100%;
+  min-width: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.page-header > div {
+  min-width: 0;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+}
+
+.page-header p {
+  margin: 0;
+  color: #667085;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: auto;
+  }
+
+  .sidebar-user {
+    margin-top: 20px;
+  }
+
+  .app-content {
+    padding: 20px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-header > button {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header > button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .app-content {
+    padding: 12px;
+  }
+
+  .page-header {
+    gap: 16px;
+  }
+}

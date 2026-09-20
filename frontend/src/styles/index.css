@@ -1,0 +1,14 @@
+@import './foundations/base.css';
+
+@import './components/buttons.css';
+@import './components/feedback.css';
+@import './components/filters.css';
+@import './components/forms.css';
+@import './components/modals.css';
+@import './components/tables.css';
+
+@import './layouts/app-layout.css';
+
+@import './pages/auth.css';
+@import './pages/dashboard.css';
+@import './pages/not-found.css';
