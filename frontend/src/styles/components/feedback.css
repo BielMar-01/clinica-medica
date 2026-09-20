@@ -1,43 +1,137 @@
 .form-error,
 .page-error {
-  padding: 12px;
-  border-radius: 8px;
-  background: #fff4f4;
-  border: 1px solid #fecdca;
-  color: #b42318;
+  padding:
+    var(--space-3)
+    var(--space-4);
+
+  border-radius:
+    var(--radius-sm);
+
+  color:
+    var(--color-danger);
+
+  background:
+    var(--color-danger-soft);
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--color-danger) 24%,
+      transparent
+    );
 }
 
 .page-error {
-  margin-bottom: 20px;
+  margin-bottom:
+    var(--space-5);
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+
   min-height: 26px;
-  padding: 0 9px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+
+  padding:
+    0
+    var(--space-3);
+
+  border-radius:
+    var(--radius-full);
+
+  font-size:
+    var(--font-size-xs);
+
+  font-weight:
+    var(--font-weight-bold);
+
+  line-height: 1;
 }
 
 .status-badge.active {
-  background: #ecfdf3;
-  color: #027a48;
+  color:
+    var(--color-success);
+
+  background:
+    var(--color-success-soft);
 }
 
 .status-badge.inactive {
-  background: #fef3f2;
-  color: #b42318;
+  color:
+    var(--color-danger);
+
+  background:
+    var(--color-danger-soft);
+}
+
+[data-theme="dark"]
+.form-error,
+[data-theme="dark"]
+.page-error {
+  color: #ffb4b4;
+
+  background:
+    rgba(
+      209,
+      67,
+      67,
+      0.12
+    );
+
+  border-color:
+    rgba(
+      209,
+      67,
+      67,
+      0.28
+    );
+}
+
+[data-theme="dark"]
+.status-badge.active {
+  color: #72e1b2;
+
+  background:
+    rgba(
+      22,
+      132,
+      91,
+      0.18
+    );
+}
+
+[data-theme="dark"]
+.status-badge.inactive {
+  color: #ff9e9e;
+
+  background:
+    rgba(
+      209,
+      67,
+      67,
+      0.16
+    );
 }
 
 .required-field-mark {
-  color: #dc2626;
-  font-weight: 700;
+  color:
+    var(--color-danger);
+
+  font-weight:
+    var(--font-weight-bold);
 }
 
 .required-fields-hint {
-  margin: 0 0 16px;
-  font-size: 0.875rem;
-  color: #6b7280;
+  margin:
+    0
+    0
+    var(--space-4);
+
+  color:
+    var(--color-text-secondary);
+
+  font-size:
+    var(--font-size-sm);
 }

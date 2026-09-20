@@ -2,7 +2,8 @@
 .patient-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+
+  gap: var(--space-5);
 }
 
 .login-form label,
@@ -10,9 +11,19 @@
 .patient-filters label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+
+  gap: var(--space-2);
+
   min-width: 0;
-  font-weight: 600;
+
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    var(--font-size-sm);
+
+  font-weight:
+    var(--font-weight-semibold);
 }
 
 .login-form input,
@@ -24,20 +35,63 @@
   width: 100%;
   min-width: 0;
   min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid #d0d5dd;
-  border-radius: 8px;
+
+  padding:
+    10px
+    var(--space-3);
+
+  border:
+    1px solid
+    var(--color-border-strong);
+
+  border-radius:
+    var(--radius-sm);
+
   outline: none;
-  background: #ffffff;
+
+  color:
+    var(--color-text-primary);
+
+  background:
+    var(--color-surface);
+
+  box-shadow:
+    inset
+    0
+    1px
+    2px
+    rgba(
+      15,
+      35,
+      45,
+      0.03
+    );
+
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.login-form input:disabled {
-  background: #f9fafb;
-  cursor: not-allowed;
+.login-form input::placeholder,
+.patient-form input::placeholder,
+.patient-form textarea::placeholder,
+.patient-filters input::placeholder {
+  color:
+    var(--color-text-muted);
+
+  opacity: 1;
 }
 
-.patient-form textarea {
-  resize: vertical;
+.login-form input:hover:not(:disabled),
+.patient-form input:hover:not(:disabled),
+.patient-form select:hover:not(:disabled),
+.patient-form textarea:hover:not(:disabled),
+.patient-filters input:hover:not(:disabled),
+.patient-filters select:hover:not(:disabled) {
+  border-color:
+    var(--color-gray-400);
 }
 
 .login-form input:focus,
@@ -46,29 +100,124 @@
 .patient-form textarea:focus,
 .patient-filters input:focus,
 .patient-filters select:focus {
-  border-color: #667085;
+  border-color:
+    var(--color-primary-500);
+
+  box-shadow:
+    0
+    0
+    0
+    3px
+    color-mix(
+      in srgb,
+      var(--color-primary-500) 15%,
+      transparent
+    );
+}
+
+.login-form input:disabled,
+.patient-form input:disabled,
+.patient-form select:disabled,
+.patient-form textarea:disabled,
+.patient-filters input:disabled,
+.patient-filters select:disabled {
+  color:
+    var(--color-text-muted);
+
+  background:
+    var(--color-surface-secondary);
+
+  border-color:
+    var(--color-border);
+
+  opacity: 0.75;
+
+  cursor: not-allowed;
+}
+
+.patient-form textarea {
+  min-height: 112px;
+
+  resize: vertical;
+}
+
+.patient-form select,
+.patient-filters select {
+  cursor: pointer;
+}
+
+.patient-form select:disabled,
+.patient-filters select:disabled {
+  cursor: not-allowed;
+}
+
+[data-theme="dark"]
+.login-form input,
+[data-theme="dark"]
+.patient-form input,
+[data-theme="dark"]
+.patient-form select,
+[data-theme="dark"]
+.patient-form textarea,
+[data-theme="dark"]
+.patient-filters input,
+[data-theme="dark"]
+.patient-filters select {
+  color:
+    var(--color-text-primary);
+
+  background:
+    var(--color-surface-secondary);
+
+  border-color:
+    var(--color-border-strong);
+
+  box-shadow: none;
+
+  color-scheme: dark;
+}
+
+[data-theme="dark"]
+.login-form input::placeholder,
+[data-theme="dark"]
+.patient-form input::placeholder,
+[data-theme="dark"]
+.patient-form textarea::placeholder,
+[data-theme="dark"]
+.patient-filters input::placeholder {
+  color:
+    var(--color-text-secondary);
 }
 
 .form-grid {
   display: grid;
+
   grid-template-columns:
     repeat(
       2,
-      minmax(0, 1fr)
+      minmax(
+        0,
+        1fr
+      )
     );
-  gap: 16px;
+
+  gap:
+    var(--space-4);
 }
 
 .full-field {
-  grid-column: 1 / -1;
+  grid-column:
+    1 / -1;
 }
 
 @media (max-width: 900px) {
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .full-field {
-    grid-column: auto;
+    grid-column:
+      auto;
   }
 }

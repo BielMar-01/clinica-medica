@@ -12,43 +12,210 @@ button {
 .filter-actions button,
 .pagination button {
   min-height: 40px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 0 var(--space-4);
+
+  border-radius: var(--radius-sm);
+
+  font-weight: var(--font-weight-semibold);
+
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .login-form button,
 .primary-button,
 .modal-actions button[type="submit"],
 .filter-actions button:first-child {
-  background: #101828;
-  color: #ffffff;
+  color: var(--color-white);
+
+  background:
+    var(--color-primary-700);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.login-form button:hover:not(:disabled),
+.primary-button:hover:not(:disabled),
+.modal-actions button[type="submit"]:hover:not(:disabled),
+.filter-actions button:first-child:hover:not(:disabled) {
+  background:
+    var(--color-primary-600);
+
+  box-shadow: var(--shadow-sm);
+
+  transform: translateY(-1px);
+}
+
+.login-form button:active:not(:disabled),
+.primary-button:active:not(:disabled),
+.modal-actions button[type="submit"]:active:not(:disabled),
+.filter-actions button:first-child:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .login-form button:disabled,
+.primary-button:disabled,
+.secondary-button:disabled,
+.small-button:disabled,
 .modal-actions button:disabled,
+.filter-actions button:disabled,
 .pagination button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
+
   cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
 }
 
 .secondary-button {
-  background: #f2f4f7;
-  color: #344054;
-  border: 1px solid #d0d5dd;
+  color: var(--color-text-primary);
+
+  background:
+    var(--color-surface);
+
+  border:
+    1px solid
+    var(--color-border-strong);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background:
+    var(--color-surface-hover);
+
+  border-color:
+    var(--color-primary-500);
+
+  color:
+    var(--color-primary-700);
+}
+
+[data-theme="dark"]
+.secondary-button:hover:not(:disabled) {
+  color:
+    var(--color-primary-300);
 }
 
 .small-button {
   min-height: 34px;
-  padding: 0 10px;
-  background: #101828;
-  color: #ffffff;
-  font-size: 13px;
+
+  padding:
+    0
+    var(--space-3);
+
+  color: var(--color-white);
+
+  background:
+    var(--color-navy-900);
+
+  font-size: var(--font-size-xs);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.small-button:hover:not(:disabled) {
+  background:
+    var(--color-primary-700);
+
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"]
+.small-button {
+  color:
+    var(--color-text-primary);
+
+  background:
+    var(--color-surface-secondary);
+
+  border:
+    1px solid
+    var(--color-border);
+}
+
+[data-theme="dark"]
+.small-button:hover:not(:disabled) {
+  color:
+    var(--color-white);
+
+  background:
+    var(--color-primary-700);
+
+  border-color:
+    var(--color-primary-600);
 }
 
 .icon-button {
   min-width: 40px;
+
   padding: 0;
+
+  color:
+    var(--color-text-secondary);
+
   background: transparent;
+
   font-size: 28px;
+}
+
+.icon-button:hover:not(:disabled) {
+  color:
+    var(--color-primary-600);
+
+  background:
+    var(--color-surface-hover);
+}
+
+.pagination button {
+  color:
+    var(--color-text-primary);
+
+  background:
+    var(--color-surface);
+
+  border:
+    1px solid
+    var(--color-border);
+}
+
+.pagination button:hover:not(:disabled) {
+  color:
+    var(--color-primary-700);
+
+  border-color:
+    var(--color-primary-500);
+
+  background:
+    var(--color-primary-50);
+}
+
+[data-theme="dark"]
+.pagination button:hover:not(:disabled) {
+  color:
+    var(--color-primary-200);
+
+  background:
+    rgba(
+      32,
+      160,
+      168,
+      0.12
+    );
+}
+
+button:focus-visible {
+  outline:
+    3px solid
+    color-mix(
+      in srgb,
+      var(--color-focus) 28%,
+      transparent
+    );
+
+  outline-offset: 2px;
 }
