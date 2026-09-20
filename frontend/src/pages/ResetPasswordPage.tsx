@@ -22,6 +22,82 @@ type ResetPasswordLocationState = {
   resetToken?: string
 }
 
+function EyeIcon({
+  visible,
+}: {
+  visible: boolean
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="3"
+      />
+
+      {visible && (
+        <path d="M4 4l16 16" />
+      )}
+    </svg>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect
+        x="5"
+        y="11"
+        width="14"
+        height="10"
+        rx="2"
+      />
+
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  )
+}
+
+function SuccessIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+      />
+
+      <path d="m8 12 2.5 2.5L16 9" />
+    </svg>
+  )
+}
+
 export function ResetPasswordPage() {
   const navigate =
     useNavigate()
@@ -53,6 +129,16 @@ export function ResetPasswordPage() {
   ] = useState('')
 
   const [
+    showNewPassword,
+    setShowNewPassword,
+  ] = useState(false)
+
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false)
+
+  const [
     error,
     setError,
   ] = useState('')
@@ -66,6 +152,40 @@ export function ResetPasswordPage() {
     success,
     setSuccess,
   ] = useState(false)
+
+  const passwordRules = {
+    minimum:
+      novaSenha.length >= 8,
+
+    uppercase:
+      /[A-Z]/.test(
+        novaSenha,
+      ),
+
+    lowercase:
+      /[a-z]/.test(
+        novaSenha,
+      ),
+
+    number:
+      /\d/.test(
+        novaSenha,
+      ),
+
+    special:
+      /[^A-Za-z0-9]/.test(
+        novaSenha,
+      ),
+  }
+
+  const passwordValid =
+    Object
+      .values(passwordRules)
+      .every(Boolean)
+
+  const passwordsMatch =
+    confirmarSenha.length > 0 &&
+    novaSenha === confirmarSenha
 
   if (
     !isLoading &&
@@ -93,10 +213,11 @@ export function ResetPasswordPage() {
   ) {
     event.preventDefault()
 
-    if (novaSenha.length < 8) {
+    if (!passwordValid) {
       setError(
-        'A nova senha deve possuir pelo menos 8 caracteres.',
+        'A nova senha não atende aos requisitos de segurança.',
       )
+
       return
     }
 
@@ -107,6 +228,7 @@ export function ResetPasswordPage() {
       setError(
         'As senhas não coincidem.',
       )
+
       return
     }
 
@@ -145,17 +267,50 @@ export function ResetPasswordPage() {
   if (success) {
     return (
       <main
-        className="login-page"
+        className="login-page auth-flow-page"
         data-testid="reset-password-success-page"
       >
+        <div className="login-background-decoration login-background-decoration-one" />
+        <div className="login-background-decoration login-background-decoration-two" />
+
         <section
-          className="login-card"
+          className="auth-flow-card auth-success-card"
           data-testid="reset-password-success-card"
         >
+          <div className="auth-flow-brand">
+            <div
+              className="login-brand-mark"
+              aria-hidden="true"
+            >
+              +
+            </div>
+
+            <div>
+              <strong>
+                Clínica Médica
+              </strong>
+
+              <span>
+                Gestão inteligente
+              </span>
+            </div>
+          </div>
+
           <div
-            className="login-header"
+            className="auth-success-icon"
+            aria-hidden="true"
+          >
+            <SuccessIcon />
+          </div>
+
+          <div
+            className="login-header auth-flow-header"
             data-testid="reset-password-success-header"
           >
+            <span className="login-header-eyebrow">
+              Recuperação concluída
+            </span>
+
             <h1
               data-testid="reset-password-success-title"
             >
@@ -166,24 +321,19 @@ export function ResetPasswordPage() {
               data-testid="reset-password-success-message"
             >
               Sua senha foi alterada com
-              sucesso. Agora você pode entrar
-              utilizando a nova senha.
+              sucesso. Agora você pode acessar
+              sua conta utilizando a nova senha.
             </p>
           </div>
 
-          <div
-            className="login-form"
+          <button
+            className="login-submit-button"
+            type="button"
+            onClick={handleGoToLogin}
+            data-testid="reset-password-login-button"
           >
-            <button
-              type="button"
-              onClick={
-                handleGoToLogin
-              }
-              data-testid="reset-password-login-button"
-            >
-              Ir para o login
-            </button>
-          </div>
+            Ir para o login
+          </button>
         </section>
       </main>
     )
@@ -191,17 +341,68 @@ export function ResetPasswordPage() {
 
   return (
     <main
-      className="login-page"
+      className="login-page auth-flow-page"
       data-testid="reset-password-page"
     >
+      <div className="login-background-decoration login-background-decoration-one" />
+      <div className="login-background-decoration login-background-decoration-two" />
+
       <section
-        className="login-card"
+        className="auth-flow-card"
         data-testid="reset-password-card"
       >
+        <div className="auth-flow-brand">
+          <div
+            className="login-brand-mark"
+            aria-hidden="true"
+          >
+            +
+          </div>
+
+          <div>
+            <strong>
+              Clínica Médica
+            </strong>
+
+            <span>
+              Gestão inteligente
+            </span>
+          </div>
+        </div>
+
         <div
-          className="login-header"
+          className="auth-step-indicator"
+          data-testid="password-recovery-steps"
+        >
+          <span className="completed">
+            ✓
+          </span>
+
+          <i className="completed" />
+
+          <span className="completed">
+            ✓
+          </span>
+
+          <i className="completed" />
+
+          <span className="active">
+            3
+          </span>
+        </div>
+
+        <div className="auth-flow-icon">
+          <LockIcon />
+        </div>
+
+        <div
+          className="login-header auth-flow-header"
           data-testid="reset-password-header"
         >
+          <span className="login-header-eyebrow">
+            Nova credencial
+          </span>
+
           <h1
             data-testid="reset-password-title"
           >
@@ -211,8 +412,8 @@ export function ResetPasswordPage() {
           <p
             data-testid="reset-password-description"
           >
-            Informe sua nova senha para
-            concluir a recuperação da conta.
+            Escolha uma senha segura para
+            concluir a recuperação da sua conta.
           </p>
         </div>
 
@@ -224,50 +425,191 @@ export function ResetPasswordPage() {
           <label>
             Nova senha
 
-            <input
-              data-testid="reset-password-new-password-input"
-              type="password"
-              value={novaSenha}
-              onChange={(event) => {
-                setNovaSenha(
-                  event.target.value,
-                )
-
-                if (error) {
-                  setError('')
+            <div className="password-input-wrapper">
+              <input
+                data-testid="reset-password-new-password-input"
+                type={
+                  showNewPassword
+                    ? 'text'
+                    : 'password'
                 }
-              }}
-              placeholder="Digite sua nova senha"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              disabled={submitting}
-            />
+                value={novaSenha}
+                onChange={(event) => {
+                  setNovaSenha(
+                    event.target.value,
+                  )
+
+                  if (error) {
+                    setError('')
+                  }
+                }}
+                placeholder="Digite sua nova senha"
+                required
+                minLength={8}
+                autoComplete="new-password"
+                disabled={submitting}
+              />
+
+              <button
+                className="password-visibility-button"
+                data-testid="reset-password-new-password-visibility-button"
+                type="button"
+                aria-label={
+                  showNewPassword
+                    ? 'Ocultar nova senha'
+                    : 'Mostrar nova senha'
+                }
+                aria-pressed={showNewPassword}
+                disabled={submitting}
+                onClick={
+                  () =>
+                    setShowNewPassword(
+                      (current) =>
+                        !current,
+                    )
+                }
+              >
+                <EyeIcon
+                  visible={showNewPassword}
+                />
+              </button>
+            </div>
           </label>
+
+          <div
+            className="password-requirements"
+            data-testid="reset-password-requirements"
+          >
+            <span>
+              Sua senha deve conter:
+            </span>
+
+            <ul>
+              <li
+                className={
+                  passwordRules.minimum
+                    ? 'valid'
+                    : ''
+                }
+              >
+                <span>✓</span>
+                8 ou mais caracteres
+              </li>
+
+              <li
+                className={
+                  passwordRules.uppercase
+                    ? 'valid'
+                    : ''
+                }
+              >
+                <span>✓</span>
+                Uma letra maiúscula
+              </li>
+
+              <li
+                className={
+                  passwordRules.lowercase
+                    ? 'valid'
+                    : ''
+                }
+              >
+                <span>✓</span>
+                Uma letra minúscula
+              </li>
+
+              <li
+                className={
+                  passwordRules.number
+                    ? 'valid'
+                    : ''
+                }
+              >
+                <span>✓</span>
+                Um número
+              </li>
+
+              <li
+                className={
+                  passwordRules.special
+                    ? 'valid'
+                    : ''
+                }
+              >
+                <span>✓</span>
+                Um caractere especial
+              </li>
+            </ul>
+          </div>
 
           <label>
             Confirmar nova senha
 
-            <input
-              data-testid="reset-password-confirm-password-input"
-              type="password"
-              value={confirmarSenha}
-              onChange={(event) => {
-                setConfirmarSenha(
-                  event.target.value,
-                )
-
-                if (error) {
-                  setError('')
+            <div className="password-input-wrapper">
+              <input
+                data-testid="reset-password-confirm-password-input"
+                type={
+                  showConfirmPassword
+                    ? 'text'
+                    : 'password'
                 }
-              }}
-              placeholder="Confirme sua nova senha"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              disabled={submitting}
-            />
+                value={confirmarSenha}
+                onChange={(event) => {
+                  setConfirmarSenha(
+                    event.target.value,
+                  )
+
+                  if (error) {
+                    setError('')
+                  }
+                }}
+                placeholder="Confirme sua nova senha"
+                required
+                minLength={8}
+                autoComplete="new-password"
+                disabled={submitting}
+              />
+
+              <button
+                className="password-visibility-button"
+                data-testid="reset-password-confirm-password-visibility-button"
+                type="button"
+                aria-label={
+                  showConfirmPassword
+                    ? 'Ocultar confirmação da senha'
+                    : 'Mostrar confirmação da senha'
+                }
+                aria-pressed={showConfirmPassword}
+                disabled={submitting}
+                onClick={
+                  () =>
+                    setShowConfirmPassword(
+                      (current) =>
+                        !current,
+                    )
+                }
+              >
+                <EyeIcon
+                  visible={showConfirmPassword}
+                />
+              </button>
+            </div>
           </label>
+
+          {confirmarSenha && (
+            <span
+              className={
+                passwordsMatch
+                  ? 'password-match valid'
+                  : 'password-match invalid'
+              }
+              data-testid="reset-password-match-status"
+            >
+              {passwordsMatch
+                ? '✓ As senhas coincidem.'
+                : 'As senhas ainda não coincidem.'}
+            </span>
+          )}
 
           {error && (
             <div
@@ -280,13 +622,23 @@ export function ResetPasswordPage() {
           )}
 
           <button
+            className="login-submit-button"
             data-testid="reset-password-submit-button"
             type="submit"
             disabled={submitting}
           >
-            {submitting
-              ? 'Redefinindo...'
-              : 'Redefinir senha'}
+            {submitting && (
+              <span
+                className="login-submit-spinner"
+                aria-hidden="true"
+              />
+            )}
+
+            <span>
+              {submitting
+                ? 'Redefinindo...'
+                : 'Redefinir senha'}
+            </span>
           </button>
         </form>
 
@@ -298,7 +650,7 @@ export function ResetPasswordPage() {
             to="/login"
             data-testid="reset-password-back-login-link"
           >
-            Voltar para o login
+            ← Voltar para o login
           </Link>
         </div>
       </section>

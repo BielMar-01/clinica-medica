@@ -22,6 +22,24 @@ type VerifyResetCodeLocationState = {
   email?: string
 }
 
+function ShieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3 20 6v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-3Z" />
+
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+
 export function VerifyResetCodePage() {
   const navigate =
     useNavigate()
@@ -108,6 +126,7 @@ export function VerifyResetCodePage() {
       setError(
         'Informe o código de 6 dígitos.',
       )
+
       return
     }
 
@@ -144,17 +163,68 @@ export function VerifyResetCodePage() {
 
   return (
     <main
-      className="login-page"
+      className="login-page auth-flow-page"
       data-testid="verify-reset-code-page"
     >
+      <div className="login-background-decoration login-background-decoration-one" />
+      <div className="login-background-decoration login-background-decoration-two" />
+
       <section
-        className="login-card"
+        className="auth-flow-card"
         data-testid="verify-reset-code-card"
       >
+        <div className="auth-flow-brand">
+          <div
+            className="login-brand-mark"
+            aria-hidden="true"
+          >
+            +
+          </div>
+
+          <div>
+            <strong>
+              Clínica Médica
+            </strong>
+
+            <span>
+              Gestão inteligente
+            </span>
+          </div>
+        </div>
+
         <div
-          className="login-header"
+          className="auth-step-indicator"
+          data-testid="password-recovery-steps"
+        >
+          <span className="completed">
+            ✓
+          </span>
+
+          <i className="completed" />
+
+          <span className="active">
+            2
+          </span>
+
+          <i />
+
+          <span>
+            3
+          </span>
+        </div>
+
+        <div className="auth-flow-icon">
+          <ShieldIcon />
+        </div>
+
+        <div
+          className="login-header auth-flow-header"
           data-testid="verify-reset-code-header"
         >
+          <span className="login-header-eyebrow">
+            Verificação de segurança
+          </span>
+
           <h1
             data-testid="verify-reset-code-title"
           >
@@ -165,6 +235,7 @@ export function VerifyResetCodePage() {
             Digite o código de 6 dígitos
             enviado para{' '}
             <strong
+              className="auth-email-highlight"
               data-testid="verify-reset-code-email"
             >
               {email}
@@ -182,6 +253,7 @@ export function VerifyResetCodePage() {
             Código de verificação
 
             <input
+              className="verification-code-input"
               data-testid="verify-reset-code-input"
               type="text"
               inputMode="numeric"
@@ -197,8 +269,17 @@ export function VerifyResetCodePage() {
               autoComplete="one-time-code"
               disabled={submitting}
               required
+              aria-describedby="verification-code-hint"
             />
           </label>
+
+          <span
+            id="verification-code-hint"
+            className="verification-code-hint"
+          >
+            O código possui 6 números e
+            expira após alguns minutos.
+          </span>
 
           {error && (
             <div
@@ -211,6 +292,7 @@ export function VerifyResetCodePage() {
           )}
 
           <button
+            className="login-submit-button"
             data-testid="verify-reset-code-submit-button"
             type="submit"
             disabled={
@@ -218,9 +300,18 @@ export function VerifyResetCodePage() {
               codigo.length !== 6
             }
           >
-            {submitting
-              ? 'Verificando...'
-              : 'Verificar código'}
+            {submitting && (
+              <span
+                className="login-submit-spinner"
+                aria-hidden="true"
+              />
+            )}
+
+            <span>
+              {submitting
+                ? 'Verificando...'
+                : 'Verificar código'}
+            </span>
           </button>
         </form>
 

@@ -17,6 +17,30 @@ import {
   forgotPasswordRequest,
 } from '../services/auth.service'
 
+function MailIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="14"
+        rx="2"
+      />
+
+      <path d="m3 7 9 6 9-6" />
+    </svg>
+  )
+}
+
 export function ForgotPasswordPage() {
   const navigate =
     useNavigate()
@@ -94,17 +118,68 @@ export function ForgotPasswordPage() {
 
   return (
     <main
-      className="login-page"
+      className="login-page auth-flow-page"
       data-testid="forgot-password-page"
     >
+      <div className="login-background-decoration login-background-decoration-one" />
+      <div className="login-background-decoration login-background-decoration-two" />
+
       <section
-        className="login-card"
+        className="auth-flow-card"
         data-testid="forgot-password-card"
       >
+        <div className="auth-flow-brand">
+          <div
+            className="login-brand-mark"
+            aria-hidden="true"
+          >
+            +
+          </div>
+
+          <div>
+            <strong>
+              Clínica Médica
+            </strong>
+
+            <span>
+              Gestão inteligente
+            </span>
+          </div>
+        </div>
+
         <div
-          className="login-header"
+          className="auth-step-indicator"
+          data-testid="password-recovery-steps"
+        >
+          <span className="active">
+            1
+          </span>
+
+          <i />
+
+          <span>
+            2
+          </span>
+
+          <i />
+
+          <span>
+            3
+          </span>
+        </div>
+
+        <div className="auth-flow-icon">
+          <MailIcon />
+        </div>
+
+        <div
+          className="login-header auth-flow-header"
           data-testid="forgot-password-header"
         >
+          <span className="login-header-eyebrow">
+            Recuperação de acesso
+          </span>
+
           <h1
             data-testid="forgot-password-title"
           >
@@ -115,9 +190,8 @@ export function ForgotPasswordPage() {
             data-testid="forgot-password-description"
           >
             Informe o e-mail da sua conta.
-            Enviaremos um código de
-            verificação para redefinir sua
-            senha.
+            Enviaremos um código de 6 dígitos
+            para continuar a recuperação.
           </p>
         </div>
 
@@ -133,11 +207,15 @@ export function ForgotPasswordPage() {
               data-testid="forgot-password-email-input"
               type="email"
               value={email}
-              onChange={(event) =>
+              onChange={(event) => {
                 setEmail(
                   event.target.value,
                 )
-              }
+
+                if (error) {
+                  setError('')
+                }
+              }}
               placeholder="seu@email.com"
               required
               autoComplete="email"
@@ -156,13 +234,23 @@ export function ForgotPasswordPage() {
           )}
 
           <button
+            className="login-submit-button"
             data-testid="forgot-password-submit-button"
             type="submit"
             disabled={submitting}
           >
-            {submitting
-              ? 'Enviando...'
-              : 'Enviar código'}
+            {submitting && (
+              <span
+                className="login-submit-spinner"
+                aria-hidden="true"
+              />
+            )}
+
+            <span>
+              {submitting
+                ? 'Enviando...'
+                : 'Enviar código'}
+            </span>
           </button>
         </form>
 
@@ -174,7 +262,7 @@ export function ForgotPasswordPage() {
             to="/login"
             data-testid="forgot-password-back-login-link"
           >
-            Voltar para o login
+            ← Voltar para o login
           </Link>
         </div>
       </section>
