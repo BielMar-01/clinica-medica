@@ -1,3 +1,4 @@
+@import './styles/foundations/tokens.css';
 @import './styles/foundations/base.css';
 
 @import './styles/components/buttons.css';
