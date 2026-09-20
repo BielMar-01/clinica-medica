@@ -1,14 +1,15 @@
-@import './foundations/base.css';
+@import './styles/foundations/tokens.css';
+@import './styles/foundations/base.css';
 
-@import './components/buttons.css';
-@import './components/feedback.css';
-@import './components/filters.css';
-@import './components/forms.css';
-@import './components/modals.css';
-@import './components/tables.css';
+@import './styles/components/buttons.css';
+@import './styles/components/feedback.css';
+@import './styles/components/filters.css';
+@import './styles/components/forms.css';
+@import './styles/components/modals.css';
+@import './styles/components/tables.css';
 
-@import './layouts/app-layout.css';
+@import './styles/layouts/app-layout.css';
 
-@import './pages/auth.css';
-@import './pages/dashboard.css';
-@import './pages/not-found.css';
+@import './styles/pages/auth.css';
+@import './styles/pages/dashboard.css';
+@import './styles/pages/not-found.css';
