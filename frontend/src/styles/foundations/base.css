@@ -1,27 +1,30 @@
 :root {
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+  font-family: var(--font-family-primary);
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 
-  color: #1d2939;
-  background: #f5f7fa;
+  color: var(--color-text-primary);
+  background: var(--color-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html,
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--color-background);
+  scroll-behavior: smooth;
+}
+
 body,
 #root {
   min-width: 320px;
@@ -31,6 +34,14 @@ body,
 
 body {
   margin: 0;
+  overflow-x: hidden;
+
+  color: var(--color-text-primary);
+  background: var(--color-background);
+
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
 }
 
 button,
@@ -44,7 +55,91 @@ button {
   cursor: pointer;
 }
 
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
 a {
   color: inherit;
   text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+p {
+  color: var(--color-text-secondary);
+}
+
+::selection {
+  color: var(--color-navy-950);
+  background: var(--color-primary-200);
+}
+
+:focus-visible {
+  outline: 3px solid
+    color-mix(
+      in srgb,
+      var(--color-focus) 35%,
+      transparent
+    );
+
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border: 2px solid var(--color-background);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
