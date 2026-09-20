@@ -1,0 +1,54 @@
+button {
+  border: 0;
+}
+
+.login-form button,
+.sidebar-user button,
+.primary-button,
+.secondary-button,
+.small-button,
+.icon-button,
+.modal-actions button,
+.filter-actions button,
+.pagination button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.login-form button,
+.primary-button,
+.modal-actions button[type="submit"],
+.filter-actions button:first-child {
+  background: #101828;
+  color: #ffffff;
+}
+
+.login-form button:disabled,
+.modal-actions button:disabled,
+.pagination button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #f2f4f7;
+  color: #344054;
+  border: 1px solid #d0d5dd;
+}
+
+.small-button {
+  min-height: 34px;
+  padding: 0 10px;
+  background: #101828;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.icon-button {
+  min-width: 40px;
+  padding: 0;
+  background: transparent;
+  font-size: 28px;
+}

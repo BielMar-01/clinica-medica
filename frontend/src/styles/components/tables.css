@@ -1,0 +1,80 @@
+.table-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+}
+
+.table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.patient-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.patient-table th,
+.patient-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eaecf0;
+  white-space: nowrap;
+}
+
+.patient-table th {
+  background: #f9fafb;
+  color: #475467;
+  font-size: 13px;
+}
+
+.patient-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .patient-table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination button {
+    width: 100%;
+  }
+
+  .pagination span {
+    text-align: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .table-actions {
+    gap: 6px;
+  }
+}

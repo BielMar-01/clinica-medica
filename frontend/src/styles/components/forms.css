@@ -1,0 +1,74 @@
+.login-form,
+.patient-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form label,
+.patient-form label,
+.patient-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.login-form input,
+.patient-form input,
+.patient-form select,
+.patient-form textarea,
+.patient-filters input,
+.patient-filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+}
+
+.login-form input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.patient-form textarea {
+  resize: vertical;
+}
+
+.login-form input:focus,
+.patient-form input:focus,
+.patient-form select:focus,
+.patient-form textarea:focus,
+.patient-filters input:focus,
+.patient-filters select:focus {
+  border-color: #667085;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 16px;
+}
+
+.full-field {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-field {
+    grid-column: auto;
+  }
+}

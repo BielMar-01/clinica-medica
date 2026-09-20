@@ -1,0 +1,43 @@
+.form-error,
+.page-error {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff4f4;
+  border: 1px solid #fecdca;
+  color: #b42318;
+}
+
+.page-error {
+  margin-bottom: 20px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.active {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-badge.inactive {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.required-field-mark {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.required-fields-hint {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
