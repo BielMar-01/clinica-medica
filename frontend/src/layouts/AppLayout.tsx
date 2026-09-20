@@ -1,5 +1,8 @@
 import {
   type ReactNode,
+  useEffect,
+  useRef,
+  useState,
 } from 'react'
 
 import {
@@ -11,6 +14,14 @@ import {
 import {
   useAuth,
 } from '../hooks/useAuth'
+
+import {
+  useTheme,
+} from '../hooks/useTheme'
+
+import type {
+  ThemePreference,
+} from '../types/theme'
 
 type NavigationIconProps = {
   children: ReactNode
@@ -152,6 +163,60 @@ function LogoutIcon() {
   )
 }
 
+function SunIcon() {
+  return (
+    <NavigationIcon>
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+      />
+
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="M4.93 4.93l1.41 1.41" />
+      <path d="M17.66 17.66l1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="M6.34 17.66l-1.41 1.41" />
+      <path d="M19.07 4.93l-1.41 1.41" />
+    </NavigationIcon>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <NavigationIcon>
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </NavigationIcon>
+  )
+}
+
+function SystemIcon() {
+  return (
+    <NavigationIcon>
+      <rect
+        x="3"
+        y="4"
+        width="18"
+        height="13"
+        rx="2"
+      />
+
+      <path d="M8 21h8" />
+      <path d="M12 17v4" />
+    </NavigationIcon>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <NavigationIcon>
+      <path d="M6 9l6 6 6-6" />
+    </NavigationIcon>
+  )
+}
+
 function getRoleLabel(
   role: string | undefined,
 ) {
@@ -199,6 +264,37 @@ function getInitials(
   ).toUpperCase()
 }
 
+function getThemeLabel(
+  preference: ThemePreference,
+) {
+  switch (preference) {
+    case 'light':
+      return 'Claro'
+
+    case 'dark':
+      return 'Escuro'
+
+    default:
+      return 'Sistema'
+  }
+}
+
+function ThemeIcon({
+  preference,
+}: {
+  preference: ThemePreference
+}) {
+  if (preference === 'light') {
+    return <SunIcon />
+  }
+
+  if (preference === 'dark') {
+    return <MoonIcon />
+  }
+
+  return <SystemIcon />
+}
+
 export function AppLayout() {
   const navigate =
     useNavigate()
@@ -208,6 +304,72 @@ export function AppLayout() {
     logout,
   } = useAuth()
 
+  const {
+    preference,
+    changeTheme,
+  } = useTheme()
+
+  const [
+    themeMenuOpen,
+    setThemeMenuOpen,
+  ] =
+    useState(false)
+
+  const themeMenuRef =
+    useRef<HTMLDivElement>(
+      null,
+    )
+
+  useEffect(
+    () => {
+      function handleOutsideClick(
+        event: MouseEvent,
+      ) {
+        if (
+          themeMenuRef.current &&
+          !themeMenuRef.current.contains(
+            event.target as Node,
+          )
+        ) {
+          setThemeMenuOpen(false)
+        }
+      }
+
+      function handleEscape(
+        event: KeyboardEvent,
+      ) {
+        if (
+          event.key === 'Escape'
+        ) {
+          setThemeMenuOpen(false)
+        }
+      }
+
+      document.addEventListener(
+        'mousedown',
+        handleOutsideClick,
+      )
+
+      document.addEventListener(
+        'keydown',
+        handleEscape,
+      )
+
+      return () => {
+        document.removeEventListener(
+          'mousedown',
+          handleOutsideClick,
+        )
+
+        document.removeEventListener(
+          'keydown',
+          handleEscape,
+        )
+      }
+    },
+    [],
+  )
+
   async function handleLogout() {
     await logout()
 
@@ -216,6 +378,18 @@ export function AppLayout() {
       {
         replace: true,
       },
+    )
+  }
+
+  function handleThemeChange(
+    nextTheme: ThemePreference,
+  ) {
+    changeTheme(
+      nextTheme,
+    )
+
+    setThemeMenuOpen(
+      false,
     )
   }
 
@@ -395,12 +569,189 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <main
-        className="app-content"
-        data-testid="app-content"
-      >
-        <Outlet />
-      </main>
+      <div className="app-main">
+        <header
+          className="app-topbar"
+          data-testid="app-topbar"
+        >
+          <div className="app-topbar-context">
+            <span className="app-topbar-eyebrow">
+              Sistema clínico
+            </span>
+
+            <strong>
+              Gestão da clínica
+            </strong>
+          </div>
+
+          <div className="app-topbar-actions">
+            <div
+              className="theme-selector"
+              ref={
+                themeMenuRef
+              }
+            >
+              <button
+                className="theme-selector-trigger"
+                data-testid="theme-selector-button"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={
+                  themeMenuOpen
+                }
+                onClick={
+                  () =>
+                    setThemeMenuOpen(
+                      (current) =>
+                        !current,
+                    )
+                }
+              >
+                <ThemeIcon
+                  preference={
+                    preference
+                  }
+                />
+
+                <span>
+                  {getThemeLabel(
+                    preference,
+                  )}
+                </span>
+
+                <ChevronIcon />
+              </button>
+
+              {themeMenuOpen && (
+                <div
+                  className="theme-menu"
+                  role="menu"
+                  data-testid="theme-selector-menu"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={
+                      preference ===
+                      'system'
+                        ? 'active'
+                        : ''
+                    }
+                    data-testid="theme-system-option"
+                    onClick={
+                      () =>
+                        handleThemeChange(
+                          'system',
+                        )
+                    }
+                  >
+                    <SystemIcon />
+
+                    <span>
+                      <strong>
+                        Sistema
+                      </strong>
+
+                      <small>
+                        Acompanha seu dispositivo
+                      </small>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={
+                      preference ===
+                      'light'
+                        ? 'active'
+                        : ''
+                    }
+                    data-testid="theme-light-option"
+                    onClick={
+                      () =>
+                        handleThemeChange(
+                          'light',
+                        )
+                    }
+                  >
+                    <SunIcon />
+
+                    <span>
+                      <strong>
+                        Claro
+                      </strong>
+
+                      <small>
+                        Sempre usar tema claro
+                      </small>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={
+                      preference ===
+                      'dark'
+                        ? 'active'
+                        : ''
+                    }
+                    data-testid="theme-dark-option"
+                    onClick={
+                      () =>
+                        handleThemeChange(
+                          'dark',
+                        )
+                    }
+                  >
+                    <MoonIcon />
+
+                    <span>
+                      <strong>
+                        Escuro
+                      </strong>
+
+                      <small>
+                        Sempre usar tema escuro
+                      </small>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="topbar-user"
+              data-testid="topbar-user"
+            >
+              <div
+                className="topbar-user-avatar"
+                aria-hidden="true"
+              >
+                {userInitials}
+              </div>
+
+              <div className="topbar-user-info">
+                <strong>
+                  {user?.nome}
+                </strong>
+
+                <span>
+                  {roleLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main
+          className="app-content"
+          data-testid="app-content"
+        >
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }
