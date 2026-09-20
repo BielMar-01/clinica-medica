@@ -21,10 +21,68 @@
 
     <meta
       name="theme-color"
-      content="#101828"
+      content="#f5f8f9"
     />
 
-    <title>Clínica Médica | Galera do TI</title>
+    <script>
+      ;(() => {
+        const storageKey =
+          'clinica-medica-theme'
+
+        const storedTheme =
+          localStorage.getItem(
+            storageKey,
+          )
+
+        const preference =
+          storedTheme === 'light' ||
+          storedTheme === 'dark' ||
+          storedTheme === 'system'
+            ? storedTheme
+            : 'system'
+
+        const systemDark =
+          window.matchMedia(
+            '(prefers-color-scheme: dark)',
+          ).matches
+
+        const resolvedTheme =
+          preference === 'system'
+            ? (
+              systemDark
+                ? 'dark'
+                : 'light'
+            )
+            : preference
+
+        document.documentElement.setAttribute(
+          'data-theme',
+          resolvedTheme,
+        )
+
+        document.documentElement.style.colorScheme =
+          resolvedTheme
+
+        const themeColor =
+          resolvedTheme === 'dark'
+            ? '#091319'
+            : '#f5f8f9'
+
+        const metaThemeColor =
+          document.querySelector(
+            'meta[name="theme-color"]',
+          )
+
+        metaThemeColor?.setAttribute(
+          'content',
+          themeColor,
+        )
+      })()
+    </script>
+
+    <title>
+      Clínica Médica | Galera do TI
+    </title>
   </head>
 
   <body>
