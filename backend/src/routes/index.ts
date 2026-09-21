@@ -9,6 +9,7 @@ import docsRouter from './docs.routes.js'
 import doctorRouter from './doctor.routes.js'
 import healthRouter from './health.routes.js'
 import patientRouter from './patient.routes.js'
+import publicSpecialtyRouter from './public-specialty.routes.js'
 import specialtyRouter from './specialty.routes.js'
 import userRouter from './user.routes.js'
 
@@ -30,6 +31,11 @@ router.use(
 
 router.use(
   databaseRouter,
+)
+
+router.use(
+  '/public/especialidades',
+  publicSpecialtyRouter,
 )
 
 router.use(
