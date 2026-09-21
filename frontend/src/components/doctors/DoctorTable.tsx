@@ -4,7 +4,9 @@ import type {
 
 type DoctorTableProps = {
   doctors: DoctorSummary[]
+
   loading: boolean
+
   canManage: boolean
 
   onEdit: (
@@ -34,6 +36,31 @@ function getOtherSpecialties(
   )
 }
 
+function getInitials(
+  name: string,
+) {
+  const parts =
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+
+  if (parts.length === 0) {
+    return 'MD'
+  }
+
+  if (parts.length === 1) {
+    return parts[0]
+      .slice(0, 2)
+      .toUpperCase()
+  }
+
+  return (
+    parts[0][0] +
+    parts[parts.length - 1][0]
+  ).toUpperCase()
+}
+
 export function DoctorTable({
   doctors,
   loading,
@@ -52,7 +79,9 @@ export function DoctorTable({
     )
   }
 
-  if (doctors.length === 0) {
+  if (
+    doctors.length === 0
+  ) {
     return (
       <div
         className="content-card"
@@ -65,11 +94,11 @@ export function DoctorTable({
 
   return (
     <div
-      className="table-card"
+      className="table-card patient-table-card"
       data-testid="doctors-table-card"
     >
       <div
-        className="table-wrapper"
+        className="table-wrapper patient-table-wrapper"
         data-testid="doctors-table-wrapper"
       >
         <table
@@ -81,16 +110,28 @@ export function DoctorTable({
           >
             <tr>
               <th>Nome</th>
+
               <th>CRM</th>
+
               <th>
                 Especialidade principal
               </th>
+
               <th>
                 Outras especialidades
               </th>
-              <th>Duração</th>
-              <th>Status</th>
-              <th>Ações</th>
+
+              <th>
+                Duração
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Ações
+              </th>
             </tr>
           </thead>
 
@@ -111,47 +152,86 @@ export function DoctorTable({
 
                 return (
                   <tr
-                    key={doctor.id}
+                    key={
+                      doctor.id
+                    }
                     data-testid={`doctors-row-${doctor.id}`}
                   >
                     <td
+                      data-label="Médico"
                       data-testid={`doctors-name-${doctor.id}`}
                     >
-                      {doctor.nomeCompleto}
+                      <div className="table-primary-cell">
+                        <div
+                          className="table-avatar"
+                          aria-hidden="true"
+                        >
+                          {getInitials(
+                            doctor.nomeCompleto,
+                          )}
+                        </div>
+
+                        <strong>
+                          {
+                            doctor.nomeCompleto
+                          }
+                        </strong>
+                      </div>
                     </td>
 
                     <td
+                      data-label="CRM"
                       data-testid={`doctors-crm-${doctor.id}`}
                     >
-                      {doctor.crmNumero}
+                      <strong>
+                        {
+                          doctor.crmNumero
+                        }
+                      </strong>
+
                       {' / '}
-                      {doctor.crmUf}
+
+                      {
+                        doctor.crmUf
+                      }
                     </td>
 
                     <td
+                      data-label="Especialidade principal"
                       data-testid={`doctors-main-specialty-${doctor.id}`}
                     >
-                      {mainSpecialty?.nome ??
-                        '-'}
+                      {mainSpecialty ? (
+                        mainSpecialty.nome
+                      ) : (
+                        <span className="table-muted-value">
+                          Não informada
+                        </span>
+                      )}
                     </td>
 
                     <td
+                      data-label="Outras especialidades"
                       data-testid={`doctors-other-specialties-${doctor.id}`}
                     >
                       {otherSpecialties.length >
-                      0
-                        ? otherSpecialties
-                            .map(
-                              (
-                                specialty,
-                              ) =>
-                                specialty.nome,
-                            )
-                            .join(', ')
-                        : '-'}
+                      0 ? (
+                        otherSpecialties
+                          .map(
+                            (
+                              specialty,
+                            ) =>
+                              specialty.nome,
+                          )
+                          .join(', ')
+                      ) : (
+                        <span className="table-muted-value">
+                          Nenhuma
+                        </span>
+                      )}
                     </td>
 
                     <td
+                      data-label="Duração"
                       data-testid={`doctors-duration-${doctor.id}`}
                     >
                       {
@@ -161,7 +241,9 @@ export function DoctorTable({
                       min
                     </td>
 
-                    <td>
+                    <td
+                      data-label="Status"
+                    >
                       <span
                         className={
                           doctor.ativo
@@ -176,12 +258,14 @@ export function DoctorTable({
                       </span>
                     </td>
 
-                    <td>
+                    <td
+                      data-label="Ações"
+                    >
                       <div
                         className="table-actions"
                         data-testid={`doctors-actions-${doctor.id}`}
                       >
-                        {canManage && (
+                        {canManage ? (
                           <>
                             <button
                               type="button"
@@ -211,6 +295,10 @@ export function DoctorTable({
                                 : 'Ativar'}
                             </button>
                           </>
+                        ) : (
+                          <span className="table-muted-value">
+                            Somente leitura
+                          </span>
                         )}
                       </div>
                     </td>

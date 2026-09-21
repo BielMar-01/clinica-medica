@@ -1,8 +1,18 @@
 .form-error,
 .page-error {
+  width: 100%;
+
   padding:
     var(--space-3)
     var(--space-4);
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--color-danger) 24%,
+      transparent
+    );
 
   border-radius:
     var(--radius-sm);
@@ -13,13 +23,14 @@
   background:
     var(--color-danger-soft);
 
-  border:
-    1px solid
-    color-mix(
-      in srgb,
-      var(--color-danger) 24%,
-      transparent
-    );
+  font-size:
+    var(--font-size-sm);
+
+  line-height: 1.5;
+}
+
+.form-error {
+  margin: 0;
 }
 
 .page-error {
@@ -27,16 +38,26 @@
     var(--space-5);
 }
 
+/*
+ * Status
+ */
+
 .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  gap: var(--space-1);
 
   min-height: 26px;
 
   padding:
     0
     var(--space-3);
+
+  border:
+    1px solid
+    transparent;
 
   border-radius:
     var(--radius-full);
@@ -48,6 +69,8 @@
     var(--font-weight-bold);
 
   line-height: 1;
+
+  white-space: nowrap;
 }
 
 .status-badge.active {
@@ -56,6 +79,13 @@
 
   background:
     var(--color-success-soft);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-success) 14%,
+      transparent
+    );
 }
 
 .status-badge.inactive {
@@ -64,7 +94,155 @@
 
   background:
     var(--color-danger-soft);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-danger) 14%,
+      transparent
+    );
 }
+
+/*
+ * Badges genéricos.
+ *
+ * Podem ser reutilizados posteriormente para
+ * perfis, categorias, tipos de consulta etc.
+ */
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 26px;
+
+  padding:
+    0
+    var(--space-3);
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-full);
+
+  color:
+    var(--color-text-secondary);
+
+  background:
+    var(--color-surface-secondary);
+
+  font-size:
+    var(--font-size-xs);
+
+  font-weight:
+    var(--font-weight-semibold);
+
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+.info-badge-primary {
+  color:
+    var(--color-primary-700);
+
+  background:
+    var(--color-primary-50);
+
+  border-color:
+    var(--color-primary-100);
+}
+
+.info-badge-success {
+  color:
+    var(--color-success);
+
+  background:
+    var(--color-success-soft);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-success) 14%,
+      transparent
+    );
+}
+
+.info-badge-warning {
+  color:
+    var(--color-warning);
+
+  background:
+    var(--color-warning-soft);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-warning) 16%,
+      transparent
+    );
+}
+
+.info-badge-danger {
+  color:
+    var(--color-danger);
+
+  background:
+    var(--color-danger-soft);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-danger) 14%,
+      transparent
+    );
+}
+
+/*
+ * Campos obrigatórios
+ */
+
+.required-field-mark {
+  color:
+    var(--color-danger);
+
+  font-weight:
+    var(--font-weight-bold);
+}
+
+.required-fields-hint {
+  margin:
+    0
+    0
+    var(--space-4);
+
+  color:
+    var(--color-text-secondary);
+
+  font-size:
+    var(--font-size-sm);
+
+  line-height: 1.5;
+}
+
+/*
+ * Valores auxiliares.
+ */
+
+.feedback-muted {
+  color:
+    var(--color-text-muted);
+
+  font-size:
+    var(--font-size-sm);
+}
+
+/*
+ * Dark Mode
+ */
 
 [data-theme="dark"]
 .form-error,
@@ -100,6 +278,14 @@
       91,
       0.18
     );
+
+  border-color:
+    rgba(
+      114,
+      225,
+      178,
+      0.12
+    );
 }
 
 [data-theme="dark"]
@@ -113,25 +299,124 @@
       67,
       0.16
     );
+
+  border-color:
+    rgba(
+      255,
+      158,
+      158,
+      0.12
+    );
 }
 
-.required-field-mark {
-  color:
-    var(--color-danger);
-
-  font-weight:
-    var(--font-weight-bold);
-}
-
-.required-fields-hint {
-  margin:
-    0
-    0
-    var(--space-4);
-
+[data-theme="dark"]
+.info-badge {
   color:
     var(--color-text-secondary);
 
-  font-size:
-    var(--font-size-sm);
+  background:
+    var(--color-surface-secondary);
+
+  border-color:
+    var(--color-border);
+}
+
+[data-theme="dark"]
+.info-badge-primary {
+  color:
+    var(--color-primary-300);
+
+  background:
+    rgba(
+      32,
+      160,
+      168,
+      0.12
+    );
+
+  border-color:
+    rgba(
+      80,
+      193,
+      199,
+      0.18
+    );
+}
+
+[data-theme="dark"]
+.info-badge-success {
+  color: #72e1b2;
+
+  background:
+    rgba(
+      22,
+      132,
+      91,
+      0.16
+    );
+
+  border-color:
+    rgba(
+      114,
+      225,
+      178,
+      0.12
+    );
+}
+
+[data-theme="dark"]
+.info-badge-warning {
+  color: #f3bd68;
+
+  background:
+    rgba(
+      213,
+      138,
+      25,
+      0.14
+    );
+
+  border-color:
+    rgba(
+      243,
+      189,
+      104,
+      0.14
+    );
+}
+
+[data-theme="dark"]
+.info-badge-danger {
+  color: #ff9e9e;
+
+  background:
+    rgba(
+      209,
+      67,
+      67,
+      0.14
+    );
+
+  border-color:
+    rgba(
+      255,
+      158,
+      158,
+      0.12
+    );
+}
+
+/*
+ * High contrast / forced colors
+ */
+
+@media (forced-colors: active) {
+  .status-badge,
+  .info-badge,
+  .form-error,
+  .page-error {
+    border:
+      1px solid
+      CanvasText;
+  }
 }

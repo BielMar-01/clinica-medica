@@ -76,6 +76,31 @@ function formatLastLogin(
   )
 }
 
+function getInitials(
+  name: string,
+) {
+  const parts =
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+
+  if (parts.length === 0) {
+    return 'US'
+  }
+
+  if (parts.length === 1) {
+    return parts[0]
+      .slice(0, 2)
+      .toUpperCase()
+  }
+
+  return (
+    parts[0][0] +
+    parts[parts.length - 1][0]
+  ).toUpperCase()
+}
+
 function userToFormData(
   systemUser: Awaited<
     ReturnType<
@@ -818,72 +843,62 @@ export function UsersPage() {
         </div>
       </div>
 
-      <div
-        className="table-card"
-        data-testid="users-table-card"
-      >
+      {loading ? (
         <div
-          className="table-wrapper"
+          className="content-card"
+          data-testid="users-loading"
         >
-          <table
-            className="patient-table"
-            data-testid="users-table"
+          Carregando usuários...
+        </div>
+      ) : users.length === 0 ? (
+        <div
+          className="content-card"
+          data-testid="users-empty-message"
+        >
+          Nenhum usuário encontrado.
+        </div>
+      ) : (
+        <div
+          className="table-card patient-table-card"
+          data-testid="users-table-card"
+        >
+          <div
+            className="table-wrapper patient-table-wrapper"
           >
-            <thead>
-              <tr>
-                <th>
-                  Nome
-                </th>
-
-                <th>
-                  E-mail
-                </th>
-
-                <th>
-                  Perfil
-                </th>
-
-                <th>
-                  Último acesso
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Ações
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading && (
+            <table
+              className="patient-table"
+              data-testid="users-table"
+            >
+              <thead>
                 <tr>
-                  <td
-                    colSpan={6}
-                    data-testid="users-loading"
-                  >
-                    Carregando usuários...
-                  </td>
+                  <th>
+                    Nome
+                  </th>
+
+                  <th>
+                    E-mail
+                  </th>
+
+                  <th>
+                    Perfil
+                  </th>
+
+                  <th>
+                    Último acesso
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Ações
+                  </th>
                 </tr>
-              )}
+              </thead>
 
-              {!loading &&
-                users.length ===
-                  0 && (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      data-testid="users-empty-message"
-                    >
-                      Nenhum usuário encontrado.
-                    </td>
-                  </tr>
-                )}
-
-              {!loading &&
-                users.map(
+              <tbody>
+                {users.map(
                   (
                     systemUser,
                   ) => {
@@ -903,14 +918,29 @@ export function UsersPage() {
                         data-testid={`users-row-${systemUser.id}`}
                       >
                         <td
+                          data-label="Usuário"
                           data-testid={`users-name-${systemUser.id}`}
                         >
-                          {
-                            systemUser.nome
-                          }
+                          <div className="table-primary-cell">
+                            <div
+                              className="table-avatar"
+                              aria-hidden="true"
+                            >
+                              {getInitials(
+                                systemUser.nome,
+                              )}
+                            </div>
+
+                            <strong>
+                              {
+                                systemUser.nome
+                              }
+                            </strong>
+                          </div>
                         </td>
 
                         <td
+                          data-label="E-mail"
                           data-testid={`users-email-${systemUser.id}`}
                         >
                           {
@@ -919,6 +949,7 @@ export function UsersPage() {
                         </td>
 
                         <td
+                          data-label="Perfil"
                           data-testid={`users-role-${systemUser.id}`}
                         >
                           {formatRole(
@@ -927,6 +958,7 @@ export function UsersPage() {
                         </td>
 
                         <td
+                          data-label="Último acesso"
                           data-testid={`users-last-login-${systemUser.id}`}
                         >
                           {formatLastLogin(
@@ -934,7 +966,9 @@ export function UsersPage() {
                           )}
                         </td>
 
-                        <td>
+                        <td
+                          data-label="Status"
+                        >
                           <span
                             className={`status-badge ${
                               systemUser.ativo
@@ -949,7 +983,9 @@ export function UsersPage() {
                           </span>
                         </td>
 
-                        <td>
+                        <td
+                          data-label="Ações"
+                        >
                           <div
                             className="table-actions"
                             data-testid={`users-actions-${systemUser.id}`}
@@ -972,7 +1008,7 @@ export function UsersPage() {
 
                             <button
                               type="button"
-                              className="small-button"
+                              className="small-button secondary-button"
                               onClick={() =>
                                 void handleToggleStatus(
                                   systemUser,
@@ -1005,10 +1041,11 @@ export function UsersPage() {
                     )
                   },
                 )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {!loading &&
         pagination.totalPages >
