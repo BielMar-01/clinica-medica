@@ -1,5 +1,4 @@
 import {
-  Navigate,
   Route,
   Routes,
 } from 'react-router'
@@ -11,6 +10,10 @@ import {
 import {
   AppLayout,
 } from '../layouts/AppLayout'
+
+import {
+  PublicLayout,
+} from '../layouts/PublicLayout'
 
 import {
   DashboardPage,
@@ -37,6 +40,10 @@ import {
 } from '../pages/PatientsPage'
 
 import {
+  HomePage,
+} from '../pages/public/HomePage'
+
+import {
   ResetPasswordPage,
 } from '../pages/ResetPasswordPage'
 
@@ -55,6 +62,19 @@ import {
 export function AppRoutes() {
   return (
     <Routes>
+      <Route
+        element={
+          <PublicLayout />
+        }
+      >
+        <Route
+          path="/"
+          element={
+            <HomePage />
+          }
+        />
+      </Route>
+
       <Route
         path="/login"
         element={
@@ -125,16 +145,6 @@ export function AppRoutes() {
             path="/usuarios"
             element={
               <UsersPage />
-            }
-          />
-
-          <Route
-            path="/"
-            element={
-              <Navigate
-                to="/dashboard"
-                replace
-              />
             }
           />
         </Route>
