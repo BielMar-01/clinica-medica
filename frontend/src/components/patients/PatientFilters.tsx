@@ -27,6 +27,71 @@ type PatientFiltersProps = {
     () => void
 }
 
+function SearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle
+        cx="11"
+        cy="11"
+        r="7"
+      />
+
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  )
+}
+
+function FilterIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 6h16" />
+      <path d="M7 12h10" />
+      <path d="M10 18h4" />
+    </svg>
+  )
+}
+
+function ChevronIcon({
+  expanded,
+}: {
+  expanded: boolean
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={
+        expanded
+          ? 'filter-chevron filter-chevron-expanded'
+          : 'filter-chevron'
+      }
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
 export function PatientFiltersComponent({
   filters,
   onChange,
@@ -144,12 +209,21 @@ export function PatientFiltersComponent({
     return 'nome-asc'
   }
 
+  const activeAdvancedFilters =
+    [
+      filters.cpf,
+      filters.telefone,
+      filters.ativo,
+    ].filter(Boolean).length
+
   const hasAdvancedFilters =
-    Boolean(
-      filters.cpf ||
-        filters.telefone ||
-        filters.ativo,
-    )
+    activeAdvancedFilters > 0
+
+  function handleClear() {
+    onClear()
+
+    setExpanded(false)
+  }
 
   return (
     <form
@@ -159,19 +233,37 @@ export function PatientFiltersComponent({
         handleSubmit
       }
     >
+      <div className="patient-filter-heading">
+        <div>
+          <strong>
+            Localizar pacientes
+          </strong>
+
+          <span>
+            Pesquise por nome ou utilize
+            filtros adicionais.
+          </span>
+        </div>
+      </div>
+
       <div
         className="patient-filter-toolbar"
         data-testid="patients-filter-toolbar"
       >
-        <div
-          className="patient-main-search"
-        >
+        <div className="patient-main-search">
           <label
             htmlFor="patient-name-search"
             className="sr-only"
           >
             Buscar paciente
           </label>
+
+          <span
+            className="patient-search-icon"
+            aria-hidden="true"
+          >
+            <SearchIcon />
+          </span>
 
           <input
             id="patient-name-search"
@@ -197,9 +289,7 @@ export function PatientFiltersComponent({
           />
         </div>
 
-        <div
-          className="patient-filter-toolbar-actions"
-        >
+        <div className="patient-filter-toolbar-actions">
           <button
             data-testid="patients-filters-button"
             type="button"
@@ -211,6 +301,7 @@ export function PatientFiltersComponent({
             aria-expanded={
               expanded
             }
+            aria-controls="patients-advanced-filters"
             onClick={() =>
               setExpanded(
                 (
@@ -220,22 +311,32 @@ export function PatientFiltersComponent({
               )
             }
           >
-            Filtros
+            <FilterIcon />
+
+            <span>
+              Filtros
+            </span>
 
             {hasAdvancedFilters && (
               <span
-                className="active-filter-indicator"
-                aria-label="Existem filtros ativos"
-              />
+                className="active-filter-count"
+                aria-label={`${activeAdvancedFilters} filtros ativos`}
+              >
+                {
+                  activeAdvancedFilters
+                }
+              </span>
             )}
+
+            <ChevronIcon
+              expanded={
+                expanded
+              }
+            />
           </button>
 
-          <label
-            className="patient-sort-field"
-          >
-            <span
-              className="sr-only"
-            >
+          <label className="patient-sort-field">
+            <span className="sr-only">
               Ordenar pacientes
             </span>
 
@@ -252,28 +353,21 @@ export function PatientFiltersComponent({
                     .value,
                 )
               }
+              aria-label="Ordenar pacientes"
             >
-              <option
-                value="nome-asc"
-              >
+              <option value="nome-asc">
                 Nome A → Z
               </option>
 
-              <option
-                value="nome-desc"
-              >
+              <option value="nome-desc">
                 Nome Z → A
               </option>
 
-              <option
-                value="recentes"
-              >
+              <option value="recentes">
                 Mais recentes
               </option>
 
-              <option
-                value="antigos"
-              >
+              <option value="antigos">
                 Mais antigos
               </option>
             </select>
@@ -284,6 +378,8 @@ export function PatientFiltersComponent({
             type="submit"
             className="patient-search-button"
           >
+            <SearchIcon />
+
             Buscar
           </button>
         </div>
@@ -291,9 +387,34 @@ export function PatientFiltersComponent({
 
       {expanded && (
         <div
+          id="patients-advanced-filters"
           className="patient-advanced-filters"
           data-testid="patients-filters-panel"
         >
+          <div className="patient-advanced-filter-header">
+            <div>
+              <strong>
+                Filtros avançados
+              </strong>
+
+              <span>
+                Refine os resultados por
+                informações cadastrais.
+              </span>
+            </div>
+
+            {hasAdvancedFilters && (
+              <span className="active-filters-label">
+                {
+                  activeAdvancedFilters
+                }{' '}
+                {activeAdvancedFilters === 1
+                  ? 'filtro ativo'
+                  : 'filtros ativos'}
+              </span>
+            )}
+          </div>
+
           <div
             className="patient-advanced-filter-grid"
             data-testid="patients-filters-fields"
@@ -397,7 +518,7 @@ export function PatientFiltersComponent({
               type="button"
               className="secondary-button"
               onClick={
-                onClear
+                handleClear
               }
             >
               Limpar filtros

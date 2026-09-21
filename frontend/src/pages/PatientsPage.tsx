@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useState,
 } from 'react'
@@ -45,268 +46,205 @@ const initialFilters:
     ordem: 'asc',
   }
 
-function patientToFormData(
-  patient: Awaited<
-    ReturnType<
-      typeof getPatientRequest
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
     >
-  >['data'],
-): PatientFormData {
-  return {
-    nomeCompleto:
-      patient.nomeCompleto,
-
-    cpf:
-      patient.cpf,
-
-    dataNascimento:
-      patient.dataNascimento,
-
-    sexo:
-      patient.sexo ??
-      '',
-
-    telefone:
-      patient.telefone,
-
-    telefoneSecundario:
-      patient.telefoneSecundario ??
-      '',
-
-    email:
-      patient.email ??
-      '',
-
-    nomeMae:
-      patient.nomeMae ??
-      '',
-
-    cep:
-      patient.cep ??
-      '',
-
-    logradouro:
-      patient.logradouro ??
-      '',
-
-    numero:
-      patient.numero ??
-      '',
-
-    complemento:
-      patient.complemento ??
-      '',
-
-    bairro:
-      patient.bairro ??
-      '',
-
-    cidade:
-      patient.cidade ??
-      '',
-
-    estado:
-      patient.estado ??
-      '',
-
-    observacoes:
-      patient.observacoes ??
-      '',
-  }
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  )
 }
 
 export function PatientsPage() {
   const {
     user,
-    isAuthenticated,
-  } =
-    useAuth()
+  } = useAuth()
 
   const [
     patients,
     setPatients,
-  ] =
-    useState<
-      PatientSummary[]
-    >([])
+  ] = useState<
+    PatientSummary[]
+  >([])
 
   const [
     filters,
     setFilters,
-  ] =
-    useState<
-      PatientFilters
-    >(
-      initialFilters,
-    )
+  ] = useState<
+    PatientFilters
+  >(
+    initialFilters,
+  )
 
   const [
     appliedFilters,
     setAppliedFilters,
-  ] =
-    useState<
-      PatientFilters
-    >(
-      initialFilters,
-    )
+  ] = useState<
+    PatientFilters
+  >(
+    initialFilters,
+  )
 
   const [
-    pagination,
-    setPagination,
-  ] =
-    useState({
-      page: 1,
-      limit: 10,
-      total: 0,
-      totalPages: 0,
-    })
+    total,
+    setTotal,
+  ] = useState(0)
+
+  const [
+    totalPages,
+    setTotalPages,
+  ] = useState(1)
 
   const [
     loading,
     setLoading,
-  ] =
-    useState(true)
+  ] = useState(true)
 
   const [
     error,
     setError,
-  ] =
-    useState('')
+  ] = useState('')
+
+  const [
+    success,
+    setSuccess,
+  ] = useState('')
 
   const [
     formOpen,
     setFormOpen,
-  ] =
-    useState(false)
-
-  const [
-    formKey,
-    setFormKey,
-  ] =
-    useState(0)
+  ] = useState(false)
 
   const [
     formTitle,
     setFormTitle,
-  ] =
-    useState(
-      'Novo paciente',
-    )
-
-  const [
-    formData,
-    setFormData,
-  ] =
-    useState<
-      PatientFormData | null
-    >(null)
+  ] = useState(
+    'Novo paciente',
+  )
 
   const [
     editingPatientId,
     setEditingPatientId,
-  ] =
-    useState<
-      string | null
-    >(null)
+  ] = useState<
+    string | null
+  >(null)
+
+  const [
+    formInitialData,
+    setFormInitialData,
+  ] = useState<
+    PatientFormData | null
+  >(null)
 
   const [
     submitting,
     setSubmitting,
-  ] =
-    useState(false)
-
-  const [
-    reloadKey,
-    setReloadKey,
-  ] =
-    useState(0)
+  ] = useState(false)
 
   const canManage =
-    user?.perfil ===
-      'ADMIN' ||
+    user?.perfil === 'ADMIN' ||
     user?.perfil ===
       'RECEPCIONISTA'
 
-  useEffect(() => {
-    if (
-      !isAuthenticated
-    ) {
-      return
-    }
+  const loadPatients =
+    useCallback(
+      async (
+        nextFilters:
+          PatientFilters,
+      ) => {
+        setLoading(true)
+        setError('')
 
-    let cancelled =
-      false
+        try {
+          const response =
+            await listPatientsRequest(
+              nextFilters,
+            )
 
-    async function loadPatients() {
-      try {
-        const response =
-          await listPatientsRequest(
-            appliedFilters,
+          setPatients(
+            response.data,
           )
 
-        if (cancelled) {
-          return
-        }
+          setTotal(
+            response
+              .pagination
+              .total,
+          )
 
-        setPatients(
-          response.data,
-        )
+          setTotalPages(
+            Math.max(
+              response
+                .pagination
+                .totalPages,
+              1,
+            ),
+          )
+        } catch (requestError) {
+          setPatients([])
+          setTotal(0)
+          setTotalPages(1)
 
-        setPagination(
-          response.pagination,
-        )
-
-        setError('')
-      } catch (error) {
-        if (cancelled) {
-          return
-        }
-
-        setError(
-          error instanceof Error
-            ? error.message
-            : 'Erro ao carregar pacientes',
-        )
-      } finally {
-        if (!cancelled) {
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : 'Erro ao carregar pacientes.',
+          )
+        } finally {
           setLoading(false)
         }
+      },
+      [],
+    )
+
+  useEffect(
+    () => {
+      const timeoutId =
+        window.setTimeout(
+          () => {
+            void loadPatients(
+              appliedFilters,
+            )
+          },
+          0,
+        )
+
+      return () => {
+        window.clearTimeout(
+          timeoutId,
+        )
       }
-    }
-
-    void loadPatients()
-
-    return () => {
-      cancelled = true
-    }
-  }, [
-    isAuthenticated,
-    appliedFilters,
-    reloadKey,
-  ])
+    },
+    [
+      appliedFilters,
+      loadPatients,
+    ],
+  )
 
   function handleApplyFilters(
     nextFilters:
       PatientFilters,
   ) {
-    const filtersToApply = {
-      ...nextFilters,
-      page: 1,
-    }
-
-    setLoading(true)
+    setSuccess('')
 
     setFilters(
-      filtersToApply,
+      nextFilters,
     )
 
     setAppliedFilters(
-      filtersToApply,
+      nextFilters,
     )
   }
 
-  function handleClear() {
-    setLoading(true)
+  function handleClearFilters() {
+    setSuccess('')
 
     setFilters(
       initialFilters,
@@ -314,23 +252,40 @@ export function PatientsPage() {
 
     setAppliedFilters(
       initialFilters,
+    )
+  }
+
+  function handlePageChange(
+    page: number,
+  ) {
+    const nextFilters = {
+      ...appliedFilters,
+      page,
+    }
+
+    setFilters(
+      nextFilters,
+    )
+
+    setAppliedFilters(
+      nextFilters,
     )
   }
 
   function openCreateForm() {
+    setError('')
+    setSuccess('')
+
     setEditingPatientId(
       null,
     )
-
-    setFormData(null)
 
     setFormTitle(
       'Novo paciente',
     )
 
-    setFormKey(
-      (current) =>
-        current + 1,
+    setFormInitialData(
+      null,
     )
 
     setFormOpen(true)
@@ -340,70 +295,158 @@ export function PatientsPage() {
     patient:
       PatientSummary,
   ) {
-    try {
-      setError('')
+    setError('')
+    setSuccess('')
 
+    try {
       const response =
         await getPatientRequest(
           patient.id,
         )
 
+      const currentPatient =
+        response.data
+
       setEditingPatientId(
         patient.id,
-      )
-
-      setFormData(
-        patientToFormData(
-          response.data,
-        ),
       )
 
       setFormTitle(
         'Editar paciente',
       )
 
-      setFormKey(
-        (current) =>
-          current + 1,
-      )
+      setFormInitialData({
+        nomeCompleto:
+          currentPatient
+            .nomeCompleto,
+
+        cpf:
+          currentPatient.cpf,
+
+        dataNascimento:
+          currentPatient
+            .dataNascimento,
+
+        sexo:
+          currentPatient
+            .sexo ?? '',
+
+        telefone:
+          currentPatient
+            .telefone,
+
+        telefoneSecundario:
+          currentPatient
+            .telefoneSecundario ??
+          '',
+
+        email:
+          currentPatient
+            .email ?? '',
+
+        nomeMae:
+          currentPatient
+            .nomeMae ?? '',
+
+        cep:
+          currentPatient
+            .cep ?? '',
+
+        logradouro:
+          currentPatient
+            .logradouro ?? '',
+
+        numero:
+          currentPatient
+            .numero ?? '',
+
+        complemento:
+          currentPatient
+            .complemento ?? '',
+
+        bairro:
+          currentPatient
+            .bairro ?? '',
+
+        cidade:
+          currentPatient
+            .cidade ?? '',
+
+        estado:
+          currentPatient
+            .estado ?? '',
+
+        observacoes:
+          currentPatient
+            .observacoes ?? '',
+      })
 
       setFormOpen(true)
-    } catch (error) {
+    } catch (requestError) {
       setError(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao carregar paciente',
+        requestError instanceof Error
+          ? requestError.message
+          : 'Erro ao carregar paciente.',
       )
     }
   }
 
-  async function handleSubmit(
+  function closeForm() {
+    if (submitting) {
+      return
+    }
+
+    setFormOpen(false)
+
+    setEditingPatientId(
+      null,
+    )
+
+    setFormInitialData(
+      null,
+    )
+  }
+
+  async function handleSubmitPatient(
     data:
       PatientFormData,
   ) {
-    try {
-      setSubmitting(true)
+    setSubmitting(true)
+    setError('')
+    setSuccess('')
 
-      if (
-        editingPatientId
-      ) {
+    try {
+      if (editingPatientId) {
         await updatePatientRequest(
           editingPatientId,
           data,
+        )
+
+        setSuccess(
+          'Paciente atualizado com sucesso.',
         )
       } else {
         await createPatientRequest(
           data,
         )
+
+        setSuccess(
+          'Paciente cadastrado com sucesso.',
+        )
       }
 
       setFormOpen(false)
 
-      setLoading(true)
+      setEditingPatientId(
+        null,
+      )
 
-      setReloadKey(
-        (current) =>
-          current + 1,
+      setFormInitialData(
+        null,
+      )
+
+      await loadPatients(
+        appliedFilters,
       )
     } finally {
       setSubmitting(false)
@@ -414,93 +457,59 @@ export function PatientsPage() {
     patient:
       PatientSummary,
   ) {
-    const action =
-      patient.ativo
-        ? 'inativar'
-        : 'ativar'
-
-    const confirmed =
-      window.confirm(
-        `Deseja ${action} o paciente ${patient.nomeCompleto}?`,
-      )
-
-    if (!confirmed) {
-      return
-    }
+    setError('')
+    setSuccess('')
 
     try {
-      setError('')
-
       await updatePatientStatusRequest(
         patient.id,
         !patient.ativo,
       )
 
-      setLoading(true)
-
-      setReloadKey(
-        (current) =>
-          current + 1,
+      setSuccess(
+        patient.ativo
+          ? 'Paciente inativado com sucesso.'
+          : 'Paciente ativado com sucesso.',
       )
-    } catch (error) {
+
+      await loadPatients(
+        appliedFilters,
+      )
+    } catch (requestError) {
       setError(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao alterar status do paciente',
+        requestError instanceof Error
+          ? requestError.message
+          : 'Erro ao alterar status do paciente.',
       )
     }
-  }
-
-  function changePage(
-    page: number,
-  ) {
-    if (
-      page < 1 ||
-      page >
-        pagination.totalPages
-    ) {
-      return
-    }
-
-    setLoading(true)
-
-    setFilters(
-      (current) => ({
-        ...current,
-        page,
-      }),
-    )
-
-    setAppliedFilters(
-      (current) => ({
-        ...current,
-        page,
-      }),
-    )
   }
 
   return (
     <section
-      className="page"
+      className="page patients-page"
       data-testid="patients-page"
     >
       <header
         className="page-header"
-        data-testid="patients-page-header"
+        data-testid="patients-header"
       >
         <div>
+          <span className="page-eyebrow">
+            Gestão clínica
+          </span>
+
           <h1
-            data-testid="patients-page-title"
+            data-testid="patients-title"
           >
             Pacientes
           </h1>
 
           <p
-            data-testid="patients-page-description"
+            data-testid="patients-description"
           >
-            Cadastro, consulta e
-            gerenciamento de
-            pacientes.
+            Consulte, organize e mantenha
+            atualizados os dados cadastrais
+            dos pacientes da clínica.
           </p>
         </div>
 
@@ -508,19 +517,31 @@ export function PatientsPage() {
           <button
             data-testid="patients-new-button"
             type="button"
-            className="primary-button"
+            className="primary-button patients-new-button"
             onClick={
               openCreateForm
             }
           >
+            <PlusIcon />
+
             Novo paciente
           </button>
         )}
       </header>
 
+      {success && (
+        <div
+          className="page-feedback page-feedback-success"
+          role="status"
+          data-testid="patients-success-message"
+        >
+          {success}
+        </div>
+      )}
+
       {error && (
         <div
-          className="page-error"
+          className="page-feedback page-feedback-error"
           role="alert"
           data-testid="patients-error-message"
         >
@@ -529,9 +550,7 @@ export function PatientsPage() {
       )}
 
       <PatientFiltersComponent
-        filters={
-          filters
-        }
+        filters={filters}
         onChange={
           setFilters
         }
@@ -539,17 +558,59 @@ export function PatientsPage() {
           handleApplyFilters
         }
         onClear={
-          handleClear
+          handleClearFilters
         }
       />
 
+      <div
+        className="page-summary patients-summary"
+        data-testid="patients-summary"
+      >
+        <div>
+          <span className="page-summary-text">
+            {loading ? (
+              'Atualizando resultados...'
+            ) : (
+              <>
+                <strong
+                  data-testid="patients-total"
+                >
+                  {total.toLocaleString(
+                    'pt-BR',
+                  )}
+                </strong>{' '}
+                {total === 1
+                  ? 'paciente encontrado'
+                  : 'pacientes encontrados'}
+              </>
+            )}
+          </span>
+        </div>
+
+        {!loading &&
+          totalPages > 1 && (
+            <span
+              className="page-summary-text"
+              data-testid="patients-page-summary"
+            >
+              Página{' '}
+              <strong>
+                {
+                  appliedFilters
+                    .page
+                }
+              </strong>{' '}
+              de{' '}
+              <strong>
+                {totalPages}
+              </strong>
+            </span>
+          )}
+      </div>
+
       <PatientTable
-        patients={
-          patients
-        }
-        loading={
-          loading
-        }
+        patients={patients}
+        loading={loading}
         canManage={
           canManage
         }
@@ -562,8 +623,7 @@ export function PatientsPage() {
       />
 
       {!loading &&
-        pagination.totalPages >
-          0 && (
+        totalPages > 1 && (
           <div
             className="pagination"
             data-testid="patients-pagination"
@@ -573,13 +633,13 @@ export function PatientsPage() {
               type="button"
               className="secondary-button"
               disabled={
-                pagination.page <=
-                1
+                appliedFilters
+                  .page <= 1
               }
               onClick={() =>
-                changePage(
-                  pagination.page -
-                    1,
+                handlePageChange(
+                  appliedFilters
+                    .page - 1,
                 )
               }
             >
@@ -590,16 +650,11 @@ export function PatientsPage() {
               data-testid="patients-pagination-info"
             >
               Página{' '}
-              {pagination.page}{' '}
-              de{' '}
               {
-                pagination.totalPages
-              }
-              {' — '}
-              {
-                pagination.total
+                appliedFilters
+                  .page
               }{' '}
-              paciente(s)
+              de {totalPages}
             </span>
 
             <button
@@ -607,13 +662,14 @@ export function PatientsPage() {
               type="button"
               className="secondary-button"
               disabled={
-                pagination.page >=
-                pagination.totalPages
+                appliedFilters
+                  .page >=
+                totalPages
               }
               onClick={() =>
-                changePage(
-                  pagination.page +
-                    1,
+                handlePageChange(
+                  appliedFilters
+                    .page + 1,
                 )
               }
             >
@@ -624,27 +680,24 @@ export function PatientsPage() {
 
       <PatientForm
         key={
-          formKey
+          editingPatientId ??
+          (formOpen
+            ? 'new-patient'
+            : 'closed')
         }
-        open={
-          formOpen
-        }
-        title={
-          formTitle
-        }
+        open={formOpen}
+        title={formTitle}
         initialData={
-          formData
+          formInitialData
         }
         submitting={
           submitting
         }
-        onClose={() =>
-          setFormOpen(
-            false,
-          )
+        onClose={
+          closeForm
         }
         onSubmit={
-          handleSubmit
+          handleSubmitPatient
         }
       />
     </section>

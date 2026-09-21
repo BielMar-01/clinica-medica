@@ -26,7 +26,6 @@
 
 .table-wrapper {
   width: 100%;
-
   max-width: 100%;
 
   overflow-x: auto;
@@ -105,6 +104,57 @@
   font-weight: var(--font-weight-medium);
 }
 
+.table-primary-cell {
+  display: flex;
+  align-items: center;
+
+  gap: var(--space-3);
+
+  min-width: 0;
+}
+
+.table-primary-cell strong {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-weight: var(--font-weight-semibold);
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.table-avatar {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  width: 34px;
+  height: 34px;
+
+  color: var(--color-primary-700);
+
+  background: var(--color-primary-50);
+
+  border:
+    1px solid
+    var(--color-primary-100);
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-size-xs);
+
+  font-weight: var(--font-weight-bold);
+}
+
+.table-muted-value {
+  color: var(--color-text-muted);
+}
+
 .table-actions {
   display: flex;
   align-items: center;
@@ -113,11 +163,6 @@
 
   gap: var(--space-2);
 }
-
-/*
- * Loading e empty state quando utilizados
- * dentro das tabelas atuais.
- */
 
 .patient-table
 tbody
@@ -131,10 +176,6 @@ td[colspan] {
 
   white-space: normal;
 }
-
-/*
- * Paginação compartilhada.
- */
 
 .pagination {
   display: flex;
@@ -169,10 +210,6 @@ td[colspan] {
 .pagination button {
   min-width: 100px;
 }
-
-/*
- * Badges.
- */
 
 .status-badge {
   display: inline-flex;
@@ -232,10 +269,6 @@ td[colspan] {
 
   background: var(--color-surface-secondary);
 }
-
-/*
- * Dark mode.
- */
 
 [data-theme="dark"]
 .table-card {
@@ -303,9 +336,26 @@ td[colspan] {
   background: var(--color-surface-secondary);
 }
 
-/*
- * Scroll horizontal.
- */
+[data-theme="dark"]
+.table-avatar {
+  color: var(--color-primary-200);
+
+  background:
+    rgba(
+      32,
+      160,
+      168,
+      0.1
+    );
+
+  border-color:
+    rgba(
+      80,
+      193,
+      199,
+      0.18
+    );
+}
 
 .table-wrapper::-webkit-scrollbar {
   height: 8px;
@@ -325,17 +375,319 @@ td[colspan] {
   background: var(--color-gray-400);
 }
 
-@media (max-width: 900px) {
+/*
+ * Tablet e mobile.
+ *
+ * A partir de 1100px a tabela deixa de depender
+ * de uma largura mínima horizontal e passa a
+ * apresentar cada registro como um card.
+ */
+
+@media (max-width: 1100px) {
+  .patient-table-card {
+    overflow: visible;
+
+    background: transparent;
+
+    border: 0;
+
+    border-radius: 0;
+
+    box-shadow: none;
+  }
+
+  .patient-table-card:hover {
+    box-shadow: none;
+  }
+
+  .patient-table-wrapper {
+    overflow: visible;
+  }
+
   .patient-table {
-    min-width: 900px;
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+
+    background: transparent;
+  }
+
+  .patient-table thead {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+
+    clip: rect(
+      0,
+      0,
+      0,
+      0
+    );
+
+    white-space: nowrap;
+
+    border: 0;
+  }
+
+  .patient-table tbody {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: var(--space-4);
+
+    width: 100%;
+  }
+
+  .patient-table tbody tr {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-width: 0;
+
+    overflow: hidden;
+
+    background: var(--color-surface);
+
+    border:
+      1px solid
+      var(--color-border);
+
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-xs);
+
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .patient-table tbody tr:hover {
+    background: var(--color-surface);
+
+    border-color: var(--color-border-strong);
+
+    box-shadow: var(--shadow-sm);
+
+    transform: translateY(-1px);
+  }
+
+  .patient-table tbody td {
+    display: grid;
+
+    grid-template-columns:
+      minmax(92px, 0.8fr)
+      minmax(0, 1.4fr);
+
+    align-items: center;
+
+    gap: var(--space-3);
+
+    width: 100%;
+    min-width: 0;
+
+    padding:
+      var(--space-3)
+      var(--space-4);
+
+    white-space: normal;
+
+    border-bottom:
+      1px solid
+      var(--color-border);
+  }
+
+  .patient-table tbody td::before {
+    content:
+      attr(data-label);
+
+    color: var(--color-text-muted);
+
+    font-size: 0.6875rem;
+
+    font-weight: var(--font-weight-bold);
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+  }
+
+  .patient-table tbody td:first-child {
+    display: block;
+
+    padding:
+      var(--space-4);
+
+    background: var(--color-surface-secondary);
+  }
+
+  .patient-table tbody td:first-child::before {
+    display: none;
+  }
+
+  .patient-table tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .table-primary-cell {
+    width: 100%;
+  }
+
+  .table-primary-cell strong {
+    overflow: visible;
+
+    text-overflow: initial;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+  }
+
+  .table-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .table-muted-value {
+    min-width: 0;
+
+    overflow-wrap: anywhere;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+  .table-actions button {
+    flex: 1 1 auto;
+  }
+
+  [data-theme="dark"]
+  .patient-table tbody tr {
+    background: var(--color-surface);
+
+    border-color: var(--color-border);
+  }
+
+  [data-theme="dark"]
+  .patient-table tbody td:first-child {
+    background: var(--color-surface-secondary);
   }
 }
 
-@media (max-width: 600px) {
+/*
+ * Tablet maior.
+ *
+ * Mantém dois cards por linha para aproveitar
+ * melhor a largura disponível no iPad/tablet.
+ */
+
+@media (
+  max-width: 1100px
+) and (
+  min-width: 769px
+) {
+  .patient-table tbody tr {
+    min-height: 100%;
+  }
+
+  .patient-table tbody td {
+    flex: 1 0 auto;
+  }
+
+  .patient-table tbody td:first-child {
+    flex: 0 0 auto;
+  }
+
+  .patient-table tbody td:last-child {
+    flex: 0 0 auto;
+  }
+}
+
+/*
+ * Tablet compacto.
+ *
+ * Em larguras intermediárias usamos apenas
+ * um card por linha para evitar conteúdo
+ * excessivamente comprimido.
+ */
+
+@media (
+  max-width: 850px
+) {
+  .patient-table tbody {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*
+ * Mobile.
+ */
+
+@media (max-width: 700px) {
+  .patient-table tbody {
+    gap: var(--space-3);
+  }
+
+  .patient-table tbody tr {
+    border-radius: var(--radius-md);
+  }
+
+  .patient-table tbody tr:hover {
+    transform: none;
+  }
+
+  .patient-table tbody td {
+    grid-template-columns:
+      minmax(88px, 0.75fr)
+      minmax(0, 1.4fr);
+
+    gap: var(--space-3);
+
+    padding:
+      var(--space-3)
+      var(--space-4);
+  }
+
+  .patient-table tbody td:first-child {
+    padding:
+      var(--space-4);
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+  .table-actions button {
+    flex:
+      1
+      1
+      120px;
+  }
+
   .pagination {
     align-items: stretch;
 
     flex-direction: column;
+
+    gap: var(--space-2);
 
     padding:
       var(--space-2)
@@ -355,15 +707,44 @@ td[colspan] {
   }
 }
 
-@media (max-width: 400px) {
-  .table-actions {
-    gap: var(--space-1);
+@media (max-width: 420px) {
+  .patient-table tbody td {
+    grid-template-columns:
+      78px
+      minmax(0, 1fr);
+
+    gap: var(--space-2);
+
+    padding:
+      var(--space-3);
   }
 
-  .patient-table th,
-  .patient-table td {
+  .patient-table tbody td:first-child {
     padding:
-      var(--space-3)
       var(--space-3);
+  }
+
+  .table-primary-cell {
+    gap: var(--space-2);
+  }
+
+  .table-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .table-actions {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .table-actions button {
+    width: 100%;
+
+    flex:
+      0
+      0
+      auto;
   }
 }

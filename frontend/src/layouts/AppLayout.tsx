@@ -217,6 +217,41 @@ function ChevronIcon() {
   )
 }
 
+function MenuIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  )
+}
+
 function getRoleLabel(
   role: string | undefined,
 ) {
@@ -315,6 +350,12 @@ export function AppLayout() {
   ] =
     useState(false)
 
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen,
+  ] =
+    useState(false)
+
   const themeMenuRef =
     useRef<HTMLDivElement>(
       null,
@@ -342,6 +383,7 @@ export function AppLayout() {
           event.key === 'Escape'
         ) {
           setThemeMenuOpen(false)
+          setMobileMenuOpen(false)
         }
       }
 
@@ -370,7 +412,59 @@ export function AppLayout() {
     [],
   )
 
+  useEffect(
+    () => {
+      if (!mobileMenuOpen) {
+        return
+      }
+
+      const previousOverflow =
+        document.body.style.overflow
+
+      document.body.style.overflow =
+        'hidden'
+
+      return () => {
+        document.body.style.overflow =
+          previousOverflow
+      }
+    },
+    [mobileMenuOpen],
+  )
+
+  useEffect(
+    () => {
+      const mediaQuery =
+        window.matchMedia(
+          '(min-width: 901px)',
+        )
+
+      function handleDesktopChange(
+        event: MediaQueryListEvent,
+      ) {
+        if (event.matches) {
+          setMobileMenuOpen(false)
+        }
+      }
+
+      mediaQuery.addEventListener(
+        'change',
+        handleDesktopChange,
+      )
+
+      return () => {
+        mediaQuery.removeEventListener(
+          'change',
+          handleDesktopChange,
+        )
+      }
+    },
+    [],
+  )
+
   async function handleLogout() {
+    setMobileMenuOpen(false)
+
     await logout()
 
     navigate(
@@ -393,6 +487,19 @@ export function AppLayout() {
     )
   }
 
+  function handleNavigation() {
+    setMobileMenuOpen(false)
+  }
+
+  function handleOpenMobileMenu() {
+    setThemeMenuOpen(false)
+    setMobileMenuOpen(true)
+  }
+
+  function handleCloseMobileMenu() {
+    setMobileMenuOpen(false)
+  }
+
   const isAdmin =
     user?.perfil === 'ADMIN'
 
@@ -408,13 +515,59 @@ export function AppLayout() {
 
   return (
     <div
-      className="app-layout"
+      className={
+        mobileMenuOpen
+          ? 'app-layout mobile-menu-is-open'
+          : 'app-layout'
+      }
       data-testid="app-layout"
     >
+      <button
+        className={
+          mobileMenuOpen
+            ? 'mobile-menu-overlay mobile-menu-overlay-visible'
+            : 'mobile-menu-overlay'
+        }
+        data-testid="mobile-menu-overlay"
+        type="button"
+        aria-label="Fechar menu de navegação"
+        tabIndex={
+          mobileMenuOpen
+            ? 0
+            : -1
+        }
+        onClick={
+          handleCloseMobileMenu
+        }
+      />
+
       <aside
-        className="sidebar"
+        className={
+          mobileMenuOpen
+            ? 'sidebar sidebar-mobile-open'
+            : 'sidebar'
+        }
         data-testid="app-sidebar"
+        aria-label="Navegação principal"
       >
+        <div className="sidebar-mobile-header">
+          <span>
+            Menu
+          </span>
+
+          <button
+            className="sidebar-mobile-close"
+            data-testid="mobile-menu-close-button"
+            type="button"
+            aria-label="Fechar menu"
+            onClick={
+              handleCloseMobileMenu
+            }
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
         <div
           className="sidebar-brand"
           data-testid="sidebar-brand"
@@ -453,6 +606,9 @@ export function AppLayout() {
             <NavLink
               to="/dashboard"
               data-testid="nav-dashboard-link"
+              onClick={
+                handleNavigation
+              }
             >
               <DashboardIcon />
 
@@ -472,6 +628,9 @@ export function AppLayout() {
             <NavLink
               to="/pacientes"
               data-testid="nav-patients-link"
+              onClick={
+                handleNavigation
+              }
             >
               <PatientsIcon />
 
@@ -483,6 +642,9 @@ export function AppLayout() {
             <NavLink
               to="/especialidades"
               data-testid="nav-specialties-link"
+              onClick={
+                handleNavigation
+              }
             >
               <SpecialtiesIcon />
 
@@ -494,6 +656,9 @@ export function AppLayout() {
             <NavLink
               to="/medicos"
               data-testid="nav-doctors-link"
+              onClick={
+                handleNavigation
+              }
             >
               <DoctorsIcon />
 
@@ -514,6 +679,9 @@ export function AppLayout() {
               <NavLink
                 to="/usuarios"
                 data-testid="nav-users-link"
+                onClick={
+                  handleNavigation
+                }
               >
                 <UsersIcon />
 
@@ -574,14 +742,32 @@ export function AppLayout() {
           className="app-topbar"
           data-testid="app-topbar"
         >
-          <div className="app-topbar-context">
-            <span className="app-topbar-eyebrow">
-              Sistema clínico
-            </span>
+          <div className="app-topbar-leading">
+            <button
+              className="mobile-menu-button"
+              data-testid="mobile-menu-button"
+              type="button"
+              aria-label="Abrir menu de navegação"
+              aria-expanded={
+                mobileMenuOpen
+              }
+              aria-controls="app-navigation"
+              onClick={
+                handleOpenMobileMenu
+              }
+            >
+              <MenuIcon />
+            </button>
 
-            <strong>
-              Gestão da clínica
-            </strong>
+            <div className="app-topbar-context">
+              <span className="app-topbar-eyebrow">
+                Sistema clínico
+              </span>
+
+              <strong>
+                Gestão da clínica
+              </strong>
+            </div>
           </div>
 
           <div className="app-topbar-actions">
