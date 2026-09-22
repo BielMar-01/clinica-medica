@@ -1,6 +1,10 @@
-import type { Prisma } from '@prisma/client'
+import type {
+  Prisma,
+} from '@prisma/client'
 
-import { prisma } from '../database/prisma.js'
+import {
+  prisma,
+} from '../database/prisma.js'
 
 type CreateSpecialtyData = {
   nome: string
@@ -44,7 +48,8 @@ export async function findSpecialtyByName(
 export async function listSpecialties(
   params: ListSpecialtiesParams,
 ) {
-  const where: Prisma.especialidadesWhereInput = {}
+  const where: Prisma.especialidadesWhereInput =
+    {}
 
   if (params.nome) {
     where.nome = {
@@ -53,29 +58,33 @@ export async function listSpecialties(
     }
   }
 
-  if (params.ativo !== undefined) {
-    where.ativo = params.ativo
+  if (
+    params.ativo !==
+    undefined
+  ) {
+    where.ativo =
+      params.ativo
   }
 
   const skip =
-    (params.page - 1) * params.limit
+    (params.page - 1) *
+    params.limit
 
-  const [specialties, total] =
-    await prisma.$transaction([
-      prisma.especialidades.findMany({
-        where,
-        skip,
-        take: params.limit,
+  const specialties =
+    await prisma.especialidades.findMany({
+      where,
+      skip,
+      take: params.limit,
 
-        orderBy: {
-          nome: 'asc',
-        },
-      }),
+      orderBy: {
+        nome: 'asc',
+      },
+    })
 
-      prisma.especialidades.count({
-        where,
-      }),
-    ])
+  const total =
+    await prisma.especialidades.count({
+      where,
+    })
 
   return {
     specialties,
@@ -89,8 +98,11 @@ export async function createSpecialty(
   return prisma.especialidades.create({
     data: {
       nome: data.nome,
-      descricao: data.descricao ?? null,
-      criado_por: data.criadoPor,
+      descricao:
+        data.descricao ??
+        null,
+      criado_por:
+        data.criadoPor,
     },
   })
 }
@@ -106,9 +118,13 @@ export async function updateSpecialty(
 
     data: {
       nome: data.nome,
-      descricao: data.descricao ?? null,
-      atualizado_em: new Date(),
-      atualizado_por: data.atualizadoPor,
+      descricao:
+        data.descricao ??
+        null,
+      atualizado_em:
+        new Date(),
+      atualizado_por:
+        data.atualizadoPor,
     },
   })
 }
@@ -125,8 +141,10 @@ export async function updateSpecialtyStatus(
 
     data: {
       ativo,
-      atualizado_em: new Date(),
-      atualizado_por: atualizadoPor,
+      atualizado_em:
+        new Date(),
+      atualizado_por:
+        atualizadoPor,
     },
   })
 }
