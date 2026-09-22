@@ -221,33 +221,29 @@ export async function listDoctors(
     (params.page - 1) *
     params.limit
 
-  const [
-    doctors,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.medicos.findMany({
-        where,
+  const doctors =
+    await prisma.medicos.findMany({
+      where,
 
-        skip,
+      skip,
 
-        take:
-          params.limit,
+      take:
+        params.limit,
 
-        include: {
-          usuarios: true,
-        },
+      include: {
+        usuarios: true,
+      },
 
-        orderBy: {
-          nome_completo:
-            'asc',
-        },
-      }),
+      orderBy: {
+        nome_completo:
+          'asc',
+      },
+    })
 
-      prisma.medicos.count({
-        where,
-      }),
-    ])
+  const total =
+    await prisma.medicos.count({
+      where,
+    })
 
   const doctorIds =
     doctors.map(

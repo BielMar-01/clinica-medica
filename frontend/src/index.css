@@ -1,16 +1,29 @@
 @import './styles/foundations/tokens.css';
+
 @import './styles/foundations/base.css';
 
 @import './styles/components/buttons.css';
+
 @import './styles/components/feedback.css';
+
 @import './styles/components/filters.css';
+
 @import './styles/components/forms.css';
+
 @import './styles/components/modals.css';
+
 @import './styles/components/tables.css';
 
+@import './styles/components/public-specialties.css';
+
+@import './styles/components/public-doctors.css';
+
 @import './styles/layouts/app-layout.css';
+
 @import './styles/layouts/public-layout.css';
 
 @import './styles/pages/auth.css';
+
 @import './styles/pages/dashboard.css';
+
 @import './styles/pages/not-found.css';

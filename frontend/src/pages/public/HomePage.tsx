@@ -3,6 +3,10 @@ import {
 } from 'react-router'
 
 import {
+  PublicDoctorsSection,
+} from '../../components/public/PublicDoctorsSection'
+
+import {
   PublicSpecialtiesSection,
 } from '../../components/public/PublicSpecialtiesSection'
 
@@ -268,6 +272,8 @@ export function HomePage() {
       </section>
 
       <PublicSpecialtiesSection />
+
+      <PublicDoctorsSection />
     </>
   )
 }
