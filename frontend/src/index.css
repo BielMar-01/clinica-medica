@@ -20,6 +20,8 @@
 
 @import './styles/components/public-differentials.css';
 
+@import './styles/components/public-cta.css';
+
 @import './styles/layouts/app-layout.css';
 
 @import './styles/layouts/public-layout.css';

@@ -3,6 +3,10 @@ import {
 } from 'react-router'
 
 import {
+  PublicCtaSection,
+} from '../../components/public/PublicCtaSection'
+
+import {
   PublicDifferentialsSection,
 } from '../../components/public/PublicDifferentialsSection'
 
@@ -280,6 +284,8 @@ export function HomePage() {
       <PublicDoctorsSection />
 
       <PublicDifferentialsSection />
+
+      <PublicCtaSection />
     </>
   )
 }
