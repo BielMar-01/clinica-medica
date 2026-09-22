@@ -18,6 +18,8 @@
 
 @import './styles/components/public-doctors.css';
 
+@import './styles/components/public-differentials.css';
+
 @import './styles/layouts/app-layout.css';
 
 @import './styles/layouts/public-layout.css';

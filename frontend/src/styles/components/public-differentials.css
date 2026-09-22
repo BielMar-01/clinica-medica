@@ -1,0 +1,465 @@
+.public-differentials-section {
+  position: relative;
+
+  padding:
+    clamp(72px, 9vw, 120px)
+    0;
+
+  overflow: hidden;
+
+  border-top:
+    1px solid
+    var(--color-border);
+
+  background:
+    var(--color-surface);
+}
+
+.public-differentials-section::before {
+  content: '';
+
+  position: absolute;
+
+  width: 480px;
+  height: 480px;
+
+  top: -240px;
+  left: -220px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      color-mix(
+        in srgb,
+        var(--color-primary-500) 9%,
+        transparent
+      ),
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+.public-differentials-container {
+  position: relative;
+
+  width:
+    min(
+      calc(100% - 48px),
+      1240px
+    );
+
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 0.85fr)
+    minmax(0, 1.15fr);
+
+  gap:
+    clamp(48px, 8vw, 112px);
+
+  align-items: start;
+}
+
+.public-differentials-intro {
+  position: sticky;
+
+  top: 120px;
+}
+
+.public-differentials-intro h2 {
+  max-width: 560px;
+
+  margin:
+    var(--space-4)
+    0
+    var(--space-5);
+
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    clamp(
+      2rem,
+      4vw,
+      3.5rem
+    );
+
+  line-height: 1.05;
+
+  letter-spacing:
+    -0.045em;
+}
+
+.public-differentials-intro > p {
+  max-width: 560px;
+
+  margin: 0;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size:
+    var(--font-size-base);
+
+  line-height: 1.75;
+}
+
+.public-differentials-highlight {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap:
+    var(--space-4);
+
+  margin-top:
+    var(--space-8);
+
+  padding:
+    var(--space-5);
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-lg);
+
+  background:
+    var(--color-surface-secondary);
+}
+
+.public-differentials-highlight::after {
+  content: '';
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  right: -35px;
+  bottom: -50px;
+
+  border-radius: 50%;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--color-primary-500) 9%,
+      transparent
+    );
+}
+
+.public-differentials-highlight-icon {
+  width: 48px;
+  height: 48px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius:
+    var(--radius-md);
+
+  color:
+    var(--color-primary-700);
+
+  background:
+    var(--color-primary-100);
+
+  font-size:
+    var(--font-size-xl);
+
+  font-weight:
+    var(--font-weight-bold);
+}
+
+.public-differentials-highlight div:last-child {
+  position: relative;
+
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap:
+    var(--space-1);
+}
+
+.public-differentials-highlight span {
+  color:
+    var(--color-text-muted);
+
+  font-size:
+    var(--font-size-xs);
+}
+
+.public-differentials-highlight strong {
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    var(--font-size-sm);
+}
+
+.public-differentials-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.public-differential-item {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    56px
+    minmax(0, 1fr)
+    auto;
+
+  gap:
+    var(--space-5);
+
+  align-items: start;
+
+  padding:
+    var(--space-7)
+    0;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+
+  transition:
+    padding
+      var(--transition-normal),
+    background
+      var(--transition-normal);
+}
+
+.public-differential-item:first-child {
+  border-top:
+    1px solid
+    var(--color-border);
+}
+
+.public-differential-item:hover {
+  padding-left:
+    var(--space-4);
+
+  padding-right:
+    var(--space-4);
+
+  background:
+    var(--color-surface-secondary);
+}
+
+.public-differential-number {
+  padding-top:
+    4px;
+
+  color:
+    var(--color-primary-600);
+
+  font-size:
+    var(--font-size-xs);
+
+  font-weight:
+    var(--font-weight-bold);
+
+  letter-spacing:
+    0.08em;
+}
+
+.public-differential-content h3 {
+  margin:
+    0
+    0
+    var(--space-3);
+
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    clamp(
+      1.15rem,
+      2vw,
+      1.4rem
+    );
+
+  line-height: 1.3;
+
+  letter-spacing:
+    -0.025em;
+}
+
+.public-differential-content p {
+  max-width: 600px;
+
+  margin: 0;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size:
+    var(--font-size-sm);
+
+  line-height: 1.7;
+}
+
+.public-differential-indicator {
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-full);
+
+  color:
+    var(--color-text-muted);
+
+  transition:
+    transform
+      var(--transition-normal),
+    color
+      var(--transition-normal),
+    border-color
+      var(--transition-normal),
+    background
+      var(--transition-normal);
+}
+
+.public-differential-item:hover
+.public-differential-indicator {
+  transform:
+    translateX(4px);
+
+  color:
+    var(--color-primary-700);
+
+  border-color:
+    var(--color-primary-100);
+
+  background:
+    var(--color-primary-50);
+}
+
+[data-theme="dark"]
+.public-differentials-highlight-icon {
+  color:
+    var(--color-primary-300);
+
+  background:
+    rgba(
+      32,
+      160,
+      168,
+      0.12
+    );
+}
+
+[data-theme="dark"]
+.public-differential-item:hover {
+  background:
+    color-mix(
+      in srgb,
+      var(--color-primary-500) 4%,
+      var(--color-surface-secondary)
+    );
+}
+
+@media (max-width: 900px) {
+  .public-differentials-container {
+    grid-template-columns:
+      minmax(0, 1fr);
+
+    gap:
+      var(--space-10);
+  }
+
+  .public-differentials-intro {
+    position: static;
+  }
+
+  .public-differentials-intro h2,
+  .public-differentials-intro > p {
+    max-width: 700px;
+  }
+
+  .public-differentials-highlight {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 700px) {
+  .public-differentials-container {
+    width:
+      min(
+        calc(100% - 32px),
+        1240px
+      );
+  }
+
+  .public-differential-item {
+    grid-template-columns:
+      40px
+      minmax(0, 1fr);
+
+    gap:
+      var(--space-3);
+
+    padding:
+      var(--space-6)
+      0;
+  }
+
+  .public-differential-indicator {
+    display: none;
+  }
+
+  .public-differential-item:hover {
+    padding-left: 0;
+    padding-right: 0;
+
+    background:
+      transparent;
+  }
+}
+
+@media (max-width: 400px) {
+  .public-differentials-container {
+    width:
+      calc(100% - 24px);
+  }
+
+  .public-differentials-highlight {
+    align-items: flex-start;
+
+    padding:
+      var(--space-4);
+  }
+}
+
+@media (
+  prefers-reduced-motion: reduce
+) {
+  .public-differential-item,
+  .public-differential-indicator {
+    transition: none;
+  }
+}
