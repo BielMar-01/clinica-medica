@@ -44,6 +44,10 @@ import {
 } from '../pages/public/HomePage'
 
 import {
+  PublicSpecialtiesPage,
+} from '../pages/public/PublicSpecialtiesPage'
+
+import {
   ResetPasswordPage,
 } from '../pages/ResetPasswordPage'
 
@@ -71,6 +75,13 @@ export function AppRoutes() {
           path="/"
           element={
             <HomePage />
+          }
+        />
+
+        <Route
+          path="/especialidades-clinicas"
+          element={
+            <PublicSpecialtiesPage />
           }
         />
       </Route>
